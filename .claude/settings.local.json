@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:houmclinic.com)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
