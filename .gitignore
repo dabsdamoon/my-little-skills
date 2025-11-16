@@ -1,2 +1,11 @@
 .DS_Store
+**/.DS_Store
+**/*.zip
 
+# Resume formatter test files with Korean characters
+resume-formatter/tests/format_before/
+resume-formatter/tests/format_to/
+resume-formatter/tests/*.json
+
+# test assets
+test_assets/
