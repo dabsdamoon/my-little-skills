@@ -222,27 +222,169 @@ class ResumeParser:
             self.extracted['summary'] = ' '.join(content)
 
     def _parse_experience(self, lines: List[str]):
-        """Parse work experience section"""
-        current_job = None
+        """Parse work experience section with project detection
 
-        for line in lines:
-            # Try to detect job entry (company, title, dates)
-            if self._looks_like_job_header(line):
+        Handles two formats:
+        1. Standard: "Company | Title | Dates" all on one line
+        2. Korean format: Date on one line, then "Company - Title" on next line
+        """
+        current_job = None
+        current_project = None
+        pending_dates = None  # Store dates found on separate line
+        i = 0
+
+        while i < len(lines):
+            line = lines[i]
+
+            # Check if this line is a standalone date (Korean format)
+            if self._is_standalone_date_line(line) and i + 1 < len(lines):
+                # Save dates and check next line for company
+                pending_dates = self._parse_date_range(line)
+                next_line = lines[i + 1]
+
+                # Check if next line is company info
+                if self._looks_like_company_line(next_line):
+                    # Save current job if exists
+                    if current_job:
+                        if current_project:
+                            if 'projects' not in current_job:
+                                current_job['projects'] = []
+                            current_job['projects'].append(current_project)
+                            current_project = None
+                        self.extracted['experience'].append(current_job)
+
+                    # Create new job with dates from previous line
+                    current_job = self._extract_company_title(next_line)
+                    current_job.update(pending_dates)
+                    current_job['confidence'] = 0.9  # High confidence for Korean format
+                    pending_dates = None
+                    i += 2  # Skip both lines
+                    continue
+
+            # Try to detect job entry (single-line format)
+            elif self._looks_like_job_header(line):
                 if current_job:
+                    if current_project:
+                        if 'projects' not in current_job:
+                            current_job['projects'] = []
+                        current_job['projects'].append(current_project)
+                        current_project = None
                     self.extracted['experience'].append(current_job)
                 current_job = self._extract_job_info(line)
+
             elif current_job:
-                # Add to responsibilities
-                if 'responsibilities' not in current_job:
-                    current_job['responsibilities'] = []
-                # Clean bullet points
-                clean_line = re.sub(r'^[•\-\*]\s*', '', line)
-                if clean_line:
-                    current_job['responsibilities'].append(clean_line)
+                # Check if this is a project header within the job
+                if self._looks_like_project_header(line):
+                    if current_project:
+                        # Save previous project
+                        if 'projects' not in current_job:
+                            current_job['projects'] = []
+                        current_job['projects'].append(current_project)
+                    current_project = {
+                        'name': line.strip('[] 【】()'),
+                        'responsibilities': []
+                    }
+                elif current_project:
+                    # Add to current project responsibilities
+                    clean_line = re.sub(r'^[•\-\*]\s*', '', line)
+                    if clean_line:
+                        current_project['responsibilities'].append(clean_line)
+                else:
+                    # Add to general job responsibilities
+                    if 'responsibilities' not in current_job:
+                        current_job['responsibilities'] = []
+                    clean_line = re.sub(r'^[•\-\*]\s*', '', line)
+                    if clean_line:
+                        current_job['responsibilities'].append(clean_line)
+
+            i += 1
+
+        # Add final project if exists
+        if current_project and current_job:
+            if 'projects' not in current_job:
+                current_job['projects'] = []
+            current_job['projects'].append(current_project)
 
         # Add final job
         if current_job:
             self.extracted['experience'].append(current_job)
+
+    def _is_standalone_date_line(self, line: str) -> bool:
+        """Check if line contains only date range (Korean format)"""
+        # Korean format: "2023년 7월 - 현재" or "2023년7월 - 현재" (space optional)
+        korean_date = re.match(r'^\s*\d{4}년\s*\d{1,2}월?\s*[-~]\s*(현재|재직중|Present|\d{4}년\s*\d{1,2}월?)\s*$', line)
+        if korean_date:
+            return True
+
+        # Dot format: "2023.07 - 현재"
+        dot_date = re.match(r'^\s*\d{4}\.\d{2}\s*[-~]\s*(현재|재직중|Present|\d{4}\.\d{2})\s*$', line)
+        return bool(dot_date)
+
+    def _looks_like_company_line(self, line: str) -> bool:
+        """Check if line looks like a company name with title"""
+        # Contains company indicators
+        has_company_indicator = bool(re.search(
+            r'(Inc\.|Ltd\.|Corp\.|Co\.|주식회사|Company|AI|엔지니어|연구원|개발자|Part)',
+            line,
+            re.I
+        ))
+
+        # Contains dash separator (Company - Title format)
+        has_dash_separator = ' - ' in line or ',' in line
+
+        # Not too long (company+title lines are usually concise)
+        not_too_long = len(line) < 100
+
+        return (has_company_indicator or has_dash_separator) and not_too_long
+
+    def _extract_company_title(self, line: str) -> Dict[str, Any]:
+        """Extract company and title from Korean format line"""
+        job = {'confidence': 0.85}
+
+        # Try dash separator: "Company - Title"
+        if ' - ' in line:
+            parts = line.split(' - ', 1)
+            job['company'] = parts[0].strip()
+            if len(parts) > 1:
+                job['title'] = parts[1].strip()
+        # Try comma separator: "Company, Department - Title"
+        elif ',' in line:
+            parts = line.split(',')
+            job['company'] = parts[0].strip()
+            if len(parts) > 1:
+                # Rest might be department and title
+                rest = ','.join(parts[1:]).strip()
+                if ' - ' in rest:
+                    dept_title = rest.split(' - ')
+                    job['department'] = dept_title[0].strip()
+                    if len(dept_title) > 1:
+                        job['title'] = dept_title[1].strip()
+                else:
+                    job['title'] = rest
+        else:
+            # Fallback: entire line is company
+            job['company'] = line.strip()
+
+        return job
+
+    def _looks_like_project_header(self, line: str) -> bool:
+        """Detect if line is a project header within job experience"""
+        # Projects often marked with brackets or special formatting
+        if line.startswith('[') or line.startswith('【'):
+            return True
+
+        # Common project keywords
+        project_keywords = ['프로젝트', 'project', '과제', 'task force']
+        if any(kw in line.lower() for kw in project_keywords):
+            # But not if it's in a sentence
+            if len(line.split()) <= 6:  # Short line more likely to be header
+                return True
+
+        # Date ranges within experience might indicate project
+        if re.search(r'\d{4}\.\d{2}\s*[-~]\s*\d{4}\.\d{2}', line) and len(line) < 100:
+            return True
+
+        return False
 
     def _looks_like_job_header(self, line: str) -> bool:
         """Heuristic to detect job entry start"""
@@ -481,6 +623,51 @@ class ResumeParser:
                     )
                     self.extracted['personal_info'][field] = sorted_items[0]
 
+    def _calculate_total_experience_years(self) -> float:
+        """Calculate total years of experience from all jobs"""
+        try:
+            from dateutil.relativedelta import relativedelta
+            from datetime import datetime
+        except ImportError:
+            self.extracted['metadata']['warnings'].append(
+                "dateutil not installed - cannot calculate total experience. Run: pip install python-dateutil"
+            )
+            return 0.0
+
+        total_months = 0
+        today = datetime.now()
+
+        for job in self.extracted['experience']:
+            start_str = job.get('start_date', '')
+            end_str = job.get('end_date', 'Present')
+
+            if not start_str:
+                continue
+
+            try:
+                # Parse start date
+                start_parts = start_str.split('.')
+                start_date = datetime(int(start_parts[0]), int(start_parts[1]), 1)
+
+                # Parse end date
+                if end_str == 'Present':
+                    end_date = today
+                else:
+                    end_parts = end_str.split('.')
+                    end_date = datetime(int(end_parts[0]), int(end_parts[1]), 1)
+
+                # Calculate months
+                delta = relativedelta(end_date, start_date)
+                months = delta.years * 12 + delta.months
+                total_months += months
+
+            except (ValueError, IndexError) as e:
+                self.extracted['metadata']['warnings'].append(
+                    f"Could not parse dates for experience: {start_str} - {end_str}"
+                )
+
+        return total_months / 12.0
+
     def _calculate_confidence(self):
         """Calculate overall extraction confidence"""
         scores = []
@@ -500,6 +687,12 @@ class ResumeParser:
         scores.append(1.0 if self.extracted['skills'].get('technical') else 0.6)
 
         self.extracted['metadata']['overall_confidence'] = sum(scores) / len(scores)
+
+        # Calculate total experience
+        if self.extracted['experience']:
+            total_years = self._calculate_total_experience_years()
+            if total_years > 0:
+                self.extracted['metadata']['total_experience_years'] = round(total_years, 1)
 
         # Warnings
         if not self.extracted['personal_info'].get('name'):
