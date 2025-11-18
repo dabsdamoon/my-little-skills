@@ -17,6 +17,17 @@ To reformat resumes from one template to another, use this skill. The skill extr
 
 **Robustness**: This skill handles diverse resume formats including multi-column layouts, headers/footers, text boxes, tables, mixed languages, and non-standard structures.
 
+**Recent Improvements (v1.2):**
+- **CRITICAL FIX**: Parser now handles Korean resume format where dates appear on separate line before company
+- Fixed parser to handle dates without spaces (e.g., "2023년7월")
+- Added experience years comparison to validator - detects missing careers
+- Validator now flags missing companies and calculates total years from both source and target
+- Fixed LinkedIn/URL duplication bug - tracks added URLs to prevent duplicates
+- Enhanced detailed experience mapping (경력 세부사항) with project grouping
+- Improved career summary mapping (경력사항) with actual company/role/dates
+- Added template placeholder cleanup to remove example text
+- Enhanced parser with project detection within jobs and total experience calculation
+
 ## When to Use This Skill
 
 Use this skill when:
@@ -149,6 +160,11 @@ Use the `scripts/content_validator.py` script to verify transformation quality.
    - Verify critical fields populated (name, contact, experience)
 
 2. **Quality**:
+   - **NEW v1.2**: Compare total experience years (source vs target) - detects missing careers
+   - **NEW v1.2**: Flag missing companies between source and target
+   - **NEW**: Detect duplicate content (URLs, repeated phrases)
+   - **NEW**: Check required sections are filled (not just template placeholders)
+   - **NEW**: Verify template placeholders removed (회사이름/부서명/직무, OOO, XXX, etc.)
    - Verify dates properly formatted
    - Check phone/email formatting correct
    - Ensure no text truncated mid-sentence
@@ -161,10 +177,11 @@ Use the `scripts/content_validator.py` script to verify transformation quality.
    - Check proper table structure maintained
 
 **Output**: Validation report with:
-- Overall completeness score (target: ≥90%)
-- Per-section completeness
-- List of issues by severity (critical, warning, info)
-- Specific recommendations for manual review
+- Overall score (weighted: 70% completeness, 30% quality)
+- Per-section completeness scores
+- Quality check results (duplicates, required sections, template cleanup)
+- List of issues by severity (CRITICAL, WARNING, info)
+- Actionable recommendations for fixing issues
 - Low-confidence extractions flagged
 
 ### Step 6: Review and Finalize
