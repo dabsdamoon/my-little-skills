@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:houmclinic.com)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(python3:*)"
     ],
     "deny": [],
     "ask": []
