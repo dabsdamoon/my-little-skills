@@ -211,7 +211,7 @@ Standard fields:
 Sometimes included:
 - 사진 (Photo)
 - 병역사항 (Military service - male only)
-- 가족사항 (Family details - sometimes considered outdated)
+- 고객사항 (Family details - sometimes considered outdated)
 - 취미 (Hobbies)
 - 특기 (Special skills)
 ```

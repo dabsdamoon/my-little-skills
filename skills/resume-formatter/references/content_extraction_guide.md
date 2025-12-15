@@ -143,7 +143,7 @@ for rel in doc.part.rels.values():
 | **Skills** | 핵심역량, 보유기술, 전문기술 | Haeksimyeokryang, Boyugisul |
 | **Certifications** | 자격사항, 자격증, 면허 | Jaggyeoksahang, Jaggyeokjeung |
 | **Military Service** | 병역사항 | Byeongyeoksahang |
-| **Family** | 가족사항 | Gajoksahang |
+| **Family** | 고객사항 | Gajoksahang |
 | **Hobbies** | 취미, 특기 | Chwimi, Teukgi |
 | **Self-Introduction** | 자기소개서 | Jagigaesoeseo |
 
@@ -475,7 +475,7 @@ OR: Row-by-row if content is related
 - Service branch: 육군 (Army), 해군 (Navy), 공군 (Air Force)
 - Dates: 2010.03 ~ 2012.01
 
-### Family Information (가족사항)
+### Family Information (고객사항)
 
 **Sometimes included** (less common in modern resumes):
 - 부 (Father), 모 (Mother), 배우자 (Spouse)
