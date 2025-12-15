@@ -321,7 +321,7 @@ To achieve high accuracy across diverse resume formats, implement these strategi
 - Recognize Korean resume conventions (인적사항, 학력사항, 경력사항, 자격사항, etc.)
 - Handle mixed Korean-English content appropriately
 - Parse Korean date formats (YYYY년 MM월 DD일)
-- Extract Korean-specific fields (병역사항/military service, 가족사항/family details)
+- Extract Korean-specific fields (병역사항/military service, 고객사항/family details)
 - Detect and handle both Korean age (한국 나이) and international age
 
 ### Phase 3: Initialize the Skill (Step 3 from skill-creator)
