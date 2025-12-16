@@ -4,6 +4,7 @@ __pycache__/
 .vscode/
 **/.DS_Store
 **/*.zip
+__pycache__/
 
 # Resume formatter test files with Korean characters
 resume-formatter/tests/format_before/
