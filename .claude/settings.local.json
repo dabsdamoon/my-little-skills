@@ -5,7 +5,8 @@
       "WebSearch",
       "Bash(python3:*)",
       "Bash(git remote add:*)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []
