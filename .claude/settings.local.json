@@ -6,7 +6,9 @@
       "Bash(python3:*)",
       "Bash(git remote add:*)",
       "Bash(git mv:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "WebFetch(domain:www.pubnub.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []
