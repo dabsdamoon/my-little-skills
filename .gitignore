@@ -18,3 +18,5 @@ resume-formatter/tests/*.json
 # test assets
 test_assets/
 notes/
+
+*.skill
