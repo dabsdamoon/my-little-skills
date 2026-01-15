@@ -16,15 +16,23 @@ Creates comprehensive Pull Request documentation in markdown format, suitable fo
 
 ## How to Create PR Documentation
 
-### Step 1: Gather Information
+### Step 1: Gather Information (Run in Parallel)
 
-Before writing the PR, collect the following information:
+Before writing the PR, collect information by running these git commands **in parallel** (single message, multiple Bash tool calls for speed):
 
-1. **Branch information**: Source and target branches
-2. **Git diff**: Run `git diff <target-branch>...HEAD` to see all changes
-3. **Commit history**: Run `git log <target-branch>..HEAD --oneline` to see commits
-4. **Changed files**: Run `git diff <target-branch>...HEAD --name-status` to list files
-5. **Context**: Ask the user about the purpose/reason for the changes if not clear
+```bash
+# Run ALL THREE in parallel (single message with 3 Bash tool calls)
+git log <target-branch>..HEAD --oneline           # Commit history
+git diff <target-branch>...HEAD --name-status     # Changed files list
+git diff <target-branch>...HEAD --stat            # Change statistics
+```
+
+**After** reviewing the above, only run full diff for specific files if needed:
+```bash
+git diff <target-branch>...HEAD -- path/to/specific/file.ts
+```
+
+**Context**: Ask the user about the purpose/reason for the changes if not clear from commits
 
 ### Step 2: Analyze Changes
 
@@ -178,6 +186,65 @@ ANOTHER_VARIABLE=value
 - Be specific about what to test
 - Include both automated and manual tests
 - Cover edge cases and regression tests
+
+---
+
+## Quick Template (for simple PRs)
+
+For small changes (< 5 files), use this minimal format instead of the full template:
+
+```markdown
+## Summary
+[1-2 sentences explaining what and why]
+
+## Changes
+- [bullet point for each major change]
+
+## Test plan
+- [ ] [how to verify the changes work]
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+```
+
+---
+
+## Creating the PR with GitHub CLI
+
+For faster PR creation, use `gh pr create` with HEREDOC directly (avoids creating intermediate files):
+
+```bash
+gh pr create --base main --head feature-branch --title "feat: Brief title" --body "$(cat <<'EOF'
+## Summary
+[1-2 sentences]
+
+## Changes
+- [bullet points]
+
+## Test plan
+- [ ] [verification steps]
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+EOF
+)"
+```
+
+**For longer PRs**, write to a temp file first then use `--body-file`:
+```bash
+# Write PR body to temp file
+# Then create PR
+gh pr create --base main --head feature-branch --title "feat: Title" --body-file /tmp/pr-body.md
+```
+
+---
+
+## Performance Tips
+
+1. **Parallel git commands**: Always run `git log`, `git diff --name-status`, and `git diff --stat` in parallel (single message with multiple Bash calls)
+2. **Use HEREDOC**: Avoid intermediate files for short PRs with `--body "$(cat <<'EOF' ... EOF)"`
+3. **Stat before diff**: Use `--stat` first to see scope, only full diff specific files if needed
+4. **Minimal first**: Start with quick template, add detail only if the PR is complex
+5. **Skip optional sections**: Omit Screenshots/Demo, Related PRs, Environment Variables if not applicable
+6. **Don't over-document**: A clear summary + changes list is often sufficient
 
 ## Keywords
 
