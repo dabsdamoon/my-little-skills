@@ -210,10 +210,12 @@ For small changes (< 5 files), use this minimal format instead of the full templ
 
 ## Creating the PR with GitHub CLI
 
+**IMPORTANT:** Always use the full path `/usr/local/bin/gh` to avoid shell alias conflicts (e.g., `gh` may be aliased to git functions).
+
 For faster PR creation, use `gh pr create` with HEREDOC directly (avoids creating intermediate files):
 
 ```bash
-gh pr create --base main --head feature-branch --title "feat: Brief title" --body "$(cat <<'EOF'
+/usr/local/bin/gh pr create --base main --head feature-branch --title "feat: Brief title" --body "$(cat <<'EOF'
 ## Summary
 [1-2 sentences]
 
@@ -232,7 +234,7 @@ EOF
 ```bash
 # Write PR body to temp file
 # Then create PR
-gh pr create --base main --head feature-branch --title "feat: Title" --body-file /tmp/pr-body.md
+/usr/local/bin/gh pr create --base main --head feature-branch --title "feat: Title" --body-file /tmp/pr-body.md
 ```
 
 ---

@@ -8,6 +8,124 @@ license: Complete terms in LICENSE.txt
 
 To create designs and interfaces for Houm, use this skill. Houm is a maternity care service provider committed to transforming the maternity care experience through informed consent, evidence-based care, companion support, and mindful intervention.
 
+---
+
+## Canonical Design System
+
+**This section defines THE standard. Use these values for consistency across all Houm properties.**
+
+### Canonical Typography
+
+| Role | Font | Fallback | Usage |
+|------|------|----------|-------|
+| **Headings** | Libre Baskerville | Georgia, serif | All headings (h1-h6), hero text |
+| **Body** | Lato | system-ui, sans-serif | Body text, UI elements, buttons |
+
+**Font Loading (Web):**
+```html
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
+```
+
+**CSS Variables:**
+```css
+:root {
+  --font-serif: 'Libre Baskerville', Georgia, serif;
+  --font-sans: 'Lato', system-ui, sans-serif;
+}
+```
+
+**Tailwind Config:**
+```javascript
+fontFamily: {
+  serif: ['Libre Baskerville', 'Georgia', 'serif'],
+  sans: ['Lato', 'system-ui', 'sans-serif'],
+}
+```
+
+### Canonical Colors
+
+**Primary Palette - Green (Action & Health):**
+
+| Name | Hex | HSL | Usage |
+|------|-----|-----|-------|
+| Primary | `#668e67` | `hsl(122 16% 48%)` | Primary buttons, key accents |
+| Primary Dark | `#4b7a4c` | `hsl(121 24% 39%)` | Hover states, headers |
+| Primary Light | `#B8D4B9` | `hsl(122 30% 78%)` | Highlights, tags |
+
+**Warm Accent Palette - Terracotta (Nurturing & Warmth):**
+
+| Name | Hex | HSL | Usage |
+|------|-----|-----|-------|
+| Terracotta | `#CCA893` | `hsl(22 33% 69%)` | Warm accents, soft highlights, nurturing elements |
+| Terracotta Dark | `#B8927A` | `hsl(22 33% 60%)` | Hover states for terracotta elements |
+| Terracotta Light | `#E8D4C4` | `hsl(22 40% 84%)` | Subtle warm backgrounds, gentle emphasis |
+
+> **Design Intent:** Terracotta adds warmth and a nurturing feel that complements the cream background. Use it for elements that should feel soft and personal (welcome messages, comfort-related features) rather than action-oriented. Green remains the primary action color for buttons and CTAs.
+
+**Neutral Palette:**
+
+| Name | Hex | HSL | Usage |
+|------|-----|-----|-------|
+| Background | `#F9F7F2` | `hsl(43 38% 96%)` | Page backgrounds |
+| Background Dark | `#EDE8DD` | `hsl(43 30% 89%)` | Card backgrounds, sections |
+| Text | `#1F2937` | `hsl(220 13% 18%)` | Body text |
+| Text Muted | `#6B7280` | `hsl(220 9% 46%)` | Secondary text |
+
+**Color Relationship:**
+```
+Green (Action)     ←→     Terracotta (Warmth)
+    ↓                           ↓
+Professional               Nurturing
+Health/Growth              Comfort/Care
+Buttons/CTAs               Accents/Highlights
+    ↓                           ↓
+            Cream Background
+            (Unifies both)
+```
+
+**CSS Variables (recommended):**
+```css
+:root {
+  /* Primary Green - Action color */
+  --houm-primary-h: 122;
+  --houm-primary-s: 16%;
+  --houm-primary-l: 48%;
+  --houm-primary: hsl(var(--houm-primary-h) var(--houm-primary-s) var(--houm-primary-l));
+  --houm-primary-dark: hsl(121 24% 39%);
+  --houm-primary-light: hsl(122 30% 78%);
+
+  /* Terracotta - Warm accent */
+  --houm-warm: hsl(22 33% 69%);
+  --houm-warm-dark: hsl(22 33% 60%);
+  --houm-warm-light: hsl(22 40% 84%);
+
+  /* Neutrals */
+  --houm-bg: hsl(43 38% 96%);
+  --houm-bg-dark: hsl(43 30% 89%);
+  --houm-text: hsl(220 13% 18%);
+  --houm-text-muted: hsl(220 9% 46%);
+}
+```
+
+### Canonical Spacing & Radius
+
+| Element | Border Radius | Notes |
+|---------|---------------|-------|
+| Buttons | `rounded-xl` (12px) | Consistent across all buttons |
+| Cards | `rounded-2xl` (16px) | Slightly softer for containers |
+| Inputs | `rounded-lg` (8px) | Compact, functional feel |
+| Avatars | `rounded-full` | Always circular |
+
+### Canonical Shadows
+
+```css
+--shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.08);
+--shadow-medium: 0 4px 16px rgba(0, 0, 0, 0.12);
+--shadow-glow: 0 0 20px rgba(102, 142, 103, 0.15);  /* Green-tinted */
+```
+
+---
+
 ## When to Use This Skill
 
 Use this skill when:
@@ -34,7 +152,7 @@ Houm's design should reflect these guiding principles:
 
 ### Brand Colors
 
-**Primary Palette (Greens):**
+**Primary Palette (Greens) - Action & Health:**
 Houm's identity centers on calming, natural green tones representing growth, health, and nurturing care.
 
 - Dark Green: `#4b7a4c` - Primary text, strong accents, headers
@@ -47,27 +165,40 @@ Houm's identity centers on calming, natural green tones representing growth, hea
 - Mint: `#c9d7c9` - Very light backgrounds
 - Ice Green: `#e4ebe4` - Subtle dividers, cards
 
-**Accent Colors:**
+**Warm Accent Palette (Terracotta) - Nurturing & Comfort:**
+Terracotta tones add warmth and a nurturing feel, blending naturally with the cream background.
 
-- Warm Cream: `#f5efdf` - Primary background, warm accents
-- Pure White: `#ffffff` - Clean backgrounds
+- Terracotta: `#CCA893` - Warm accents, soft highlights, welcome elements
+- Terracotta Dark: `#B8927A` - Hover states, emphasis
+- Terracotta Light: `#E8D4C4` - Subtle warm backgrounds
+
+**Neutral Palette:**
+
+- Background Cream: `#F9F7F2` - **Canonical** page background
+- Warm Cream: `#f5efdf` - Alternative warm background (legacy)
+- Pure White: `#ffffff` - Clean card backgrounds
 - Soft White: `#f6f8f6` - Alternative light backgrounds
 
 **Usage Guidelines:**
+- **Green for action**: Buttons, CTAs, progress indicators, health-related elements
+- **Terracotta for warmth**: Welcome messages, comfort features, nurturing content, soft accents
 - Use darker greens (#4b7a4c, #668e67) for text and primary actions
-- Use mid-range greens (#789b78, #8aa88a, #81a282) for interactive elements
+- Use terracotta (#CCA893) sparingly for warmth, not as primary action color
 - Use lighter greens (#98b298, #a5bca5, #c9d7c9, #e4ebe4) for backgrounds and subtle divisions
-- Use cream (#f5efdf) as a warm, inviting background alternative to white
+- Use cream (#F9F7F2) as the standard page background
 - Maintain high contrast for accessibility (WCAG AA minimum)
+
+**Color Pairing Examples:**
+- Hero section: Cream background + Green CTA button + Terracotta welcome text accent
+- Cards: White background + Green action buttons + Terracotta subtle highlights
+- Dashboard: Cream background + Green progress bars + Terracotta greeting messages
 
 ### Typography
 
-**Font Recommendations:**
-While Houm's website uses system fonts, for artifacts use these professional, healthcare-appropriate fonts:
-
-- **Headings**: InstrumentSans, WorkSans, or Outfit (clean, modern sans-serif)
-- **Body Text**: WorkSans, InstrumentSans, or system-ui (readable sans-serif)
-- **Serif Options**: Lora, CrimsonPro, InstrumentSerif, LibreBaskerville (for warmth in editorial content)
+**Canonical Fonts (Web Applications):**
+See "Canonical Design System" section above for THE standard:
+- **Headings**: Libre Baskerville (serif)
+- **Body**: Lato (sans-serif)
 
 **Typography Principles:**
 - Use clear, readable font sizes (minimum 16px for body text)
@@ -75,23 +206,24 @@ While Houm's website uses system fonts, for artifacts use these professional, he
 - Use font weight to create hierarchy (600-700 for headings, 400-500 for body)
 - Avoid decorative fonts; prioritize clarity and accessibility
 
-**Canvas Fonts for Static Designs:**
-When creating posters, graphics, or PDF designs, use fonts from the `canvas-fonts/` directory:
+**Canvas Fonts for Static Designs (Posters, PDFs):**
+When creating posters, graphics, or PDF designs, use fonts from the `canvas-fonts/` directory.
 
-**Recommended for Houm:**
-- **Lora** (Regular, Bold, Italic, BoldItalic) - Warm, readable serif perfect for maternity care content. Use for body text or elegant headings.
-- **InstrumentSans** (Regular, Bold, Italic, BoldItalic) - Clean, modern sans-serif with professional warmth. Ideal for headings and UI text.
-- **WorkSans** (Regular, Bold, Italic, BoldItalic) - Friendly, professional sans-serif. Great for body text and accessible designs.
-- **Outfit** (Regular, Bold) - Modern, approachable sans-serif. Use for contemporary headings.
-- **InstrumentSerif** (Regular, Italic) - Refined serif for sophisticated touches.
-- **CrimsonPro** (Regular, Bold, Italic) - Elegant serif for editorial content.
-- **LibreBaskerville** (Regular) - Classic, trustworthy serif for traditional healthcare materials.
+**Primary Choice (matches web):**
+- **LibreBaskerville** (Regular) - Canonical serif, matches web heading font
 
-**Font Pairing Suggestions:**
-- **Professional Warmth**: InstrumentSans (headings) + Lora (body)
-- **Modern Approachable**: Outfit (headings) + WorkSans (body)
-- **Classic Trust**: LibreBaskerville (headings) + WorkSans (body)
-- **Editorial Elegance**: CrimsonPro (headings) + InstrumentSerif (body)
+**Alternative Fonts (for variety in static designs only):**
+- **Lora** (Regular, Bold, Italic, BoldItalic) - Warm, readable serif for elegant headings
+- **WorkSans** (Regular, Bold, Italic, BoldItalic) - Friendly sans-serif, similar feel to Lato
+- **InstrumentSans** (Regular, Bold, Italic, BoldItalic) - Clean, modern sans-serif
+- **Outfit** (Regular, Bold) - Modern, approachable sans-serif
+- **InstrumentSerif** (Regular, Italic) - Refined serif for sophisticated touches
+- **CrimsonPro** (Regular, Bold, Italic) - Elegant serif for editorial content
+
+**Font Pairing for Static Designs:**
+- **Canonical**: LibreBaskerville (headings) + WorkSans (body) - Closest to web
+- **Alternative Warm**: Lora (headings) + WorkSans (body)
+- **Modern Editorial**: CrimsonPro (headings) + InstrumentSans (body)
 
 ### Design Aesthetic
 
