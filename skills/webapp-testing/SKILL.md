@@ -8,6 +8,64 @@ license: Complete terms in LICENSE.txt
 
 To test local web applications, write native Python Playwright scripts.
 
+## CRITICAL: Testing Philosophy — Detect Issues, Don't Adapt to Them
+
+**Your job is to test INTENDED behavior, not to confirm CURRENT behavior.**
+
+When a user provides test cases, those describe what the app SHOULD do. Your tests must:
+
+1. **Write tests from the user's specification, not from the code** — If the test case says "Admin can grant/revoke PDF access from the dashboard", test exactly that. Navigate to the dashboard and look for it there.
+
+2. **When a test fails, REPORT it as a finding — NEVER silently adapt the test** — If the feature isn't where the spec says it should be, that's a finding. Don't go hunt for where it actually lives and rewrite the test to match.
+
+3. **Classify every discrepancy** — Each test result must be one of:
+   - **PASS**: Behavior matches the test case expectation
+   - **FAIL (Bug)**: Feature is broken or missing
+   - **FAIL (UX Issue)**: Feature works but is in the wrong place, hard to find, or requires unexpected steps
+   - **FAIL (Performance)**: Feature works but is unacceptably slow (>5s load without feedback)
+   - **FAIL (Accessibility)**: Feature lacks proper labels, keyboard nav, or screen reader support
+
+4. **Capture evidence for every failure** — Screenshot + description of what was expected vs. what actually happened.
+
+5. **Do ONE reconnaissance pass, then write strict tests** — You may do an initial recon to understand selectors and page structure. But once you write the actual test assertions, those must test the SPEC, not the recon findings. If recon reveals the feature is in a different place than the spec says, that's a finding.
+
+```
+❌ WRONG (adapting to code):
+   Spec: "PDF manager on admin dashboard"
+   Reality: PDF manager is on Content tab, not dashboard
+   Action: Change test to navigate to Content tab → test passes
+   Result: 27/27 pass, zero issues found
+
+✅ RIGHT (detecting issues):
+   Spec: "PDF manager on admin dashboard"
+   Reality: PDF manager is on Content tab, not dashboard
+   Action: Report as UX Issue — "PDF Access Manager not on dashboard overview,
+           requires navigating to Content tab. Admin may not discover this feature."
+   Result: 25/27 pass, 2 issues found → actionable feedback
+```
+
+### Output Format
+
+After running all tests, produce an **Audit Report** summarizing:
+
+```markdown
+## Test Audit Report
+
+### Summary
+- X/Y test cases passed
+- N issues found (Z bugs, W UX issues, V performance issues)
+
+### Findings
+
+| # | Test Case | Expected | Actual | Status | Severity | Evidence |
+|---|-----------|----------|--------|--------|----------|----------|
+| 1 | Admin PDF access on dashboard | Visible on overview | Only on Content tab | UX Issue | Medium | screenshot_04.png |
+| 2 | URL deep-linking (?tab=X) | Navigates to tab | Redirects strip params | Bug | Medium | screenshot_01.png |
+
+### Recommendations
+- [Actionable suggestions based on findings]
+```
+
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
