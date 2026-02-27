@@ -1,0 +1,8 @@
+{
+  "name": "developer-workflow-skills",
+  "description": "PR creation, webapp testing, Docker RAM checking, MCP building, prompt optimization, and debugging retrospectives",
+  "version": "1.0.0",
+  "author": {
+    "name": "dabsdamoon"
+  }
+}
