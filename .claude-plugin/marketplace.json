@@ -1,17 +1,16 @@
 {
-  "name": "anthropic-agent-skills",
+  "name": "my-little-skills",
   "owner": {
-    "name": "Keith Lazuka",
-    "email": "klazuka@anthropic.com"
+    "name": "dabsdamoon"
   },
   "metadata": {
-    "description": "Anthropic example skills",
+    "description": "A curated collection of Claude Code skills for productivity, design, document handling, and developer workflows.",
     "version": "1.0.0"
   },
   "plugins": [
     {
       "name": "document-skills",
-      "description": "Collection of document processing suite including Excel, Word, PowerPoint, and PDF capabilities",
+      "description": "Document processing suite: Excel, Word, PowerPoint, and PDF",
       "source": "./",
       "strict": false,
       "skills": [
@@ -22,23 +21,69 @@
       ]
     },
     {
-      "name": "example-skills",
-      "description": "Collection of example skills demonstrating various capabilities including skill creation, MCP building, visual design, algorithmic art, internal communications, web testing, artifact building, Slack GIFs, and theme styling",
+      "name": "design-skills",
+      "description": "Frontend design, algorithmic art, canvas design, brand guidelines, and theme styling",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/algorithmic-art",
         "./skills/brand-guidelines",
         "./skills/canvas-design",
-        "./skills/doc-coauthoring",
         "./skills/frontend-design",
-        "./skills/internal-comms",
-        "./skills/mcp-builder",
-        "./skills/skill-creator",
+        "./skills/houmlike-design",
         "./skills/slack-gif-creator",
         "./skills/theme-factory",
-        "./skills/web-artifacts-builder",
+        "./skills/web-artifacts-builder"
+      ]
+    },
+    {
+      "name": "developer-workflow-skills",
+      "description": "PR creation, webapp testing, Docker RAM checking, MCP building, prompt optimization, and debugging retrospectives",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/debugging-retrospective",
+        "./skills/docker-ram-checker",
+        "./skills/gcloud-direnv-setup",
+        "./skills/mcp-builder",
+        "./skills/pr-creator",
+        "./skills/prompt-optimizer",
+        "./skills/subagent-creator",
         "./skills/webapp-testing"
+      ]
+    },
+    {
+      "name": "writing-skills",
+      "description": "Documentation co-authoring, internal communications, system prompts, and skill creation guides",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/doc-coauthoring",
+        "./skills/internal-comms",
+        "./skills/skill-creator",
+        "./skills/system-prompt-creator"
+      ]
+    },
+    {
+      "name": "resume-skills",
+      "description": "Resume formatting, translation, and project summary generation",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/resume-formatter",
+        "./skills/resume-project-summary",
+        "./skills/resume-translator"
+      ]
+    },
+    {
+      "name": "config-skills",
+      "description": "Claude config migration and update notes",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/claude-config-migrator",
+        "./skills/update-houmy-notes",
+        "./skills/update-notes"
       ]
     }
   ]
