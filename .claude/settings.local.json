@@ -15,7 +15,9 @@
       "Bash(gh api:*)",
       "Bash(gh:*)",
       "Bash(/usr/local/bin/gh api:*)",
-      "Bash(/usr/local/bin/gh search:*)"
+      "Bash(/usr/local/bin/gh search:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)"
     ],
     "deny": [],
     "ask": []
