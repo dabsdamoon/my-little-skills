@@ -1,0 +1,8 @@
+{
+  "name": "document-skills",
+  "description": "Document processing suite: Excel, Word, PowerPoint, and PDF",
+  "version": "1.0.0",
+  "author": {
+    "name": "dabsdamoon"
+  }
+}
