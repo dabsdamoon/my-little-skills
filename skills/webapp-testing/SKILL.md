@@ -71,6 +71,61 @@ After running all tests, produce an **Audit Report** summarizing:
 
 **Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 
+## Step 0: Authentication Setup (before writing any tests)
+
+If the app requires login/session to access pages, **resolve auth first** before writing Playwright scripts. Silent auth failures (redirect to login/signup) will cause every test to fail for the same reason.
+
+### 1. Identify session mechanism
+```bash
+# Check for session/cookie/auth patterns in the codebase
+grep -r "session\|SESSION_SECRET\|createCookie\|jwt" app/lib/ --include="*.ts" -l
+```
+
+### 2. Check ALL secret sources for mismatches
+```bash
+# These three can have DIFFERENT values — compare them:
+grep SESSION_SECRET .env .env.local .env.development 2>/dev/null   # Vite loads these automatically
+grep SESSION docker-compose.yml 2>/dev/null                         # Docker env vars
+grep -r "SESSION_SECRET\|secrets:" app/lib/ --include="*.ts"        # Code defaults
+```
+**The #1 cause of silent auth failure is secret mismatch between `.env` and code defaults.** Vite auto-loads `.env` files, so the running app may use a different secret than the code's fallback value.
+
+### 3. Generate a valid session cookie using the app's own runtime
+```bash
+# Use the ACTUAL running app to serialize a cookie (ensures correct secret)
+docker exec <container> node -e "
+  const { createCookie } = await import('react-router');
+  const secret = process.env.SESSION_SECRET || '<code-default>';
+  // ... serialize session with the real secret
+"
+```
+
+### 4. Verify auth with curl BEFORE writing Playwright tests
+```bash
+# This takes 2 seconds vs. minutes of debugging Playwright failures
+curl -s -o /dev/null -w "%{http_code}" \
+  -H "Cookie: <session_cookie>" \
+  http://localhost:PORT/protected-page
+# Expected: 200. If 302 → auth is broken, fix before proceeding.
+```
+
+### 5. Only then proceed to Playwright
+Once curl returns 200 on a protected page, use the cookie value in Playwright:
+```python
+context.add_cookies([{
+    "name": "session_name",
+    "value": cookie_value,
+    "domain": "localhost",
+    "path": "/",
+    "httpOnly": True,
+    "sameSite": "Lax",
+}])
+```
+
+**Rule: Never write a full test suite until one authenticated curl request succeeds.**
+
+---
+
 ## Decision Tree: Choosing Your Approach
 
 ```
