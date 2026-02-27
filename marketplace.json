@@ -1,0 +1,162 @@
+{
+  "name": "my-little-skills",
+  "owner": {
+    "name": "dabsdamoon"
+  },
+  "metadata": {
+    "description": "A curated collection of Claude Code skills for productivity, design, document handling, and developer workflows.",
+    "pluginRoot": "skills"
+  },
+  "plugins": [
+    {
+      "name": "algorithmic-art",
+      "source": "./algorithmic-art",
+      "description": "Create algorithmic art using p5.js with seeded randomness and interactive parameter exploration."
+    },
+    {
+      "name": "brand-guidelines",
+      "source": "./brand-guidelines",
+      "description": "Apply Anthropic's official brand colors and typography to artifacts."
+    },
+    {
+      "name": "canvas-design",
+      "source": "./canvas-design",
+      "description": "Create beautiful visual art in .png and .pdf documents using design philosophy."
+    },
+    {
+      "name": "claude-config-migrator",
+      "source": "./claude-config-migrator",
+      "description": "Migrate Claude Code configuration (rules, skills, hooks, settings) between repositories."
+    },
+    {
+      "name": "debugging-retrospective",
+      "source": "./debugging-retrospective",
+      "description": "Generate educational debugging retrospectives that summarize sessions and extract lessons learned."
+    },
+    {
+      "name": "doc-coauthoring",
+      "source": "./doc-coauthoring",
+      "description": "Structured workflow for co-authoring documentation, proposals, and technical specs."
+    },
+    {
+      "name": "docker-ram-checker",
+      "source": "./docker-ram-checker",
+      "description": "Check Docker container RAM usage before deploying to cloud services."
+    },
+    {
+      "name": "docx",
+      "source": "./docx",
+      "description": "Create, read, edit, and manipulate Word documents (.docx files)."
+    },
+    {
+      "name": "frontend-design",
+      "source": "./frontend-design",
+      "description": "Create distinctive, production-grade frontend interfaces with high design quality."
+    },
+    {
+      "name": "gcloud-direnv-setup",
+      "source": "./gcloud-direnv-setup",
+      "description": "Set up per-directory GCP credentials using gcloud and direnv."
+    },
+    {
+      "name": "houmlike-design",
+      "source": "./houmlike-design",
+      "description": "Create web UI and design artifacts for Houm, a maternity care service provider."
+    },
+    {
+      "name": "internal-comms",
+      "source": "./internal-comms",
+      "description": "Write internal communications using company-specific formats and templates."
+    },
+    {
+      "name": "mcp-builder",
+      "source": "./mcp-builder",
+      "description": "Guide for creating high-quality MCP servers in Python (FastMCP) or Node/TypeScript."
+    },
+    {
+      "name": "pdf",
+      "source": "./pdf",
+      "description": "Read, create, merge, split, rotate, watermark, encrypt, and OCR PDF files."
+    },
+    {
+      "name": "pptx",
+      "source": "./pptx",
+      "description": "Create, read, edit, and manipulate PowerPoint presentations (.pptx files)."
+    },
+    {
+      "name": "pr-creator",
+      "source": "./pr-creator",
+      "description": "Create professional Pull Request documentation in markdown format."
+    },
+    {
+      "name": "prompt-optimizer",
+      "source": "./prompt-optimizer",
+      "description": "Optimize prompts for production LLM applications by reducing tokens and maximizing cache efficiency."
+    },
+    {
+      "name": "resume-formatter",
+      "source": "./resume-formatter",
+      "description": "Reformat resumes to match specific company templates while preserving content quality."
+    },
+    {
+      "name": "resume-project-summary",
+      "source": "./resume-project-summary",
+      "description": "Generate portfolio-ready project summaries from codebases for resume/CV use."
+    },
+    {
+      "name": "resume-translator",
+      "source": "./resume-translator",
+      "description": "Translate resumes between English and Japanese, Korean, or Chinese with format options."
+    },
+    {
+      "name": "skill-creator",
+      "source": "./skill-creator",
+      "description": "Guide for creating effective Claude Code skills with specialized knowledge and workflows."
+    },
+    {
+      "name": "slack-gif-creator",
+      "source": "./slack-gif-creator",
+      "description": "Create animated GIFs optimized for Slack with constraints and validation."
+    },
+    {
+      "name": "subagent-creator",
+      "source": "./subagent-creator",
+      "description": "Create repository-specific Claude Code subagents tailored to your codebase."
+    },
+    {
+      "name": "system-prompt-creator",
+      "source": "./system-prompt-creator",
+      "description": "Write effective system prompts following industry best practices and security guidelines."
+    },
+    {
+      "name": "theme-factory",
+      "source": "./theme-factory",
+      "description": "Style artifacts with pre-set or custom themes for slides, docs, reports, and landing pages."
+    },
+    {
+      "name": "update-houmy-notes",
+      "source": "./update-houmy-notes",
+      "description": "Write concise update notes to docs/UPDATE.md in the Houmy repository."
+    },
+    {
+      "name": "update-notes",
+      "source": "./update-notes",
+      "description": "Write update notes documenting code changes."
+    },
+    {
+      "name": "web-artifacts-builder",
+      "source": "./web-artifacts-builder",
+      "description": "Create elaborate multi-component claude.ai HTML artifacts using React, Tailwind, and shadcn/ui."
+    },
+    {
+      "name": "webapp-testing",
+      "source": "./webapp-testing",
+      "description": "Test local web applications using Playwright with screenshots and browser logs."
+    },
+    {
+      "name": "xlsx",
+      "source": "./xlsx",
+      "description": "Create, read, edit, and manipulate spreadsheet files (.xlsx, .xlsm, .csv, .tsv)."
+    }
+  ]
+}

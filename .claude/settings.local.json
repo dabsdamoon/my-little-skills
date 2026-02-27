@@ -8,7 +8,14 @@
       "Bash(git mv:*)",
       "Bash(mkdir:*)",
       "WebFetch(domain:www.pubnub.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(gh:*)",
+      "Bash(/usr/local/bin/gh api:*)",
+      "Bash(/usr/local/bin/gh search:*)"
     ],
     "deny": [],
     "ask": []
