@@ -127,12 +127,10 @@ ANOTHER_VARIABLE=value
 
 ## Testing Checklist
 
-- [ ] [Test case 1 - describe what to test]
-- [ ] [Test case 2 - describe what to test]
-- [ ] [Test case 3 - describe what to test]
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Manual testing completed
+- [x] [Test case already verified by integration/unit tests]
+- [x] [Another test case covered by automated tests]
+- [ ] [Test case requiring manual verification - describe steps]
+- [ ] [Another manual check needed]
 
 ---
 
@@ -183,8 +181,9 @@ ANOTHER_VARIABLE=value
 - Group by category if multiple
 
 ### Testing Checklist Section
+- **Checked `[x]`**: Items already verified by existing integration/unit tests (pre-verified)
+- **Unchecked `[ ]`**: Items that require manual verification by the reviewer (e.g., UI appearance, deploy steps, browser testing)
 - Be specific about what to test
-- Include both automated and manual tests
 - Cover edge cases and regression tests
 
 ---
@@ -201,7 +200,8 @@ For small changes (< 5 files), use this minimal format instead of the full templ
 - [bullet point for each major change]
 
 ## Test plan
-- [ ] [how to verify the changes work]
+- [x] [item verified by automated tests]
+- [ ] [item requiring manual verification]
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
