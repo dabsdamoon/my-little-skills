@@ -34,14 +34,65 @@ git diff <target-branch>...HEAD -- path/to/specific/file.ts
 
 **Context**: Ask the user about the purpose/reason for the changes if not clear from commits
 
-### Step 2: Analyze Changes
+### Step 2: Blast Radius Analysis
+
+Assess how far the changes ripple through the codebase. Run these **in parallel**:
+
+```bash
+# For each modified file, find how many other files depend on it
+# Repeat for key changed files
+grep -rn "from.*<changed-module>.*import\|require.*<changed-module>" --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" .
+grep -rn "<changed-function-or-class>" --include="*.py" --include="*.ts" --include="*.tsx" --include="*.js" . | grep -v "def \|function \|class "
+```
+
+Classify each changed file:
+
+| Blast Radius | Criteria | Review Urgency |
+|---|---|---|
+| **LOW** | Leaf file (no other files import it), test files, docs | Normal |
+| **MEDIUM** | Imported by 2-5 files, component used in a few pages | Careful |
+| **HIGH** | Imported by 6+ files, shared utility/hook/service, config files | Thorough |
+| **CRITICAL** | Auth, DB schema, API contracts, env config, CI/CD | Requires sign-off |
+
+Include the blast radius summary in the PR documentation (see template below).
+
+### Step 3: Security Analysis
+
+Scan the diff for common security concerns. Check for:
+
+**Secrets & Credentials:**
+```bash
+# Search diff for potential secrets
+git diff <target-branch>...HEAD | grep -iE "(password|secret|token|api_key|apikey|private_key|credential|auth_token)\\s*[=:]" | grep -v "\\.(md|txt|example):"
+```
+
+**OWASP Top 10 Checks (review the diff for):**
+
+| Category | What to Look For |
+|---|---|
+| **Injection** | Raw SQL, unsanitized user input in queries, `eval()`, `exec()`, template literals in queries |
+| **Broken Auth** | Hardcoded tokens, missing auth checks on new endpoints, session handling changes |
+| **Sensitive Data** | Logging PII, exposing internal errors to clients, new env vars with secrets |
+| **XSS** | `dangerouslySetInnerHTML`, unescaped user content, `innerHTML` assignment |
+| **Insecure Dependencies** | New packages with known CVEs, pinned to vulnerable versions |
+| **Misconfiguration** | CORS wildcards (`*`), debug mode in prod, permissive file permissions |
+| **SSRF** | User-controlled URLs passed to `fetch`/`requests` without validation |
+
+**Rate the overall security posture:**
+- **CLEAR** — No security-relevant changes detected
+- **NOTE** — Minor items worth mentioning (e.g., new env var, new dependency)
+- **CONCERN** — Issues found that should be addressed before merge
+
+Include findings in the PR documentation (see template below).
+
+### Step 4: Analyze Changes
 
 For each changed file, understand:
 - **What** changed (added, modified, deleted)
 - **Why** it changed (bug fix, feature, refactor, etc.)
 - **Impact** on other parts of the system
 
-### Step 3: Write PR Documentation
+### Step 5: Write PR Documentation
 
 Generate a markdown document with the following sections:
 
@@ -67,6 +118,37 @@ Generate a markdown document with the following sections:
 - [Bullet point 1]
 - [Bullet point 2]
 - [Bullet point 3]
+
+---
+
+## Blast Radius
+
+| File | Dependents | Radius | Notes |
+|------|-----------|--------|-------|
+| `path/to/shared-util.ts` | 12 files | **CRITICAL** | Used across all services |
+| `path/to/component.tsx` | 3 files | MEDIUM | Used in 3 pages |
+| `path/to/leaf-file.ts` | 0 files | LOW | No downstream dependents |
+
+**Overall Blast Radius:** [LOW / MEDIUM / HIGH / CRITICAL]
+
+---
+
+## Security Analysis
+
+**Rating:** [CLEAR / NOTE / CONCERN]
+
+[If CLEAR:]
+> No security-relevant changes detected.
+
+[If NOTE or CONCERN, list findings:]
+
+| Category | Finding | Severity | File |
+|----------|---------|----------|------|
+| [e.g., Sensitive Data] | [e.g., New env var `API_SECRET` added] | NOTE | `path/to/file` |
+| [e.g., Injection] | [e.g., Raw user input in SQL query] | CONCERN | `path/to/file` |
+
+[If CONCERN, add recommended actions:]
+> **Action Required:** [Describe what should be fixed before merge]
 
 ---
 
@@ -127,12 +209,10 @@ ANOTHER_VARIABLE=value
 
 ## Testing Checklist
 
-- [ ] [Test case 1 - describe what to test]
-- [ ] [Test case 2 - describe what to test]
-- [ ] [Test case 3 - describe what to test]
-- [ ] Unit tests pass
-- [ ] Integration tests pass
-- [ ] Manual testing completed
+- [x] [Test case already verified by integration/unit tests]
+- [x] [Another test case covered by automated tests]
+- [ ] [Test case requiring manual verification - describe steps]
+- [ ] [Another manual check needed]
 
 ---
 
@@ -162,6 +242,18 @@ ANOTHER_VARIABLE=value
 
 ## Guidelines
 
+### Blast Radius Section
+- Run dependency grep for every file with non-trivial changes
+- Always classify each changed file into LOW / MEDIUM / HIGH / CRITICAL
+- Flag CRITICAL items prominently — these need reviewer attention
+- State the overall blast radius clearly
+
+### Security Analysis Section
+- Always scan the diff for secrets and OWASP concerns
+- Rate as CLEAR if nothing found — don't skip the section
+- For CONCERN items, include specific file and line references
+- Recommend concrete fixes, not vague warnings
+
 ### Summary Section
 - Be concise but complete
 - Focus on the "what" and "why"
@@ -183,8 +275,9 @@ ANOTHER_VARIABLE=value
 - Group by category if multiple
 
 ### Testing Checklist Section
+- **Checked `[x]`**: Items already verified by existing integration/unit tests (pre-verified)
+- **Unchecked `[ ]`**: Items that require manual verification by the reviewer (e.g., UI appearance, deploy steps, browser testing)
 - Be specific about what to test
-- Include both automated and manual tests
 - Cover edge cases and regression tests
 
 ---
@@ -201,7 +294,8 @@ For small changes (< 5 files), use this minimal format instead of the full templ
 - [bullet point for each major change]
 
 ## Test plan
-- [ ] [how to verify the changes work]
+- [x] [item verified by automated tests]
+- [ ] [item requiring manual verification]
 
 🤖 Generated with [Claude Code](https://claude.com/claude-code)
 ```
