@@ -213,6 +213,7 @@ ANOTHER_VARIABLE=value
 - [x] [Another test case covered by automated tests]
 - [ ] [Test case requiring manual verification - describe steps]
 - [ ] [Another manual check needed]
+- [ ] [Automatable test case not yet covered] ⚠️ **automatable** — suggest adding unit/integration test
 
 ---
 
@@ -279,6 +280,14 @@ ANOTHER_VARIABLE=value
 - **Unchecked `[ ]`**: Items that require manual verification by the reviewer (e.g., UI appearance, deploy steps, browser testing)
 - Be specific about what to test
 - Cover edge cases and regression tests
+
+**Test coverage gap analysis (important):** Before finalizing the checklist, review each unchecked `[ ]` item and ask: *"Can this be covered by a unit or integration test?"* If the answer is yes — and the project already has a test setup — **flag it explicitly** as a test gap rather than leaving it as a manual-only item. Use this format:
+
+```markdown
+- [ ] Verify user registration creates auth user + member record ⚠️ **automatable** — suggest adding unit test
+```
+
+This ensures reviewers and authors are aware that the item is unchecked not because it *can't* be tested, but because a test *hasn't been written yet*. The goal is to minimize false "manual-only" items and encourage test coverage before merge.
 
 ---
 
