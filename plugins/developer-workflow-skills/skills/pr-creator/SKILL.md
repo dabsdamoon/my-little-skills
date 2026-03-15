@@ -1,6 +1,7 @@
 ---
 name: pr-creator
 description: Creates professional Pull Request (PR) documentation in markdown format. Use this skill when asked to create a PR, write PR notes, document code changes for review, or prepare merge request documentation. The skill analyzes git changes, understands the codebase context, and produces comprehensive PR documentation.
+argument-hint: [target-branch]
 ---
 
 # PR Creator Skill
@@ -354,3 +355,7 @@ EOF
 ## Keywords
 
 PR, pull request, merge request, code review, git, documentation, changelog
+
+## Reference Examples
+- For a bugfix PR example, see [examples/bugfix-pr.md](examples/bugfix-pr.md)
+- For a feature PR example, see [examples/sso-feature-pr.md](examples/sso-feature-pr.md)

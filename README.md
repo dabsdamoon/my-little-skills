@@ -24,7 +24,7 @@ Then go to the **Discover** tab, or install directly:
 |--------|--------|-------------|
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
 | **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
-| **developer-workflow-skills** | pr-creator, webapp-testing, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | PR creation with blast radius & security analysis, browser testing, Docker memory checks, and more |
+| **developer-workflow-skills** | pr-creator, webapp-testing, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | PR docs with blast radius & security analysis, Playwright browser testing, Docker memory checks, debugging postmortems, and more |
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator | Documentation workflows, internal comms, skill/prompt authoring |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
@@ -120,6 +120,6 @@ To bundle skills into a plugin, create a `plugins/<name>/.claude-plugin/plugin.j
 ## Links
 
 - [Agent Skills standard](https://agentskills.io)
-- [What are skills?](https://support.claude.com/en/articles/12512176-what-are-skills)
-- [Creating custom skills](https://support.claude.com/en/articles/12512198-creating-custom-skills)
+- [Skills documentation](https://code.claude.com/docs/en/skills)
+- [Plugins documentation](https://code.claude.com/docs/en/plugins)
 - [Upstream: anthropics/skills](https://github.com/anthropics/skills)
