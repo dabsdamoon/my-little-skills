@@ -234,7 +234,7 @@ gcloud auth application-default set-quota-project PROJECT_ID
 direnv allow
 
 # Check current state
-~/.claude/skills/gcloud-direnv-setup/scripts/check_gcloud_setup.sh
+${CLAUDE_SKILL_DIR}/scripts/check_gcloud_setup.sh
 ```
 
 ## References
