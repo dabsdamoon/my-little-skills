@@ -56,6 +56,11 @@
       "skills": [
         "./skills/claude-api"
       ]
+    },
+    {
+      "name": "analysis-skills",
+      "description": "Critical thinking and analysis: idea critique, assumption challenging, and fact-checking",
+      "source": "./plugins/analysis-skills"
     }
   ]
 }
