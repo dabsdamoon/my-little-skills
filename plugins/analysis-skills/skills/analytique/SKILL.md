@@ -43,7 +43,8 @@ Selection heuristics:
 - Input is a strategic decision → Second-Order Effects + Hidden Assumptions
 - Input sounds stuck or framed too narrowly → Alternative Framing + Hidden Assumptions
 - Input claims novelty → Prior Art + Hidden Assumptions
-- When in doubt → Hidden Assumptions + Logical Consistency
+- Input matches multiple heuristics → select the 3 most relevant lenses (Hidden Assumptions still counts as one of the 3)
+- **When in doubt → Hidden Assumptions + Logical Consistency**
 
 ### Step 3 — Analysis
 
@@ -70,6 +71,8 @@ Ask if the user wants to dig deeper into any specific point. Deeper exploration 
 - Applying the same lens with more depth.
 - Introducing a new lens from the pool that was not initially selected.
 - Free-form discussion on a specific finding.
+
+On follow-up explorations of the same input, skip Intent Extraction — the original restatement remains in effect.
 
 ---
 
