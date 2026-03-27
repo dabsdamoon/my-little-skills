@@ -1,0 +1,8 @@
+{
+  "name": "translation-skills",
+  "description": "Book translation using parallel sub-agents with multi-format output",
+  "version": "1.0.0",
+  "author": {
+    "name": "dabsdamoon"
+  }
+}
