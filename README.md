@@ -30,6 +30,7 @@ Then go to the **Discover** tab, or install directly:
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
 | **houmy-skills** | houmlike-design, houm-refactoring | Houmy maternity care service: branded UI design and systematic codebase refactoring |
 | **claude-api** | claude-api | Claude API & SDK reference across Python, TypeScript, Go, Java, PHP, Ruby, C#, curl |
+| **translation-skills** | translate-book | Translate entire books (PDF/DOCX/EPUB) into any language using parallel sub-agents |
 
 ## What's Included from Upstream
 
@@ -57,6 +58,12 @@ These skills are original to this marketplace — not available in Anthropic's o
 | **subagent-creator** | Generates repository-specific Claude Code subagents tailored to your tech stack |
 | **debugging-retrospective** | Summarizes debugging sessions into educational postmortems with lessons learned |
 | **gcloud-direnv-setup** | Configures per-directory GCP credentials with direnv for multi-account setups |
+
+### Translation
+
+| Skill | What It Does |
+|-------|-------------|
+| **translate-book** | Translates entire books (PDF/DOCX/EPUB) into any language using 8 parallel sub-agents with SHA-256 manifest validation. Outputs HTML, DOCX, EPUB, PDF. Requires Calibre + Pandoc. ([source: deusyu/translate-book](https://github.com/deusyu/translate-book)) |
 
 ### Resume & Career (Work in Progress)
 
