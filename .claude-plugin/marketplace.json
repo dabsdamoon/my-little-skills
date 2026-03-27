@@ -61,6 +61,11 @@
       "name": "analysis-skills",
       "description": "Critical thinking and analysis: idea critique, assumption challenging, and fact-checking",
       "source": "./plugins/analysis-skills"
+    },
+    {
+      "name": "translation-skills",
+      "description": "Book translation using parallel sub-agents with multi-format output (HTML, DOCX, EPUB, PDF)",
+      "source": "./plugins/translation-skills"
     }
   ]
 }
