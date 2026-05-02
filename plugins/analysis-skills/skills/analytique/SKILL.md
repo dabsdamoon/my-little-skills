@@ -28,10 +28,12 @@ Apply 2-3 lenses per analysis: **Hidden Assumptions is always applied**, plus 1-
 
 ### Step 1 — Intent Extraction
 
-Parse what the user is actually saying or proposing. Restate it back in one sentence to confirm understanding.
+Parse what the user is actually saying or proposing. Restate it back in one sentence and ask the user to confirm.
 
-- If the restatement is accurate, proceed to Step 2.
-- If the user corrects the restatement, re-extract and restate before proceeding. Do not move forward until the restatement is confirmed.
+**This step is blocking.** End your turn after asking. Do not run lens selection, analysis, or any other step in the same turn as the restatement — wait for the user's reply.
+
+- If the user confirms the restatement, proceed to Step 2 in the next turn.
+- If the user corrects the restatement, re-extract, restate, and ask again. Repeat until confirmed. Do not move forward until the user has explicitly confirmed.
 
 ### Step 2 — Lens Selection
 
