@@ -51,7 +51,7 @@ Three rounds. Batch the questions in each round; don't ask them one at a time.
 
 **Round B — Skills, files, and repos.** What the agent has on hand when it starts.
 
-*Skills* — two types; both work the same way — Claude auto-uses them when relevant. Max 64 per agent.
+*Skills* — two types; both work the same way — Claude auto-uses them when relevant. Max 20 per agent.
 - [ ] **Pre-built Agent Skills**: `xlsx`, `docx`, `pptx`, `pdf`. Reference by name.
 - [ ] **Custom Skills**: skills uploaded to the user's org via the Skills API. Reference by `skill_id` + optional `version`. If the skill doesn't exist yet, walk the user through `POST /v1/skills` + `POST /v1/skills/{id}/versions` (beta header `skills-2025-10-02`). Full detail: `shared/managed-agents-tools.md` → Skills + Skills API.
 
@@ -74,7 +74,7 @@ Emit as `resources: [{type: "file", file_id, mount_path}]`. Max 999 file resourc
 - [ ] Networking: unrestricted internet from the container, or lock egress to specific hosts? (If locked, MCP server domains must be in `allowed_hosts` or tools silently fail.)
 - [ ] Name?
 - [ ] Job (one or two sentences — becomes the system prompt)?
-- [ ] Model? (default `claude-opus-4-6`)
+- [ ] Model? (default `claude-opus-4-7`)
 
 ---
 
@@ -90,7 +90,7 @@ Credentials are write-only, matched to MCP servers by URL, auto-refreshed. See `
 **Kickoff:**
 - [ ] First message to the agent?
 
-Session creation blocks until all resources mount. Open the event stream before sending the kickoff. Stream is SSE; break on `session.status_terminated`, or on `session.status_idle` with a terminal `stop_reason` — i.e. anything except `requires_action`, which fires transiently while the session waits on a tool confirmation or custom-tool result (see `shared/managed-agents-client-patterns.md` Pattern 5). Usage lands on `span.model_request_end`. Agent-written artifacts end up in `/mnt/session/outputs/` — download via `files.list({scope: session_id})`.
+Session creation blocks until all resources mount. Open the event stream before sending the kickoff. Stream is SSE; break on `session.status_terminated`, or on `session.status_idle` with a terminal `stop_reason` — i.e. anything except `requires_action`, which fires transiently while the session waits on a tool confirmation or custom-tool result (see `shared/managed-agents-client-patterns.md` Pattern 5). Usage lands on `span.model_request_end`. Agent-written artifacts end up in `/mnt/session/outputs/` — download via `files.list({scope_id: session.id, betas: ["managed-agents-2026-04-01"]})`.
 
 ---
 
