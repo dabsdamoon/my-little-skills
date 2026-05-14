@@ -1,0 +1,52 @@
+name: Verify Production Pointer
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, production]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-production-pointer:
+    name: Verify production is reachable from main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch main and production
+        shell: bash
+        run: |
+          git fetch origin main:refs/remotes/origin/main
+          git fetch origin production:refs/remotes/origin/production || true
+
+      - name: Verify live-pointer invariant
+        shell: bash
+        run: |
+          if ! git rev-parse --verify --quiet origin/production >/dev/null; then
+            echo "origin/production does not exist yet; first release may create it."
+            exit 0
+          fi
+
+          if git merge-base --is-ancestor origin/production origin/main; then
+            echo "OK: origin/production is reachable from origin/main."
+          else
+            echo "ERROR: origin/production has commits that are not on origin/main."
+            echo "Back-port production-only hotfixes to main before releasing."
+            exit 1
+          fi
+
+      - name: Show main-production divergence
+        shell: bash
+        run: |
+          if git rev-parse --verify --quiet origin/production >/dev/null; then
+            echo "Pending commits from main to production:"
+            git rev-list --count origin/production..origin/main
+            git log --oneline --decorate origin/production..origin/main | head -50 || true
+          fi
