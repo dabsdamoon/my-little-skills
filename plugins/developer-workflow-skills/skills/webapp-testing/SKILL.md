@@ -66,11 +66,30 @@ After running all tests, produce an **Audit Report** summarizing:
 ```
 
 **Helper Scripts Available**:
+- `scripts/ensure_playwright.sh` - Bootstraps a dedicated venv with Playwright + chromium (MUST be run first)
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
-**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is absolutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
+**Always run scripts with `--help` first** (where supported) to see usage. DO NOT read the source until you try running the script first and find that a customized solution is absolutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 
-## Step 0: Authentication Setup (before writing any tests)
+## Step 0: Bootstrap the testing environment (before any Python invocation)
+
+The skill uses a dedicated user-scoped venv so it does not pollute the system Python or any project venv. Run the bootstrap script ONCE per session and capture the venv path it prints:
+
+```bash
+VENV="$(scripts/ensure_playwright.sh)" || exit 1
+echo "Using venv: $VENV"
+```
+
+- **First run** takes 30-90s (creates venv, installs `playwright`, downloads chromium ~170MB).
+- **Subsequent runs** are no-ops (~400ms) — safe to call before every test invocation.
+- The venv lives at `${XDG_CACHE_HOME:-$HOME/.cache}/claude-skills/webapp-testing/venv` and persists across projects and sessions.
+- Override the playwright version with `PLAYWRIGHT_VERSION=1.55.0 scripts/ensure_playwright.sh` if your project pins a specific one.
+
+**Always invoke Python via `$VENV/bin/python`** — never `python3` directly — to ensure you get the playwright install. The `with_server.py` helper below should also be invoked via `$VENV/bin/python scripts/with_server.py`.
+
+If the script fails, it reports the cause on stderr (missing `python3`, Python too old, chromium launch failure). Do not proceed to writing tests until it succeeds.
+
+## Step 1: Authentication Setup (before writing any tests)
 
 If the app requires login/session to access pages, **resolve auth first** before writing Playwright scripts. Silent auth failures (redirect to login/signup) will cause every test to fail for the same reason.
 
@@ -134,7 +153,7 @@ User task → Is it static HTML?
     │         └─ Fails/Incomplete → Treat as dynamic (below)
     │
     └─ No (dynamic webapp) → Is the server already running?
-        ├─ No → Run: python scripts/with_server.py --help
+        ├─ No → Run: "$VENV/bin/python" scripts/with_server.py --help
         │        Then use the helper + write simplified Playwright script
         │
         └─ Yes → Reconnaissance-then-action:
@@ -150,15 +169,15 @@ To start a server, run `--help` first, then use the helper:
 
 **Single server:**
 ```bash
-python scripts/with_server.py --server "npm run dev" --port 5173 -- python your_automation.py
+"$VENV/bin/python" scripts/with_server.py --server "npm run dev" --port 5173 -- "$VENV/bin/python" your_automation.py
 ```
 
 **Multiple servers (e.g., backend + frontend):**
 ```bash
-python scripts/with_server.py \
+"$VENV/bin/python" scripts/with_server.py \
   --server "cd backend && python server.py" --port 3000 \
   --server "cd frontend && npm run dev" --port 5173 \
-  -- python your_automation.py
+  -- "$VENV/bin/python" your_automation.py
 ```
 
 To create an automation script, include only Playwright logic (servers are managed automatically):
