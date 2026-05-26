@@ -1,0 +1,23 @@
+{
+  "skill_name": "pr-checklist-verifier",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just ran the QA on PR #19 and the mobile tab-strip scroll + the reload persistence both pass. Can you verify them properly and get the PR description up to date?",
+      "expected_output": "Skill resolves PR #19, runs the two browser checks (or confirms the provided results) via webapp-testing, then edits the PR body: flips exactly those two `- [ ]` items to `- [x]`, adds a QA Verification section with evidence, leaves any subjective/un-run items unchecked. Reports ticked vs left-unchecked.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Verify the test plan on the PR for my current branch before I merge. Don't check anything off that you can't actually prove.",
+      "expected_output": "Resolves the current branch's PR via gh, parses unchecked items, classifies each (browser/test-suite/build/api/subjective), runs the verifiable ones, and only ticks PASSes. Subjective or blocked items stay unchecked and are reported with reasons. PR body updated with a QA Verification section. No box ticked without evidence.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Can you confirm the checklist items on PR #42 actually work? One of them is 'category filter returns 200 for each tab' and one is 'PM approved the copy'.",
+      "expected_output": "Resolves PR #42. The API item ('returns 200 for each tab') is verified with curl/HTTP and ticked if it passes; a FAIL is surfaced as a finding rather than silently skipped. The 'PM approved the copy' item is recognized as subjective/human-only, left unchecked, and reported as needing a person. PR body updated only for the verified item.",
+      "files": []
+    }
+  ]
+}
