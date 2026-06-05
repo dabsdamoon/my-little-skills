@@ -9,13 +9,16 @@ Turn raw LLM-Wiki material into a connected Obsidian wiki. Treat `raw/` as sourc
 
 ## Vault
 
-Default vault:
+Resolve the target vault in this order:
 
-```text
-/Users/dabsdamoon/LLM-Wiki/LLM-Wiki
-```
+1. A vault path explicitly provided by the user.
+2. The current working directory, if it contains `AGENTS.md`, `raw/`, and `wiki/`.
+3. The `LLM_WIKI_VAULT` environment variable, if available.
+4. The personal default `/Users/dabsdamoon/LLM-Wiki/LLM-Wiki`, if it exists.
 
-If the user gives another vault path, use it. Always read `AGENTS.md` first when it exists.
+If none resolve, stop before writing and ask the user: "What is the path to your LLM-Wiki vault?" Do not guess or create a new vault implicitly.
+
+Always read `AGENTS.md` first when it exists.
 
 ## Input Selection
 
