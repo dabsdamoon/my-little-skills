@@ -39,6 +39,11 @@
       "source": "./plugins/config-skills"
     },
     {
+      "name": "llm-wiki-skills",
+      "description": "LLM-Wiki raw capture and wikification workflows for Obsidian",
+      "source": "./plugins/llm-wiki-skills"
+    },
+    {
       "name": "houmy-skills",
       "description": "Houmy maternity care service: UI design and codebase refactoring",
       "source": "./plugins/houmy-skills"

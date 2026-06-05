@@ -1,0 +1,4 @@
+interface:
+  display_name: "Wikify Raw"
+  short_description: "Turn raw sources into linked wiki pages."
+  default_prompt: "Use $wikify-raw to ingest raw LLM-Wiki inbox files into connected wiki pages."

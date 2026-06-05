@@ -28,6 +28,7 @@ Then go to the **Discover** tab, or install directly:
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator | Documentation workflows, internal comms, skill/prompt authoring |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
+| **llm-wiki-skills** | make-llm-wiki-raw, wikify-raw | Capture raw LLM-Wiki sources and turn them into linked Obsidian wiki pages |
 | **houmy-skills** | houmlike-design, houm-refactoring | Houmy maternity care service: branded UI design and systematic codebase refactoring |
 | **claude-api** | claude-api | Claude API & SDK reference across Python, TypeScript, Go, Java, PHP, Ruby, C#, curl |
 | **translation-skills** | translate-book | Translate entire books (PDF/DOCX/EPUB) into any language using parallel sub-agents |
@@ -85,6 +86,13 @@ These skills are original to this marketplace — not available in Anthropic's o
 | **system-prompt-creator** | Guides creation of production system prompts following OpenAI, Anthropic, Google, and OWASP best practices |
 | **update-notes** | Writes concise release/update notes for projects |
 
+### LLM Wiki
+
+| Skill | What It Does |
+|-------|-------------|
+| **make-llm-wiki-raw** | Creates raw source notes in `/Users/dabsdamoon/LLM-Wiki/LLM-Wiki/raw/inbox` from URLs, files, pasted text, or project artifacts |
+| **wikify-raw** | Ingests raw LLM-Wiki sources into `wiki/sources`, `wiki/entities`, `wiki/concepts`, `wiki/syntheses`, `wiki/index.md`, and `wiki/log.md` |
+
 ### Houmy (Project-Specific)
 
 | Skill | What It Does |
@@ -105,6 +113,7 @@ plugins/
   writing-skills/
   resume-skills/
   config-skills/
+  llm-wiki-skills/
   houmy-skills/
 skills/                     # Source skills (copied into plugins)
 spec/                       # Agent Skills specification

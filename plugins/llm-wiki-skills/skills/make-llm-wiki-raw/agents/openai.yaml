@@ -1,0 +1,4 @@
+interface:
+  display_name: "Make LLM Wiki Raw"
+  short_description: "Create raw LLM-Wiki source notes."
+  default_prompt: "Use $make-llm-wiki-raw to create a raw source note in the LLM-Wiki vault."
