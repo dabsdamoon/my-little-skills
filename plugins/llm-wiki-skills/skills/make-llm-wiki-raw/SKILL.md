@@ -16,6 +16,8 @@ Resolve the target vault in this order:
 3. The `LLM_WIKI_VAULT` environment variable, if available.
 4. The personal default `/Users/dabsdamoon/LLM-Wiki/LLM-Wiki`, if it exists.
 
+If none resolve, stop before writing and ask the user: "What is the path to your LLM-Wiki vault?" Do not guess or create a new vault implicitly.
+
 If the user gives another vault path, use that path. Before writing, verify the vault has `AGENTS.md`, `raw/inbox/`, and `wiki/`. If `raw/inbox/` is missing but the vault is clearly an LLM-Wiki vault, create the missing raw directories only.
 
 ## Workflow
