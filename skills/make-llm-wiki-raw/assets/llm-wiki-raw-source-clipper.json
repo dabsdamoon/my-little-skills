@@ -1,0 +1,10 @@
+{
+  "schemaVersion": "0.1.0",
+  "name": "LLM Wiki Raw Source",
+  "behavior": "create",
+  "noteContentFormat": "---\ntype: raw_source\nsource_type: web\ntitle: \"{{title}}\"\nurl: \"{{url}}\"\nsite: \"{{site}}\"\nauthor: \"{{author}}\"\npublished: \"{{published}}\"\nclipped: \"{{date}}\"\nstatus: inbox\n---\n\n# {{title}}\n\nSource: {{url}}\n\n{{content}}",
+  "properties": [],
+  "triggers": [],
+  "noteNameFormat": "{{title}}",
+  "path": "raw/inbox"
+}

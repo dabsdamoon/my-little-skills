@@ -9,11 +9,12 @@ Create source-of-truth material in the LLM-Wiki raw layer. Do not wikify, summar
 
 ## Vault
 
-Default vault:
+Resolve the target vault in this order:
 
-```text
-/Users/dabsdamoon/LLM-Wiki/LLM-Wiki
-```
+1. A vault path explicitly provided by the user.
+2. The current working directory, if it contains `AGENTS.md`, `raw/`, and `wiki/`.
+3. The `LLM_WIKI_VAULT` environment variable, if available.
+4. The personal default `/Users/dabsdamoon/LLM-Wiki/LLM-Wiki`, if it exists.
 
 If the user gives another vault path, use that path. Before writing, verify the vault has `AGENTS.md`, `raw/inbox/`, and `wiki/`. If `raw/inbox/` is missing but the vault is clearly an LLM-Wiki vault, create the missing raw directories only.
 
@@ -21,34 +22,39 @@ If the user gives another vault path, use that path. Before writing, verify the 
 
 1. Identify the input type: pasted text, URL, local file, binary attachment, repository artifact, or mixed sources.
 2. Read `AGENTS.md` if present and obey its raw-layer contract.
-3. Create exactly one raw inbox note per source unless the user asks for a batch.
-4. Preserve the source content as directly as practical. Do not rewrite it into a wiki summary.
-5. Put markdown/text sources under `raw/inbox/`.
-6. Put binary assets under `raw/assets/` and create a `raw/inbox/` note that links to the asset.
-7. Never overwrite an existing raw note. If a filename collides, append a short suffix.
-8. Do not update `wiki/index.md`, `wiki/log.md`, or generated pages.
+3. Read the bundled Web Clipper template at `assets/llm-wiki-raw-source-clipper.json` relative to this skill, and use its `noteContentFormat`, `noteNameFormat`, and `path` as the canonical raw note format.
+4. Create exactly one raw inbox note per source unless the user asks for a batch.
+5. Preserve the source content as directly as practical. Do not rewrite it into a wiki summary.
+6. Put markdown/text sources under the template path, normally `raw/inbox`.
+7. Put binary assets under `raw/assets/` and create a raw wrapper note that follows the same frontmatter shape where practical.
+8. Never overwrite an existing raw note. If a filename collides, append a short suffix.
+9. Do not update `wiki/index.md`, `wiki/log.md`, or generated pages.
 
 ## Raw Note Format
 
-Use this format for a captured markdown source:
+For web, pasted text, and markdown/text captures, mirror `assets/llm-wiki-raw-source-clipper.json`. The current canonical template is:
 
 ```markdown
 ---
 type: raw_source
-source_type: web|file|pdf|doc|screenshot|meeting|repo|manual|other
+source_type: web
 title: "Title"
 url: ""
-source_path: ""
-captured: YYYY-MM-DD
+site: ""
+author: ""
+published: ""
+clipped: "YYYY-MM-DDTHH:MM:SS+TZ"
 status: inbox
 ---
 
 # Title
 
-Source: URL or local path
+Source: URL
 
 Original content goes here.
 ```
+
+For non-web text sources, keep the same shape for consistency. Set `source_type` to `file`, `meeting`, `repo`, `manual`, or `other`; set `url` to `""`; put the local path or origin in the `Source:` line; and use `clipped` for the capture timestamp.
 
 For binary files, copy or reference the asset and create a wrapper note:
 
@@ -57,8 +63,11 @@ For binary files, copy or reference the asset and create a wrapper note:
 type: raw_source
 source_type: pdf|doc|image|other
 title: "Title"
-source_path: "raw/assets/file.ext"
-captured: YYYY-MM-DD
+url: ""
+site: ""
+author: ""
+published: ""
+clipped: "YYYY-MM-DDTHH:MM:SS+TZ"
 status: inbox
 ---
 
