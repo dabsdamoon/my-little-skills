@@ -25,7 +25,7 @@
     },
     {
       "name": "writing-skills",
-      "description": "Documentation co-authoring, internal communications, system prompts, and skill creation guides",
+      "description": "Documentation co-authoring, internal communications, system prompts, Korean AI-text humanizing, and skill creation guides",
       "source": "./plugins/writing-skills"
     },
     {
