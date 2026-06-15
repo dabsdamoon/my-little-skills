@@ -25,7 +25,7 @@ Then go to the **Discover** tab, or install directly:
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
 | **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
 | **developer-workflow-skills** | pr-creator, setup-release-pipeline, deploy-check, webapp-testing, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | PR docs, opinionated production-pointer release pipelines, deploy checks, Playwright browser testing, Docker memory checks, debugging postmortems, and more |
-| **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator | Documentation workflows, internal comms, skill/prompt authoring |
+| **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
 | **llm-wiki-skills** | make-llm-wiki-raw, wikify-raw | Capture raw LLM-Wiki sources and turn them into linked Obsidian wiki pages |
@@ -61,6 +61,16 @@ These skills are original to this marketplace — not available in Anthropic's o
 | **subagent-creator** | Generates repository-specific Claude Code subagents tailored to your tech stack |
 | **debugging-retrospective** | Summarizes debugging sessions into educational postmortems with lessons learned |
 | **gcloud-direnv-setup** | Configures per-directory GCP credentials with direnv for multi-account setups |
+
+### Writing
+
+| Skill | What It Does |
+|-------|-------------|
+| **humanize-korean** | Rewrites Korean AI-generated text to sound natural while preserving facts, claims, names, numbers, and quoted text |
+| **doc-coauthoring** | Helps co-author structured documentation with the user |
+| **internal-comms** | Drafts and refines internal communications |
+| **system-prompt-creator** | Guides production-grade system prompt creation |
+| **skill-creator** | Helps create and update reusable agent skills |
 
 ### Translation
 
