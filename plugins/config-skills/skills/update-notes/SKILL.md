@@ -1,85 +1,42 @@
 ---
 name: update-notes
-description: [TODO: Complete and informative explanation of what the skill does and when to use it. Include WHEN to use this skill - specific scenarios, file types, or tasks that trigger it.]
+description: "Write concise project update notes, release notes, or changelog entries after code or documentation changes. Use when the user asks to summarize recent changes, document completed work, update UPDATE.md, CHANGELOG.md, or release notes, or create a project-facing change summary."
 ---
 
 # Update Notes
 
-## Overview
+Write short, concrete update notes for a project after implementation, refactoring, documentation, or operational changes.
 
-[TODO: 1-2 sentences explaining what this skill enables]
+## Workflow
 
-## Structuring This Skill
+1. Inspect changed work with `git status --short`, `git diff --stat`, and targeted `git diff` reads. If the directory is not a Git worktree, inspect the files the user names.
+2. Locate the project notes target. Prefer an existing `docs/UPDATE.md`, `UPDATE.md`, `CHANGELOG.md`, or `RELEASE_NOTES.md`. If none exists, ask before creating a new notes file unless the user already specified a path.
+3. Read the latest entries to match ordering, headings, tense, and level of detail.
+4. Add one entry that covers only the current completed changes. Keep unrelated or speculative work out.
+5. Verify the edited note for duplicated claims, stale dates, broken markdown, and paths that no longer exist.
 
-[TODO: Choose the structure that best fits this skill's purpose. Common patterns:
+## Entry Guidance
 
-**1. Workflow-Based** (best for sequential processes)
-- Works well when there are clear step-by-step procedures
-- Example: DOCX skill with "Workflow Decision Tree" → "Reading" → "Creating" → "Editing"
-- Structure: ## Overview → ## Workflow Decision Tree → ## Step 1 → ## Step 2...
+- Use today's date in `YYYY-MM-DD` unless the existing file uses another date format.
+- Prefer newest-first when the file already follows that convention; otherwise preserve the existing order.
+- Keep summaries concise: what changed, why it matters, and any behavior or migration impact.
+- Use concrete file paths and feature names instead of broad claims.
+- Skip sections that do not apply. Do not invent testing, migration, or deployment details.
+- For the Houmy repository, prefer the project-specific `update-houmy-notes` skill when available.
 
-**2. Task-Based** (best for tool collections)
-- Works well when the skill offers different operations/capabilities
-- Example: PDF skill with "Quick Start" → "Merge PDFs" → "Split PDFs" → "Extract Text"
-- Structure: ## Overview → ## Quick Start → ## Task Category 1 → ## Task Category 2...
+## Suggested Format
 
-**3. Reference/Guidelines** (best for standards or specifications)
-- Works well for brand guidelines, coding standards, or requirements
-- Example: Brand styling with "Brand Guidelines" → "Colors" → "Typography" → "Features"
-- Structure: ## Overview → ## Guidelines → ## Specifications → ## Usage...
+When the target file has no established format, use:
 
-**4. Capabilities-Based** (best for integrated systems)
-- Works well when the skill provides multiple interrelated features
-- Example: Product Management with "Core Capabilities" → numbered capability list
-- Structure: ## Overview → ## Core Capabilities → ### 1. Feature → ### 2. Feature...
+```markdown
+## YYYY-MM-DD: Short Title
 
-Patterns can be mixed and matched as needed. Most skills combine patterns (e.g., start with task-based, add workflow for complex operations).
+### Summary
+1-3 sentences describing the user-visible or operational effect.
 
-Delete this entire "Structuring This Skill" section when done - it's just guidance.]
+### Changes
+- `path/to/file`: Brief description of the meaningful change.
 
-## [TODO: Replace with the first main section based on chosen structure]
-
-[TODO: Add content here. See examples in existing skills:
-- Code samples for technical skills
-- Decision trees for complex workflows
-- Concrete examples with realistic user requests
-- References to scripts/templates/references as needed]
-
-## Resources
-
-This skill includes example resource directories that demonstrate how to organize different types of bundled resources:
-
-### scripts/
-Executable code (Python/Bash/etc.) that can be run directly to perform specific operations.
-
-**Examples from other skills:**
-- PDF skill: `fill_fillable_fields.py`, `extract_form_field_info.py` - utilities for PDF manipulation
-- DOCX skill: `document.py`, `utilities.py` - Python modules for document processing
-
-**Appropriate for:** Python scripts, shell scripts, or any executable code that performs automation, data processing, or specific operations.
-
-**Note:** Scripts may be executed without loading into context, but can still be read by Claude for patching or environment adjustments.
-
-### references/
-Documentation and reference material intended to be loaded into context to inform Claude's process and thinking.
-
-**Examples from other skills:**
-- Product management: `communication.md`, `context_building.md` - detailed workflow guides
-- BigQuery: API reference documentation and query examples
-- Finance: Schema documentation, company policies
-
-**Appropriate for:** In-depth documentation, API references, database schemas, comprehensive guides, or any detailed information that Claude should reference while working.
-
-### assets/
-Files not intended to be loaded into context, but rather used within the output Claude produces.
-
-**Examples from other skills:**
-- Brand styling: PowerPoint template files (.pptx), logo files
-- Frontend builder: HTML/React boilerplate project directories
-- Typography: Font files (.ttf, .woff2)
-
-**Appropriate for:** Templates, boilerplate code, document templates, images, icons, fonts, or any files meant to be copied or used in the final output.
-
----
-
-**Any unneeded directories can be deleted.** Not every skill requires all three types of resources.
+### Verification
+- Command or manual check performed, if any.
+```
