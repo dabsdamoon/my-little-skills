@@ -1,0 +1,4 @@
+interface:
+  display_name: "Humanize Korean"
+  short_description: "Remove Korean AI tells while preserving meaning."
+  default_prompt: "Use $humanize-korean to make this Korean text sound naturally human while preserving the content."
