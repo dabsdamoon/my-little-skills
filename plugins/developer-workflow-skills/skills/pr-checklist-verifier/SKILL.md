@@ -2,6 +2,7 @@
 name: pr-checklist-verifier
 description: Verifies the unchecked items in a pull request's testing checklist by actually running the appropriate tool (browser/webapp-testing for UI behavior, the test suite for "tests pass", curl for endpoints, a build for "compiles"), then closes the loop by updating the PR body — ticking only the items it proved and recording the evidence. Use this whenever someone asks to "verify the PR checklist", "check off the test plan", "confirm the manual QA items", "verify and update the PR", or runs QA against a PR and wants the description brought up to date. Reach for it any time a PR has `- [ ]` checklist items that ought to be confirmed before merge, even if the user only says "make sure the PR is actually tested."
 argument-hint: [pr-number]
+model: sonnet
 ---
 
 # PR Checklist Verifier
