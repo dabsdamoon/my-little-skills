@@ -24,3 +24,6 @@ notes/
 # private claude artifacts
 .claude/*
 docs/superpowers
+
+# model-quality-compare experiment outputs
+output/
