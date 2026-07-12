@@ -1,0 +1,8 @@
+{
+  "name": "research-workflow-skills",
+  "description": "Research workflow toolkit: autonomous experiment-loop iteration with keep/discard discipline, noise guards, and full audit trails",
+  "version": "1.0.0",
+  "author": {
+    "name": "dabsdamoon"
+  }
+}
