@@ -71,6 +71,11 @@
       "name": "translation-skills",
       "description": "Book translation using parallel sub-agents with multi-format output (HTML, DOCX, EPUB, PDF)",
       "source": "./plugins/translation-skills"
+    },
+    {
+      "name": "research-workflow-skills",
+      "description": "Research workflows: autonomous experiment iteration (keep/discard loop with noise guard and audit trail)",
+      "source": "./plugins/research-workflow-skills"
     }
   ]
 }
