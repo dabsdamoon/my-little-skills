@@ -27,3 +27,4 @@ docs/superpowers
 
 # model-quality-compare experiment outputs
 output/
+tmp/
