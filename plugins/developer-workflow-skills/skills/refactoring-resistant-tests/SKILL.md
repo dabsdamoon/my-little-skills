@@ -1,72 +1,114 @@
 ---
 name: refactoring-resistant-tests
-description: Use when writing or modifying automated tests of any kind — unit, component, API, integration, or e2e — including when a feature implementation needs tests, when asked to add test coverage, or when a test broke after a refactor. Especially use before imitating an existing test file's conventions. Works in both Claude Code and Codex (pure guidance, no runtime-specific tools). Triggers: write tests, add coverage, vitest, jest, pytest, testing-library, fireEvent, vi.mock, jest.mock, MagicMock, monkeypatch, MSW, TestClient, brittle tests, tests broken by refactoring.
+description: Use when writing, modifying, repairing, or reviewing automated tests of any kind, including unit, component, API, integration, and end-to-end tests. Also use when a feature needs coverage or tests broke after a refactor. Applies to Vitest, Jest, pytest, Testing Library, Playwright, SQLite fixtures, connector and parser tests, deployment scripts, selectors, assertions, fixtures, and mocking decisions.
 ---
 
 # Refactoring-Resistant Tests
 
-A test may fail only when observable behavior changes — never because internal structure changed. Tests couple to what the user or API consumer can see, not to how the code is organized. A test coupled to implementation becomes a false alarm on every refactor, and false alarms get deleted or blindly "fixed" until the suite protects nothing.
+Make tests fail only when observable behavior changes. Couple tests to what a user or API consumer can observe, not to internal organization.
 
-## The Mocking Rule: only fake what you don't own
+## Required workflow
 
-**Allowed to fake** (external boundaries):
-- Network/transport: MSW, respx, responses, or a `fetch` stub returning real `Response` objects
-- Third-party SDKs (payment, LLM, storage, auth providers), native/bridge modules
-- Filesystem, clock, env vars, stdin/terminal
-- The DB driver level — or better, a real DB (in-memory repo, tmpdir, local container)
+1. Read the test, the production boundary it exercises, and nearby tests.
+2. Run the narrowest relevant test before editing.
+3. State the contract in one sentence: input, observable output, and required side effects.
+4. Classify the change:
+   - **Behavior-preserving refactor:** preserve expected values and effects; change only obsolete setup, wiring, or selectors.
+   - **Intentional behavior change:** derive expectations from the request or domain contract, never from the implementation alone.
+   - **Regression fix:** prove the old defect fails and the corrected behavior passes.
+5. Choose the narrowest stable test boundary.
+6. Make the smallest test change that proves the contract.
+7. Run the focused test, then the appropriate broader checks.
+8. Explain why any assertion changed.
 
-**Never module-mock** (internal collaborators): your project's own hooks, contexts, components, services, repositories, query layers, utils, or ORM. If an internal collaborator is hard to set up, construct the real one — providers take props, services take constructor args. If a real one truly can't run in a test, inject a fake at the composition seam (constructor/props/DI override); do not `vi.mock`/`patch` the module path.
+If the contract is unclear, inspect callers, documentation, schemas, or fixtures. Do not copy the current output into an assertion merely to make the test pass.
+
+## Choose a stable boundary
+
+| Subject | Prefer asserting | Avoid coupling to |
+|---|---|---|
+| Pure logic | Return values and documented edge cases | Private helpers and intermediate values |
+| Parsers and adapters | Normalized records, rejection rules, and idempotency | SDK call order and temporary parsing structures |
+| Persistence | Public repository behavior using a temporary database | SQL text, live databases, and private query builders |
+| Jobs and pipelines | Final status, persisted effects, stable error codes, and retry behavior | Incidental logs and process internals |
+| UI | Roles, accessible names, stable test IDs, URLs, and user-visible outcomes | CSS classes, DOM depth, and generated bundle names |
+| Executable scripts | Exit codes, resulting files or state, and coarse contract markers when execution is impractical | Whitespace, command construction details, and snapshots |
+
+## The mocking rule: only fake what you do not own
+
+**Allowed to fake** at external boundaries:
+
+- Network and transport using MSW, respx, responses, or a `fetch` stub returning real `Response` objects
+- Third-party SDKs such as payment, LLM, storage, and authentication providers
+- Native or bridge modules, filesystem, clock, environment variables, stdin, and terminal
+- The database driver level, though a real temporary database is usually better
+
+**Do not module-mock internal collaborators:** project-owned hooks, contexts, components, services, repositories, query layers, utilities, or ORM code. Construct real collaborators through providers, constructor arguments, or dependency injection. When a real collaborator cannot run in a test, inject a fake at the composition boundary instead of mocking its module path.
 
 ## Recipe per layer
 
 | Layer | Arrange | Act | Assert |
 |---|---|---|---|
-| React component | Render with **real** providers; fake network via MSW or `vi.stubGlobal("fetch", ...)` with real `Response`s | `userEvent` (never `fireEvent`; React Native's `fireEvent` is the exception — RNTL has no userEvent) | `screen.getByRole`/`getByText`; semantic matchers: `toBeVisible`, `toBeDisabled`, `toHaveTextContent` |
-| Backend API | Real service + repo (in-memory/tmp/real DB); fake only external APIs at transport (respx/responses) or swap the gateway object at the composition seam | Through the HTTP entry point: `TestClient`, `app.inject`, supertest, `app.request` | Status code + the specific fields that matter; full-body equality only for small, intentional wire contracts |
-| Pure logic / hooks | Nothing to mock by design | Call the public function directly | Return values / observable state |
-| e2e (Playwright) | Real app | Real interactions | `get_by_role`/`get_by_text`, not CSS selectors |
+| React component | Render with real providers; fake network through MSW or `fetch` with real `Response` objects | Use `userEvent`; React Native may use its framework event API | Use role, name, text, visibility, enabled state, and stable outcomes |
+| Backend API | Use the real service and repository with an in-memory, temporary, or test database; fake external APIs at transport | Exercise the HTTP entry point | Assert status and contractual response fields |
+| Pure logic or hooks | Avoid mocks by design | Call the public function | Assert return values or observable state |
+| End to end | Run the real app | Use real interactions | Prefer role, name, text, URL, and durable effects |
+
+## Assertion design
+
+- Do not weaken exact contractual values into truthiness, broad regular expressions, or mere existence.
+- Use full object equality only when every field is part of the contract; otherwise assert the relevant fields.
+- Derive expected values independently from the implementation under test.
+- Use explicit timestamps or an injected clock for time-dependent behavior.
+- Assert ordering only when ordering is contractual.
+- Use isolated temporary databases and close all handles.
+- In Playwright, use web-first assertions; do not use fixed sleeps such as `waitForTimeout` to hide synchronization problems.
+- For regressions, record red-green evidence: the focused test must fail for the defect and pass with the fix.
 
 ## Existing bad tests are not a license
 
-"Match the existing style" applies to naming, file layout, and formatting — **not** to coupling patterns. If the repo's existing tests mock internal modules, use `fireEvent`, or query CSS classes, do not propagate those patterns into new tests. Write the new test with the recipe above (it will coexist fine), and tell the user in one line that the older tests are implementation-coupled.
+Match existing naming, file layout, and formatting, but do not copy coupling patterns. If older tests mock internal modules, use synthetic browser events, or query CSS classes, avoid spreading those patterns and note the existing risk briefly.
 
-## Red flags — stop and rewrite the test
+## Red flags
 
-- `vi.mock`/`jest.mock`/`patch(...)`/`monkeypatch.setattr(...)` targeting a path inside your own `src/`/`app/`
-- `fireEvent` in a web (non-React-Native) test
-- `container.querySelector`, `.closest()`, `toHaveClass`, asserting CSS class names or DOM structure
-- `toMatchSnapshot`
-- Calling `_private` methods or reaching past an existing HTTP entry point
-- `expect(myOwnModuleMock).toHaveBeenCalledWith(...)` — interaction asserts belong only on external-boundary fakes
+- `vi.mock`, `jest.mock`, `patch`, or `monkeypatch.setattr` targeting project-owned source modules
+- `fireEvent` in a web test when realistic user interaction is available
+- `container.querySelector`, `.closest()`, `toHaveClass`, CSS selectors, or DOM-structure assertions
+- Snapshot assertions used in place of an explicit contract
+- Calls to private methods or bypassing an existing public entry point
+- Interaction assertions against mocks of project-owned modules
+- Updating expected output solely because the current implementation produced it
+- Broadening or deleting an assertion without identifying a changed requirement
 
-## Rationalizations
-
-| Excuse | Reality |
-|---|---|
-| "The existing tests do it this way" | Consistency covers style, not coupling. Bad patterns propagate exactly this way. |
-| "Mocking the hook isolates the component" | The hook is the component's implementation. Render it real; fake the network instead. |
-| "MSW isn't installed, so I'll mock our api module" | Stub `fetch` with real `Response` objects — same isolation, correct boundary. |
-| "fireEvent is simpler" | `userEvent` is the same length and survives handler refactors. |
-| "Asserting the class name proves it rendered" | Assert what a user sees: role, text, visibility, disabled state. |
-| "Testing `_private` directly is more focused" | Privates change freely under refactoring. Test through the public caller. |
-
-## One example (bad → good)
+## Example
 
 ```tsx
-// BAD: mocks own modules, fires synthetic events, asserts DOM structure
+// Bad: mocks owned modules, fires a synthetic event, and asserts styling.
 vi.mock("../../contexts/AuthContext", () => ({ useAuth: () => fakeUser }));
 vi.mock("../../api/client", () => ({ apiFetch: apiFetchMock }));
 fireEvent.click(container.querySelector(".bell__button")!);
 expect(container.querySelector(".bell")).toHaveClass("bell--open");
 
-// GOOD: real providers, boundary fake, user-level act, semantic assert
+// Good: uses real providers, fakes the external boundary, and proves a visible outcome.
 vi.stubGlobal("fetch", async () =>
   Response.json({ notifications: [{ id: 1, message: "Deploy finished", read: false }] }));
-render(<AuthProvider user={fakeUser}><LanguageProvider><NotificationBell /></LanguageProvider></AuthProvider>);
+render(
+  <AuthProvider user={fakeUser}>
+    <LanguageProvider><NotificationBell /></LanguageProvider>
+  </AuthProvider>,
+);
 await user.click(screen.getByRole("button", { name: "Notifications" }));
 expect(await screen.findByText("Deploy finished")).toBeVisible();
 ```
 
-## Guardrails (offer once per project)
+## Completion gate
 
-When adding tests to a project with no test lint, offer — do not silently install — deterministic enforcement: `eslint-plugin-testing-library` (`prefer-user-event`, `no-node-access`, `no-container`) plus a `no-restricted-syntax` rule banning `vi.mock`/`jest.mock` outside a shared `test/mocks/` folder, so the mock whitelist becomes syntax, not judgment.
+Before finishing, answer all five questions:
+
+1. Does the test describe behavior rather than implementation structure?
+2. Would an internal refactor with identical behavior still pass?
+3. Would a real behavior regression make it fail?
+4. Are time, data, network, and persistence dependencies deterministic and isolated?
+5. Did the focused test and the appropriate broader checks pass?
+
+When a project has no test linting, offer deterministic enforcement once rather than silently installing it. Useful options include Testing Library lint rules and narrowly scoped restrictions on internal module mocks.

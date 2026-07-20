@@ -1,10 +1,12 @@
 # my-little-skills
 
-A curated Claude Code plugin marketplace that bundles [Anthropic's official skills](https://github.com/anthropics/skills) with custom-built skills for developer workflows, document processing, design, and project-specific automation.
+A curated Codex and Claude Code plugin marketplace that bundles [Anthropic's official skills](https://github.com/anthropics/skills) with custom-built skills for developer workflows, document processing, design, and project-specific automation.
 
 ## Quick Start
 
-Register this marketplace in Claude Code:
+### Claude Code
+
+Register this marketplace:
 ```
 /plugin marketplace add dabsdamoon/my-little-skills
 ```
@@ -18,13 +20,76 @@ Then go to the **Discover** tab, or install directly:
 /plugin install <plugin-name>@my-little-skills
 ```
 
+### Codex
+
+Connect the GitHub marketplace and install a plugin once for the current user:
+
+```bash
+codex plugin marketplace add dabsdamoon/my-little-skills --ref main
+codex plugin add developer-workflow-skills@my-little-skills
+```
+
+The installed plugin is available in every repository opened by that user. Codex stores plugin configuration and cache data under `CODEX_HOME`, which defaults to `~/.codex`; installation is not shared automatically with other operating-system accounts.
+
+Run the shared update primitive at any time:
+
+```bash
+codex plugin marketplace upgrade my-little-skills
+```
+
+This refreshes the Git-backed marketplace and its installed plugins. The platform adapters below schedule this same command; they do not edit application repositories.
+
+## Automatic Codex Updates
+
+Clone this repository on each machine where updates should be scheduled, connect the marketplace as shown above, and run the adapter for that operating system. Each adapter captures the current `codex` executable and `CODEX_HOME`, runs once at login or user-manager startup, and checks daily afterward.
+
+### Windows
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\install-codex-marketplace-updater.ps1 -RunNow
+```
+
+This installs the per-user Task Scheduler task `Codex-MyLittleSkills-Upgrade`. To target a non-default profile, pass `-CodexHome C:\path\to\codex-home`. To remove it:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\uninstall-codex-marketplace-updater.ps1
+```
+
+### macOS
+
+```bash
+sh scripts/install-codex-marketplace-updater.sh --run-now
+```
+
+This installs `~/Library/LaunchAgents/com.dabsdamoon.codex-my-little-skills-upgrade.plist`. A LaunchAgent runs for the signed-in user. For an unattended macOS service account, provision an equivalent LaunchDaemon through the machine's administration tooling.
+
+### Linux
+
+```bash
+sh scripts/install-codex-marketplace-updater.sh --run-now
+```
+
+This installs and enables the systemd user timer `codex-my-little-skills-upgrade.timer`. On a headless server, run the installer as the account that owns the Codex installation and keep that user's systemd manager active:
+
+```bash
+sudo loginctl enable-linger <service-account>
+```
+
+For macOS or Linux with a non-default profile, pass `--codex-home /path/to/codex-home`. Remove either POSIX adapter with:
+
+```bash
+sh scripts/uninstall-codex-marketplace-updater.sh
+```
+
+The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rotated backup. Push plugin changes to the tracked branch and keep the version and core metadata aligned across both plugin manifests. New Codex sessions load the refreshed plugin; restart Codex if an update is not detected in an existing session.
+
 ## Plugins
 
 | Plugin | Skills | Description |
 |--------|--------|-------------|
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
 | **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
-| **developer-workflow-skills** | pr-creator, setup-release-pipeline, deploy-check, webapp-testing, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | PR docs, opinionated production-pointer release pipelines, deploy checks, Playwright browser testing, Docker memory checks, debugging postmortems, and more |
+| **developer-workflow-skills** | pr-creator, pr-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | PR docs, release pipelines, deploy checks, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
@@ -61,6 +126,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 | **subagent-creator** | Generates repository-specific Claude Code subagents tailored to your tech stack |
 | **debugging-retrospective** | Summarizes debugging sessions into educational postmortems with lessons learned |
 | **gcloud-direnv-setup** | Configures per-directory GCP credentials with direnv for multi-account setups |
+| **refactoring-resistant-tests** | Builds behavior-focused tests that survive internal refactors and use stable observable boundaries |
 
 ### Writing
 
@@ -117,7 +183,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 .claude-plugin/
   marketplace.json          # Marketplace registry
 plugins/
-  document-skills/          # Plugin: .claude-plugin/plugin.json + skills/
+  document-skills/          # Plugin manifests and skills/
   design-skills/
   developer-workflow-skills/
   writing-skills/
@@ -128,6 +194,7 @@ plugins/
 skills/                     # Source skills (copied into plugins)
 spec/                       # Agent Skills specification
 template/                   # Skill template for creating new skills
+scripts/                    # Cross-platform Codex marketplace updater adapters
 ```
 
 ## Creating a New Skill
@@ -143,11 +210,12 @@ description: "When and how to trigger this skill"
 # Instructions for Claude here...
 ```
 
-To bundle skills into a plugin, create a `plugins/<name>/.claude-plugin/plugin.json` and add the entry to `marketplace.json`. See any existing plugin for reference.
+To bundle skills into a dual-compatible plugin, create `plugins/<name>/.codex-plugin/plugin.json` and `plugins/<name>/.claude-plugin/plugin.json`, then add the plugin to `.claude-plugin/marketplace.json`. Keep their versions and core metadata aligned; the Codex manifest can additionally contain its required `interface` metadata.
 
 ## Links
 
 - [Agent Skills standard](https://agentskills.io)
 - [Skills documentation](https://code.claude.com/docs/en/skills)
 - [Plugins documentation](https://code.claude.com/docs/en/plugins)
+- [Codex plugin documentation](https://learn.chatgpt.com/docs/build-plugins)
 - [Upstream: anthropics/skills](https://github.com/anthropics/skills)
