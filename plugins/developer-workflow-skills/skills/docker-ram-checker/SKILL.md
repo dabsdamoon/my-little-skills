@@ -1,7 +1,7 @@
 ---
 name: docker-ram-checker
 description: Check Docker container RAM/memory usage before deploying to cloud services like Cloud Run, ECS, or Kubernetes. Use this skill when users want to test memory consumption of their Docker containers, verify applications fit within memory limits, or diagnose memory issues before deployment. Triggers on requests like "check docker memory", "test container RAM usage", "will my app fit in 1GB", or "memory test before deploy".
-disable-model-invocation: true
+disable-model-invocation: false
 argument-hint: "[app-name] [memory-limit]"
 ---
 
