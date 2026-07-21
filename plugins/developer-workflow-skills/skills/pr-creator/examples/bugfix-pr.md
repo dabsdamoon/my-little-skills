@@ -21,6 +21,47 @@ This PR fixes Kakao SSO login that worked on web but failed on iOS native app. T
 
 ---
 
+## Blast Radius
+
+| File | Dependents | Radius | Notes |
+|------|-----------|--------|-------|
+| `capacitor.config.ts` | build config | **CRITICAL** | Changes the deployment server URL — affects every build, not just SSO. Verify the value is correct for the target environment before merge |
+| `client/src/native/hooks/useAuth.ts` | 8 files | **HIGH** | Shared auth hook consumed across the native app |
+| `ios/App/App/AppDelegate.swift` | app entry | **HIGH** | Every launch path goes through here |
+| `ios/App/KakaoURLHandler.swift` | 1 file | MEDIUM | Only `AppDelegate` calls it |
+| `client/src/native/components/login-modal/CompleteProfileScreen.tsx` | 2 files | MEDIUM | Rendered by login modal and profile page |
+| `client/src/native/pages/CompleteProfilePage.tsx` | 0 files | LOW | Leaf route |
+
+**Overall Blast Radius:** HIGH — a config file and a shared auth hook are both in scope.
+
+---
+
+## Security Analysis
+
+**Rating:** CONCERN
+
+| Category | Finding | Severity | File |
+|----------|---------|----------|------|
+| Sensitive Data | User email placed in a URL query string, where it lands in browser history, server logs, and `Referer` headers | **CONCERN** | `client/src/native/pages/CompleteProfilePage.tsx` |
+| Sensitive Data | Email interpolated into an API URL unencoded — breaks on `+` in addresses and leaks PII to access logs | **CONCERN** | `client/src/native/components/login-modal/CompleteProfileScreen.tsx` |
+| Misconfiguration | Deployment server URL changed | NOTE | `capacitor.config.ts` |
+
+> **Action Required:** Both findings pass PII through URLs. The navigation fix already reaches for `encodeURIComponent`, which addresses correctness but not exposure. Prefer passing `email` through app state or a POST body. If a URL param is genuinely unavoidable here, say so explicitly in this section so the reviewer can accept the tradeoff deliberately rather than by omission.
+
+---
+
+## Deviations from Spec
+
+The reference implementation for this flow is the working web client — "make native behave like web."
+
+| Type | Item | Spec said | This PR does | Why |
+|------|------|-----------|--------------|-----|
+| Deviation | Param passing after profile completion | Web keeps `email`/`provider` in session state | Native passes them as URL query params | Native routing remounts the page and loses in-memory state. This is a workaround for the remount, not a chosen design — see the Security finding above |
+| Deferred | Android deep-link handling | Both platforms should intercept `looktake://` | iOS only | Android was not reproducing the failure; deferring rather than shipping an untested handler |
+| Spec defect | Deep-link scheme undocumented | No spec covers `looktake://` ownership | Surfaced only | The scheme is registered in two places with no doc. Not corrected here — needs an owner |
+
+---
+
 ## Major Changes
 
 ### 1. iOS Deep Link Handling (Native)
@@ -119,9 +160,9 @@ navigate(`/explore?email=${encodeURIComponent(email)}&provider=${provider}`);
 - [ ] Kakao SSO on iOS simulator - existing user (direct login)
 - [ ] Kakao SSO on TestFlight - new user
 - [ ] Kakao SSO on TestFlight - existing user
-- [ ] Kakao SSO on web browser - still works (regression test)
+- [ ] Kakao SSO on web browser - still works ⚠️ **automatable** — suggest an E2E regression test; this path is the one most likely to break silently
 - [ ] Profile completion form displays correctly
-- [ ] Profile completion submits successfully
+- [ ] Profile completion submits successfully ⚠️ **automatable** — suggest a unit test asserting the `email` param is present in the API call, which is exactly the bug fixed here
 
 ---
 
@@ -133,6 +174,15 @@ navigate(`/explore?email=${encodeURIComponent(email)}&provider=${provider}`);
 | WebView | N/A | Stayed on Kakao page |
 | API Email Param | Included | Missing |
 | Navigation | Stays on URL | Lost params |
+
+---
+
+## Not Included / Out of Scope
+
+- **Android deep-link handling** — deferred, see Deviations. Android SSO still fails on the same class of bug
+- **Shared web/native utility for the auth call** — the root cause of two of these three bugs is native code drifting from web. Nothing in this PR prevents it recurring
+- **Regression test for the deep-link path** ⚠️ **automatable** — an integration test asserting `looktake://` resolves to the profile screen would have caught this before TestFlight
+- **PII-in-URL fix** — the security findings above are documented but not resolved here; resolving them properly means reworking how native passes auth context between routes
 
 ---
 
