@@ -23,6 +23,52 @@ This PR implements Apple Sign-in and Kakao Login using JavaScript SDK approach (
 
 ---
 
+## Blast Radius
+
+| File | Dependents | Radius | Notes |
+|------|-----------|--------|-------|
+| `client/src/hooks/use-auth.tsx` | 23 files | **CRITICAL** | Auth context for the entire web app. `CompleteSsoData` is a public type — changing it ripples to every consumer |
+| `client/src/native/hooks/useAuth.ts` | 8 files | **HIGH** | Native equivalent of the above |
+| `ios/App/App/AppDelegate.swift` | app entry | **HIGH** | Registers URL handlers on every launch |
+| `android/.../MainActivity.java` | app entry | **HIGH** | Registers the WebViewClient on every launch |
+| `client/src/components/login-modal.tsx` | 4 files | MEDIUM | Rendered from several entry points |
+| `ios/App/App/Info.plist` | build config | MEDIUM | URL scheme registration; requires a native rebuild |
+| `client/src/pages/explore-page.tsx` | 1 file | LOW | **Unrelated to SSO** — see Deviations |
+| `client/public/config.js` | 0 files | LOW | Whitespace only |
+
+**Overall Blast Radius:** CRITICAL — this PR modifies the auth layer on both web and native.
+
+---
+
+## Security Analysis
+
+**Rating:** NOTE — appropriate for an auth change, but it warrants a careful review rather than a skim.
+
+| Category | Finding | Severity | File |
+|----------|---------|----------|------|
+| Broken Auth | Apple `identityToken` is verified server-side, not trusted client-side | NOTE (correct) | `client/src/components/login-modal.tsx` |
+| Sensitive Data | `VITE_`-prefixed env vars are bundled into the client bundle | NOTE | `.env` |
+| Broken Auth | `(window as any).AppleID` bypasses type checking on an auth-critical path | NOTE | `client/src/components/login-modal.tsx` |
+
+Detail:
+
+- **Token verification is in the right place.** The client forwards `identityToken` and the backend verifies it. Flagged as a NOTE so a reviewer confirms the backend PR actually does this — the security of the whole flow rests on it.
+- **`VITE_APPLE_CLIENT_ID` and `VITE_KAKAO_JS_KEY` are public by design** — both are client identifiers, not secrets. Called out so nobody later adds a real secret to that block by pattern-matching.
+- **The `as any` casts are on the auth path.** Not exploitable, but it means an SDK shape change fails at runtime rather than at build time.
+
+---
+
+## Deviations from Spec
+
+| Type | Item | Spec said | This PR does | Why |
+|------|------|-----------|--------------|-----|
+| Deviation | Auth mechanism | Follow the existing passport.js pattern used by Google SSO | Uses the Apple/Kakao JS SDKs instead | No server redirect needed, and both providers ship a first-party SDK. Means SSO providers now use two different patterns — accepted, and worth revisiting if a third is added |
+| Deviation | `fullName` on registration | Required at registration | Optional for SSO | Apple returns the name only on **first** sign-in, so requiring it would hard-block returning users. Matches existing Google SSO behaviour |
+| Deferred | Kakao availability | Available to all users | Shown only where `isKorea` is true | Kakao has negligible usage elsewhere. The gate is a display condition, not an entitlement check — do not rely on it for authorization |
+| Scope creep | `explore-page.tsx` avatar handling | Not part of this feature | Included anyway | **Should have been a separate PR.** Called out so a reviewer does not assume it was reviewed as part of SSO |
+
+---
+
 ## Major Changes
 
 ### 1. Apple Sign-in (Web + Native)
@@ -143,6 +189,16 @@ VITE_KAKAO_JS_KEY=your-kakao-javascript-key
 ## Related PRs / Dependencies
 
 - Backend PR in `looktake-v2-server` - Apple/Kakao token verification endpoints
+
+---
+
+## Not Included / Out of Scope
+
+- **Backend token verification** — lives in the `looktake-v2-server` PR listed above. This PR is not functional without it; do not merge alone
+- **Automated tests for the SSO flows** ⚠️ **automatable** — every item in the checklist below was verified by hand. At minimum the provider-tracking bug (`provider='apple'` being saved as `'google'`) deserves a unit test, since it was a silent data-correctness bug
+- **Native Kakao testing on real devices** — simulator only so far; the two unchecked boxes below
+- **Consolidating the two SSO patterns** — Google uses passport.js, Apple/Kakao use JS SDKs. Deliberately not unified here; a third provider should force the decision
+- **`explore-page.tsx` avatar change** — unrelated to SSO, see Deviations
 
 ---
 

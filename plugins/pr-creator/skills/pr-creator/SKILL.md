@@ -86,14 +86,45 @@ git diff <target-branch>...HEAD | grep -iE "(password|secret|token|api_key|apike
 
 Include findings in the PR documentation (see template below).
 
-### Step 4: Analyze Changes
+### Step 4: Deviation & Scope Analysis
+
+Blast radius and security are mechanical — grep finds them. This step is not, and it is the one reviewers most need. Ask two questions the diff alone cannot answer.
+
+**"Where does this depart from what was asked?"**
+
+Find the source of truth first, then compare each major change against it:
+
+```bash
+git log <target-branch>..HEAD --format=%B | grep -iE "closes|fixes|implements|refs|spec|design|ticket"
+ls docs/ design/ specs/ 2>/dev/null   # spec/design docs the PR may implement
+```
+
+Classify anything that does not match:
+
+| Type | Meaning | What to write |
+|---|---|---|
+| **Deviation** | Built deliberately differently from the spec/design/ticket | What the spec asked, what you built, and why the difference is correct |
+| **Deferred** | A spec item this PR does not implement at all | What is missing and whether it blocks the spec's goal |
+| **Spec defect** | The spec itself is wrong, stale, or self-contradictory | Whether this PR corrects it or only surfaces it |
+
+Spec defects are worth their own attention. If the spec contradicts itself, say so and state which way you resolved it — a reviewer diffing implementation against spec will otherwise read your correct code as a bug. If you cannot resolve it, **do not guess**: implement the spec faithfully and raise it as an open question for the spec owner. Silently "fixing" a spec you misread is worse than transcribing one that is wrong.
+
+**"What would a reader wrongly assume is done?"**
+
+List work the change implies but does not contain: deferred spec items, follow-ups the approach now requires, stale artifacts left untouched, pre-existing problems in files you edited but chose not to fix.
+
+Both answers go in the PR (see template). If genuinely neither applies — the change matches its spec exactly and implies no follow-up — say that explicitly rather than dropping the sections.
+
+---
+
+### Step 5: Analyze Changes
 
 For each changed file, understand:
 - **What** changed (added, modified, deleted)
 - **Why** it changed (bug fix, feature, refactor, etc.)
 - **Impact** on other parts of the system
 
-### Step 5: Write PR Documentation
+### Step 6: Write PR Documentation
 
 Generate a markdown document with the following sections:
 
@@ -150,6 +181,25 @@ Generate a markdown document with the following sections:
 
 [If CONCERN, add recommended actions:]
 > **Action Required:** [Describe what should be fixed before merge]
+
+---
+
+## Deviations from Spec
+
+[Where the implementation departs from the spec/design/ticket it implements. If it matches exactly:]
+> No deviations — implementation follows the spec as written.
+
+[Otherwise:]
+
+| Type | Item | Spec said | This PR does | Why |
+|------|------|-----------|--------------|-----|
+| Deviation | [e.g., Inline guide switching] | [what the design drew] | [what shipped] | [why the difference is correct] |
+| Deferred | [e.g., Memory-save card] | [what the spec asked] | Not implemented | [what blocks it] |
+| Spec defect | [e.g., Mixed register in copy] | [the contradiction] | [corrected here / surfaced only] | [how it was resolved] |
+
+[For spec defects you could NOT resolve — implement the spec faithfully and ask:]
+
+> **Open question for [spec owner]:** [state the contradiction, what the PR currently does, and what you need decided]
 
 ---
 
@@ -235,6 +285,20 @@ ANOTHER_VARIABLE=value
 
 ---
 
+## Not Included / Out of Scope
+
+[Work a reader might reasonably assume is done, but isn't. If nothing applies:]
+> No known gaps — this PR fully covers its scope.
+
+[Otherwise:]
+
+- [Deferred spec item] — [why deferred, and whether it blocks anything]
+- [Follow-up this approach now requires]
+- [Stale artifact deliberately left untouched] — [e.g., superseded prototypes still carry old copy]
+- [Pre-existing issue in a file you edited but chose not to fix] ⚠️ **automatable** — [if a test could cover it]
+
+---
+
 ## Notes for Reviewers
 
 [Any special instructions or areas to focus on during review]
@@ -255,6 +319,20 @@ ANOTHER_VARIABLE=value
 - Rate as CLEAR if nothing found — don't skip the section
 - For CONCERN items, include specific file and line references
 - Recommend concrete fixes, not vague warnings
+
+### Deviations from Spec Section
+- Compare every major change against the spec/design/ticket it implements — do not assume the diff speaks for itself
+- State what the spec asked, what shipped, and why the difference is correct. Two of the three is not enough
+- Distinguish **deviation** (built differently on purpose) from **deferred** (not built) from **spec defect** (the spec is wrong)
+- If you corrected a spec, say so here AND change the spec file in the same PR — otherwise implementation and spec drift apart silently
+- If you could not resolve a spec contradiction, implement the spec faithfully and raise an open question. Never silently "fix" a spec you might be misreading
+- Say "no deviations" explicitly when true — a missing section reads as an unasked question
+
+### Not Included / Out of Scope Section
+- Ask what a reader would wrongly assume is finished, and name it
+- Cover: deferred spec items, follow-ups the approach now requires, stale artifacts left untouched, pre-existing issues in files you edited
+- This is what stops a partial change being read as complete, and stops reviewers filing bugs for gaps you already know about
+- Naming a gap converts it from an oversight into a decision
 
 ### Summary Section
 - Be concise but complete
@@ -303,6 +381,9 @@ For small changes (< 5 files), use this minimal format instead of the full templ
 ## Changes
 - [bullet point for each major change]
 
+## Deviations / Not included
+- [any departure from the spec, or known gap — omit only if genuinely none]
+
 ## Test plan
 - [x] [item verified by automated tests]
 - [ ] [item requiring manual verification]
@@ -325,6 +406,9 @@ For faster PR creation, use `gh pr create` with HEREDOC directly (avoids creatin
 
 ## Changes
 - [bullet points]
+
+## Deviations / Not included
+- [departure from spec, or known gap — omit only if genuinely none]
 
 ## Test plan
 - [ ] [verification steps]
