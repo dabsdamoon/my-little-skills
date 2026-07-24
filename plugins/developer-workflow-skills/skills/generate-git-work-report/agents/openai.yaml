@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Work Report"
+  short_description: "Git 근거 기반 수행이력과 상세 Work Log 생성"
+  default_prompt: "Use $generate-git-work-report to create an external project-history summary and an evidence-backed internal work log from this repository."

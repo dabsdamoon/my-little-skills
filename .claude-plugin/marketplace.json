@@ -20,7 +20,7 @@
     },
     {
       "name": "developer-workflow-skills",
-      "description": "PR creation, release pipeline setup, deploy checks, webapp testing, Docker RAM checking, MCP building, prompt optimization, and debugging retrospectives",
+      "description": "PR creation, release pipelines, deploy checks, Git-based work reports, testing workflows, Docker analysis, MCP building, prompt optimization, and debugging retrospectives",
       "source": "./plugins/developer-workflow-skills"
     },
     {
