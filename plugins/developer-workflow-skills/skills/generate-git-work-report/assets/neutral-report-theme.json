@@ -1,6 +1,8 @@
 {
   "name": "neutral-a4-report",
-  "version": 1,
+  "version": 2,
+  "mode": "fallback-only",
+  "usage": "Apply only when the user provides no visual reference. A retained reference overrides every token in this file.",
   "page": {
     "size": "A4",
     "orientation": "portrait",
@@ -38,5 +40,13 @@
   "footer": {
     "page_number_only": true,
     "color": "#666666"
+  },
+  "quality": {
+    "minimum_body_pt": 8.0,
+    "reject_accidental_blank_pages": true,
+    "reject_isolated_callouts": true,
+    "reject_continuation_only_pages": true,
+    "reject_short_split_tables": true,
+    "require_full_page_visual_qa": true
   }
 }
