@@ -1,0 +1,42 @@
+{
+  "name": "neutral-a4-report",
+  "version": 1,
+  "page": {
+    "size": "A4",
+    "orientation": "portrait",
+    "margin_mm": {
+      "top": 18,
+      "right": 18,
+      "bottom": 18,
+      "left": 18
+    }
+  },
+  "colors": {
+    "ink": "#111111",
+    "text": "#232323",
+    "muted": "#666666",
+    "accent": "#1F5D6B",
+    "surface": "#F1F2F2",
+    "evidence_surface": "#EAF0F2",
+    "rule": "#D1D1D1",
+    "paper": "#FFFFFF"
+  },
+  "typography": {
+    "korean_sans": ["Noto Sans CJK KR", "Apple SD Gothic Neo", "Malgun Gothic"],
+    "latin_sans": ["Inter", "Arial", "sans-serif"],
+    "body_pt": 9.5,
+    "title_pt": 24,
+    "line_height": 1.35
+  },
+  "tables": {
+    "header_fill": "#111111",
+    "header_text": "#FFFFFF",
+    "body_vertical_borders": false,
+    "horizontal_rules": true,
+    "label_color": "#1F5D6B"
+  },
+  "footer": {
+    "page_number_only": true,
+    "color": "#666666"
+  }
+}
