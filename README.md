@@ -163,7 +163,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, pr-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **analysis-skills** | analytique, building-decision-reports, building-health-evidence-reports | Critical analysis, evidence-backed business decision reports, scenario modeling, and health statistics evidence packs |
 | **fde-estimation-skills** | capture-customer-outcomes, document-field-discovery, collect-as-built-evidence, define-estimation-policy, reconcile-scope-delta, generate-estimate-package | Interactive, evidence-backed FDE discovery, reviewed staffing, seniority, rate, scope, and effort reconciliation, budgetary estimates, and basis-of-estimate reports |
-| **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing |
+| **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean, explain-simply | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing, decoding jargon-heavy work summaries |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
 | **llm-wiki-skills** | make-llm-wiki-raw, wikify-raw | Capture raw LLM-Wiki sources and turn them into linked Obsidian wiki pages |
@@ -234,6 +234,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 | **internal-comms** | Drafts and refines internal communications |
 | **system-prompt-creator** | Guides production-grade system prompt creation |
 | **skill-creator** | Helps create and update reusable agent skills |
+| **explain-simply** | Decodes a finished work summary, PR, or research result for the person who owns its consequences: ranks changes by blast radius, separates what needs a decision from what is FYI, verifies destructive items against the diff, and refuses to turn "tests pass" into a safety verdict. ([source: yash2002vardhan/explain-simply](https://github.com/yash2002vardhan/explain-simply)) |
 
 ### Translation
 
