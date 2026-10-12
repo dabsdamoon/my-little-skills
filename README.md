@@ -102,6 +102,45 @@ automatically install newly published plugins. Start a new session if
 `writing-skills:humanize-korean` does not appear immediately after
 installation.
 
+#### `layered-character-production` installation
+
+For Project MagicGirlSquad's character animation harness and the `image designers`
+workflow, install `character-production-skills@my-little-skills` after this plugin
+is available on the marketplace's tracked branch:
+
+```bash
+codex plugin marketplace upgrade my-little-skills
+codex plugin add character-production-skills@my-little-skills
+```
+
+Claude Code users can install the same plugin with
+`/plugin install character-production-skills@my-little-skills`.
+
+The canonical standalone skill is at `skills/layered-character-production`; its
+complete directory includes references, UI metadata, and license notices. It can
+also be installed directly into the user's Codex skills directory for branch
+preview before a marketplace release. Use either that standalone installation or
+the plugin distribution to avoid duplicate skill entries.
+
+Invoke `$layered-character-production` in the game chat and retain that chat's
+current task. If skill discovery has not refreshed in an existing turn, explicitly
+read the installed `layered-character-production/SKILL.md` and its relevant
+references. The skill resolves the active game checkout from project evidence,
+which is useful when the chat itself starts in an image folder.
+
+The separately installable upstream skills are optional broader references:
+
+```bash
+npx skills add calesthio/generative-media-skills --skill character-design-continuity --agent codex --global
+npx skills add calesthio/generative-media-skills --skill 2d-character-rig-animation --agent codex --global
+```
+
+The adapter includes the necessary project guidance without requiring those
+skills, Spine, or Live2D. It uses the existing image-generation tools and game
+harness; it does not include character artwork or modify game files on install.
+See its [source and scope notes](skills/layered-character-production/references/sources.md)
+for the upstream revision and the inspected project contracts.
+
 Run the shared update primitive at any time:
 
 ```bash
@@ -160,6 +199,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 |--------|--------|-------------|
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
 | **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
+| **character-production-skills** | layered-character-production | Project MagicGirlSquad character continuity, layered rigs, costume damage, expressions, and playable review |
 | **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, pr-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **analysis-skills** | analytique, building-decision-reports, building-health-evidence-reports | Critical analysis, evidence-backed business decision reports, scenario modeling, and health statistics evidence packs |
 | **fde-estimation-skills** | capture-customer-outcomes, document-field-discovery, collect-as-built-evidence, define-estimation-policy, reconcile-scope-delta, generate-estimate-package | Interactive, evidence-backed FDE discovery, reviewed staffing, seniority, rate, scope, and effort reconciliation, budgetary estimates, and basis-of-estimate reports |
@@ -189,6 +229,12 @@ git rebase upstream/main
 ## Custom Skills
 
 These skills are original to this marketplace — not available in Anthropic's official repo.
+
+### Character Production (Project MagicGirlSquad)
+
+| Skill | What It Does |
+|-------|-------------|
+| **layered-character-production** | Combines the existing character animation harness contracts with character continuity and 2D rig guidance: recover runs, preserve prior designs, bind body/costume/face parts, inspect motion and damage states, and deliver a real review artifact. Includes attribution to the adapted upstream skills. |
 
 ### Analysis
 
@@ -290,6 +336,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 plugins/
   document-skills/          # Plugin manifests and skills/
   design-skills/
+  character-production-skills/
   analysis-skills/
   developer-workflow-skills/
   fde-estimation-skills/

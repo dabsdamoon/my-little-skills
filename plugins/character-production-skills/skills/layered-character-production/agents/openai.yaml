@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layered Character Production"
+  short_description: "Build and review MagicGirlSquad character art and rigs"
+  default_prompt: "Use $layered-character-production to continue the current MagicGirlSquad character harness task, preserve its design and registration, and deliver the requested reviewed artwork or playable motion artifact."
