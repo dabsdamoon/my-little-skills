@@ -28,6 +28,8 @@ python3 tools/layer_costume.py audit --run "$character_run" --character "$charac
 
 An exit code of zero means the report was written. Read `design_status`, issues, and incomplete review checks in `records/design-conformance.json`. A technical pass can coexist with `needs_redraw` or `needs_art_review`.
 
+When the checkout has the automatic art evaluation (`tools/art_metrics.py`), declare the source art's fixed overlaps in the character's evaluation profile (`painted_order`) and export per-part coverage, so the depth-swap and painted-order gates run. A gate marked `review` names its worst frame or step. Open that frame, and its neighbors for a temporal gate, at full size before reporting. Then fix it or record why it is acceptable, citing the frame inspected. Do not file a flagged item as a known limitation without looking at it; the user should not be the first to see a defect the tool already named.
+
 `records/design-review.json` is meaningful only for the model and profile hashes actually reviewed. Record observed checks through the project's existing format, with frame/state and evidence references. Leave unavailable checks unverified. Never synthesize pass flags to satisfy the audit, reuse an older hash's approval, or equate the agent's visual inspection with user acceptance.
 
 ## Make the artifact reviewable

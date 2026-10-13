@@ -28,6 +28,8 @@ Only when authorized to proceed with generation, request the next job:
 python3 tools/character_animation.py --run "$character_run" next
 ```
 
+When the checkout's harness supports `expect`, declare before `next` what an edit must keep, change, leave empty or avoid, as canvas regions with a retry reason; the checks become part of the request. `record` then refuses output that fails them or generic hygiene and prints the correction to pass to `reject --reason`; `check` runs the same checks without storing. Passing checks is not design approval.
+
 Use the emitted request's real ID, reference order, and tool arguments. Inspect the referenced images and invoke the available image tool under the current imagegen instructions. Record the returned path promptly through `record`; use `reject` with a concrete defect for failed or unusable output. Recover an already returned PNG after interruption before making a duplicate generation call. Use `retry` when intentionally replacing an accepted source and follow the harness's dependent-frame invalidation.
 
 Before a **new** plan, resolve the character and production mode explicitly. The inspected generic default plans 14 characters; it is unsuitable for a one-character repair. Existing layered authoring scripts may repurpose job slots as part roles, so read their authoring scope and implementation before calling them. Registered job count is not necessarily animation frame count. A script may also target a fixed artifact version; inspect its destinations before rebuilding.

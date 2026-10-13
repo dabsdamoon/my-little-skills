@@ -12,7 +12,9 @@ Use the current `CHARACTER-LAYER-AUTHORING.md` and character bindings as authori
 
 ## Occlusion and motion
 
-Store pose-dependent draw order independently of bone parenting. When an arm moves in front, its visible upper arm, sleeve, forearm, and hand must agree with that depth state. In the rear pose they must be occluded appropriately. A correct hand alone does not prove the whole arm is correct.
+Store pose-dependent draw order independently of bone parenting. Change depth only for the segment that actually crosses another layer, usually the forearm and hand, and keep the source art's overlaps everywhere else. If the source paints a garment armhole over the sleeve, the shoulder sleeve and upper arm stay under it in every frame, even while the forearm swings in front. Switching a whole limb with its sleeve exposes the sleeve's cut inner edge and makes the arm jump forward for one frame.
+
+When a garment piece must follow a moving segment, such as a cuff over the forearm, split it with complementary masks from the same posed pixels at a row where the two halves provably never meet the other layers involved, and give that piece the segment's depth. Choose switch frames where the swapped parts barely overlap, and measure the counterfactual: drawing a switch frame in the other order should change almost no pixels. A correct hand alone does not prove the whole arm is correct; inspect the frames on both sides of each switch at full size.
 
 Review rear/side/front keys before generating all inbetweens. For walking, inspect planted feet, root travel, limb bend direction, and contact/passing/up/down poses. Reuse the run's actual timing; the legacy seven-image export and the layered 48-frame demo are different formats. Do not impose either one's frame count, cadence, or origin on the other.
 

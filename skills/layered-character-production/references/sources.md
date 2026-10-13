@@ -23,5 +23,6 @@ Resolve these in the intended game checkout, not relative to this skill:
 - `docs/art/ADELA-LAYER-DAMAGE-V12.md`
 - `data/art/layer_costume_profile.json`
 - `tools/character_animation.py`, `tools/layer_costume.py`, `tools/adela_layer_walk.py`, and `tools/adela_layer_damage.py`
+- `docs/art/ART-EVALUATION-METRICS.md`, `tools/art_metrics.py`, and `tools/image_checks.py` (added 2026-10-13: generation-time checks, depth-order gates, and review handling)
 
 Project numbers, character bindings, and version examples are dated observations, not defaults for every character. Re-read current local contracts before work. Keep reference provenance, technical validation, observed visual review, user feedback, and runtime installation distinct when updating this adapter.
