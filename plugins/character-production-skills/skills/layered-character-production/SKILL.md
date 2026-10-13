@@ -14,7 +14,7 @@ The chat's working directory may be an image folder while the harness lives in a
 
 Read that checkout's `AGENTS.md`, `docs/art/CHARACTER-ANIMATION-HARNESS.md`, and `docs/art/CHARACTER-LAYER-AUTHORING.md`. Inspect the current character profile, run, latest review, and relevant source images. For game behavior changes, also read the repository's development and design requirements. If the project cannot be located, ask for its path while avoiding guesses that mutate another checkout.
 
-Use the latest user request and the project's current contracts as the authority. The references here describe the harness inspected on 2026-10-12; resolve later changes from the checkout. Existing user authorization carries through routine reversible production steps. A quality checkpoint is an inspection step, not an automatic request for another approval. Record pending aesthetic feedback honestly and continue other authorized work.
+Use the latest user request and the project's current contracts as the authority. The references here describe the harness inspected on 2026-10-13; resolve later changes from the checkout. Existing user authorization carries through routine reversible production steps. A quality checkpoint is an inspection step, not an automatic request for another approval. Record pending aesthetic feedback honestly and continue other authorized work.
 
 Route only the requested work:
 
