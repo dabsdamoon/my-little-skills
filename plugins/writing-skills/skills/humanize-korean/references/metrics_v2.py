@@ -14,10 +14,11 @@ Versioning:
 - v1.6 8 functions (comma_inclusion_rate ... lexical_diversity) are imported
   *as-is* from references/metrics.py (signature + return preserved). DO NOT
   redefine them here. Regression-safe.
-- v2.0 adds 14 NEW pure functions for post-editese + T1~T8 detection.
+- v2.0 adds 14 NEW pure functions for post-editese + T1~T8 detection,
+  plus `change_rate()` — the SSOT for 철칙 #4 change-rate gating.
 
-This file lives in `_workspace/v2.0-YYYY-MM-DD/03_metrics/`. Phase 6
-integrator will merge it into the project's references/metrics.py.
+This file ships next to metrics.py at
+`skills/humanize-korean/references/`.
 
 CLI:
     python metrics_v2.py --input run/01_input.txt \
@@ -27,6 +28,7 @@ CLI:
 from __future__ import annotations
 
 import argparse
+import difflib
 import json
 import math
 import os
@@ -41,10 +43,8 @@ from typing import Any
 # ---------------------------------------------------------------------------
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-_PROJECT_ROOT = os.path.abspath(os.path.join(_HERE, "..", "..", ".."))
-_V1_METRICS_DIR = os.path.join(
-    _PROJECT_ROOT, ".claude", "skills", "humanize-korean", "references"
-)
+# metrics.py ships in the same references/ directory as this file.
+_V1_METRICS_DIR = _HERE
 if _V1_METRICS_DIR not in sys.path:
     sys.path.insert(0, _V1_METRICS_DIR)
 
@@ -84,7 +84,11 @@ _DECLARATIVE_ENDINGS = ("한다", "된다", "이다")
 # 진행형 어미 — T8b. "~고 있다" 표층 매칭. 종결형/연결형 모두 포함.
 # 부정형 "있지 않다", 의존명사 "있는" 은 별개. 정규식은 "고 있" 토큰
 # 시작점 + 후속 "다/었/는" 등을 폭넓게 캡처.
-_PROGRESSIVE_RE = re.compile(r"고\s*있(?:다|었|는|을|던|는다)")
+_PROGRESSIVE_RE = re.compile(
+    r"고\s*있(?:다|었|는|을|던|는다"          # 한다체·관형형 (기존)
+    r"|음|었음|으며|었으며|고|어|어서|으니|"   # 음슴체·연결형 (추가)
+    r"기|기에|는지|을지|겠다|겠음)"            # 명사형·추정 (추가)
+)
 
 # T2b 이중 피동 표층 어휘. 모두 "되어진/여진/혀진/려진" 등 피동 보조어간 +
 # 피동 보조용언 중첩의 표층형. 단순 "되다" 는 정상 표현이므로 제외.
@@ -112,10 +116,49 @@ _DOUBLE_PASSIVE_TOKENS = (
     "놓여진",
 )
 
-# T2a "~에 의해 + 피동" — 피동 동사가 직후 N어절 안에 등장해야 매칭.
+# T2a "~에 의해 + 피동" — 피동 동사가 직후 3어절 안에 등장해야 매칭.
 # 단순 "에 의해" 는 빈번한 자연 한국어이므로 제외 (보고서 T2 caveat).
+# 어미는 NFC 결합형(된다=된+다)으로 표면화되므로 음절 단위로 열거하고,
+# 부사 등이 끼는 경우를 위해 어절 경계는 최대 2개까지 넘는다 (#131).
+# 어간 단독 매칭은 오탐을 만들어 어미·경계 조건을 덧붙였다(아래).
+_PASSIVE_JI_SURFACES = tuple(
+    f"{pre}{suf}"
+    for pre in ("어", "아", "여", "혀", "려", "해", "워")
+    for suf in ("지", "진", "질", "짐", "졌", "져")
+)
+
+# ⚠️ 어간만 열어 두면 부사·명사를 피동으로 오탐한다 (2026-09-22 실측):
+#   "정부에 의해 되레 손해를 봤다"  → '되'   (부사 '되레')
+#   "규정에 의해 받침을 고쳤다"      → '받'   (명사 '받침')
+#   "그에 의해 되도록 빨리 처리했다" → '되'   (부사 '되도록')
+# 그래서 어간(되·받·당하)에는 **어미를 필수로 요구**한다 (PR #94 제안).
+# 반대로 합성 종결·관형형(된다·됨·될·어지…)은 어미가 이미 붙어 있으므로
+# **어절 경계**를 요구해 명사 끝음절과 구분한다 — 경계 없이 맨몸 `진|질|져`를
+# 열면 '본진·추진·촉진·재질·지진'이 전부 걸린다.
+_BOUND = r"(?=\s|[\"'”’()\[\]\.,!?…;:「」『』《》〈〉]|$)"
+
+# T2a 는 네 갈래다. 갈래를 섞으면 한쪽을 고칠 때 다른 쪽이 새는 것이 반복됐다.
+#
+#   ① 어간(되·받·당하) + **어미 필수** — 어미를 요구하지 않으면 부사·명사가 걸린다
+#      ("되레"·"받침"·"되도록").
+#   ② 합성 종결형 — 어미가 이미 결합돼 있어 경계가 불필요하다. 다만 맨몸
+#      `진다|졌다` 는 **넣지 않는다** — 어휘적 -지다 동사를 잡는다
+#      ("권리를 가진다"·"질문을 던진다"·"건물이 무너진다"). 그 계열은 ④가 받는다.
+#   ③ 합성 관형·명사형 + **어절 경계** — 경계가 없으면 명사 끝음절이 걸린다
+#      ("추진"·"본진"·"재질"·"지진"). `당해` 는 **넣지 않는다** — 법률 상용어
+#      當該("당해 기관"·"당해 연도")와 충돌한다.
+#   ④ 피동 보조어간 표면형(어지·여진·해져 …) + **용언 어미** — 어/아/여 접두가
+#      명사와 구분해 주므로 경계가 필요 없고, 어미를 요구해 餘震·解止·餘地 같은
+#      한자 명사를 거른다.
 _BY_PASSIVE_RE = re.compile(
-    r"에\s*의(?:해|하여)\s+\S{0,12}?(?:되|받|당하|지)(?:다|었|어|ㄴ다|는다|는|ㄹ|을)"
+    r"에\s*의(?:해|하여)\s+(?:\S+\s+){0,2}?\S*?(?:"
+    r"(?:되|받|당하)(?:다|었|았|어|는|은|을|고|며|면|지|기|까|던|자|어서)"
+    r"|된다|됐|당한다|당했|됩니다|됩니까"
+    r"|(?:됨|된|될|되어|당한|당할|" + "|".join(_PASSIVE_JI_SURFACES) + r")"
+    r"(?:지|고|며|까|으로써|으로|지만|데)?" + _BOUND +
+    r"|(?:" + "|".join(_PASSIVE_JI_SURFACES) + r")"
+    r"(?:다|는|던|자|기|까|고|며|면|서|음|었|았|지|만)"
+    r")"
 )
 
 # T3 인칭 대명사 — 영어 he/she/it/they 의 1대1 매핑.
@@ -613,12 +656,87 @@ def interference_index(text: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# === C-8 ANTITHESIS COUNTER (구조 게이트 — 전멸 판정 전용) ===
+# ---------------------------------------------------------------------------
+
+# C-8 부정-긍정 대구 표층형: "X가/이 아니라 Y", "~이기 이전에", "~되기 이전에",
+# "~이기보다". 사람 글에도 흔한 정상 수사이므로 절대치로는 아무 판정도 못 한다.
+_ANTITHESIS_RE = re.compile(r"(?:가|이)\s*아니라|이기\s*이전에|되기\s*이전에|이기보다")
+
+
+def antithesis_count(text: str) -> int:
+    """C-8 부정-긍정 대구("X가 아니라 Y" 류) 카운트. 전멸 게이트용.
+
+    절대치 판정 금지 — 대구는 사람 글에도 흔한 정상 수사다. 이 카운트는
+    ``before >= 5 AND after == 0`` (전멸 = 윤문이 수사 구조를 몰살) 판정
+    전용이다. 문자 diff가 못 보는 구조 편집(C-8 -75% 뒤에 change_rate
+    2.77%가 숨는 실측 사례)을 잡기 위한 진단 앵커.
+    """
+    if not text.strip():
+        return 0
+    return len(_ANTITHESIS_RE.findall(text))
+
+
+# ---------------------------------------------------------------------------
+# === CHANGE RATE (철칙 #4 게이트 SSOT) ===
+# ---------------------------------------------------------------------------
+
+# 철칙 #4 게이트 임계값. change_rate() 반환값과 직접 비교한다.
+CHANGE_RATE_WARN = 0.30   # 30% 초과 — 경고, 과윤문 점검
+CHANGE_RATE_ABORT = 0.50  # 50% 초과 — 강제 중단
+
+# 마크업 전용 줄: 코드 펜스·수평선·표 구분선 등 — ignore_markup 모드에서 제거.
+_MARKUP_ONLY_LINE_RE = re.compile(
+    r"^\s*(?:```.*|~~~.*|-{3,}|\*{3,}|={3,}|\|[\s:\-|]*)\s*$"
+)
+# 줄머리 마크업 장식: 헤딩(#)·불릿(-·*·+)·번호 목록·인용(>) — 장식만 벗기고
+# 텍스트 내용은 보존한다.
+_MARKUP_PREFIX_RE = re.compile(r"^\s*(?:#{1,6}\s+|>\s?|[-*+]\s+|\d{1,3}[.)]\s+)")
+
+
+def _strip_markup(text: str) -> str:
+    """Drop markup-only lines and leading markup decoration, keep content."""
+    kept: list[str] = []
+    for line in text.splitlines():
+        if _MARKUP_ONLY_LINE_RE.match(line):
+            continue
+        kept.append(_MARKUP_PREFIX_RE.sub("", line))
+    return "\n".join(kept)
+
+
+def change_rate(before: str, after: str, ignore_markup: bool = False) -> float:
+    """윤문 전후 문자 기반 변경률 — 철칙 #4 게이트의 SSOT.
+
+    이 함수의 반환값이 변경률의 단일 진실 원천(SSOT)이며, 에이전트의
+    재량(눈대중) 자가 산출을 대체한다. 게이트 판정은 반드시 이 값과
+    ``CHANGE_RATE_WARN``(0.30 경고) / ``CHANGE_RATE_ABORT``(0.50 강제 중단)
+    상수를 비교해 내린다.
+
+    계산: ``difflib.SequenceMatcher`` 문자 단위 유사도의 보수
+    (``1 - ratio``). 0.0(동일) ~ 1.0(전면 교체) 범위.
+
+    ``ignore_markup=True``이면 양쪽 텍스트에서 마크업 전용 줄(코드 펜스·
+    수평선·표 구분선)을 제거하고 줄머리 장식(헤딩 #·불릿·번호·인용 >)을
+    벗긴 뒤 비교한다 — 헤딩·마크업 삭제가 본문 변경률을 부풀리는 문제
+    (2026-04-26-001 run에서 44.7% 중 상당분이 마크업 삭제)의 보정용.
+    기본값은 순수 문자 diff.
+    """
+    if ignore_markup:
+        before = _strip_markup(before)
+        after = _strip_markup(after)
+    if not before and not after:
+        return 0.0
+    matcher = difflib.SequenceMatcher(None, before, after, autojunk=False)
+    return 1.0 - matcher.ratio()
+
+
+# ---------------------------------------------------------------------------
 # Baseline + z-score (v2.0 extension)
 # ---------------------------------------------------------------------------
 
 
 def _default_baseline_v2_path() -> str:
-    return os.path.join(_HERE, "baseline_v2_diff.json")
+    return os.path.join(_HERE, "baseline_v2.json")
 
 
 def _load_baseline_v2(path: str | None) -> dict[str, Any]:
@@ -670,6 +788,9 @@ def compute_all_v2(
         "have_make_literal_count": have_make_literal_count(text),
         "double_particle_count": double_particle_count(text),
         "progressive_aspect_rate": progressive_aspect_rate(text),
+        # C-8 대구 카운트 — 진단 앵커로만 노출. baseline placeholder라 z는
+        # None이어도 무방. 판정은 before/after 전멸 비교로만 한다.
+        "antithesis_count": antithesis_count(text),
     }
     interference = interference_index(text)
 
