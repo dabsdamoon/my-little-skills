@@ -6,9 +6,9 @@ Run from anywhere with pytest:
 
 Pure stdlib beyond pytest itself.
 
-The first block below is the reason this skill exists: three regressions
-observed against a real dual-track-pr-creator body, none of which the
-predecessor's suite covered.
+The first block covers three regressions observed against a real
+dual-track-pr-creator body. Generic test-plan bodies (pr-creator, hand-written)
+get their own block further down.
 """
 import subprocess
 import sys
@@ -130,14 +130,14 @@ def test_tick_flips_only_matching_unchecked_items():
     out, matched = vc.tick_items(DUAL_TRACK_BODY, ["CI on this PR"])
     assert "- [x] **CI on this PR**" in out
     assert "- [ ] **Screen-reader verification**" in out
-    assert matched == {"CI on this PR": True}
+    assert matched == {"CI on this PR": 1}
 
 
 def test_tick_ignores_already_checked_items():
     body = "- [x] done\n- [ ] todo\n"
     out, matched = vc.tick_items(body, ["done"])
     assert out == body
-    assert matched == {"done": False}
+    assert matched == {"done": 0}
 
 
 def test_tick_preserves_indentation_and_bullet_style():
@@ -154,7 +154,44 @@ def test_tick_ignores_empty_check_string():
     body = "- [ ] something\n"
     out, matched = vc.tick_items(body, [""])
     assert out == body
-    assert matched == {"": False}
+    assert matched == {"": 0}
+
+
+def test_tick_leaves_nonmatching_lines_untouched():
+    body = "  - [ ] indented item\n* [ ] star bullet\n- [ ] keep me\n"
+    out, _ = vc.tick_items(body, ["star bullet"])
+    assert out == "  - [ ] indented item\n* [x] star bullet\n- [ ] keep me\n"
+
+
+def test_tick_substring_matching_several_items_ticks_none():
+    """Ticking every line containing "deploy" would claim unverified items."""
+    body = "- [ ] deploy api\n- [ ] deploy web\n"
+    out, matched = vc.tick_items(body, ["deploy"])
+    assert out == body
+    assert matched == {"deploy": 2}
+
+
+def test_tick_full_text_selects_one_item_among_similar_ones():
+    body = "- [ ] deploy api\n- [ ] deploy web\n"
+    out, matched = vc.tick_items(body, ["deploy api"])
+    assert out == "- [x] deploy api\n- [ ] deploy web\n"
+    assert matched == {"deploy api": 1}
+
+
+def test_tick_exact_item_text_wins_over_longer_items():
+    body = "- [ ] deploy\n- [ ] deploy web\n"
+    out, matched = vc.tick_items(body, ["deploy"])
+    assert out == "- [x] deploy\n- [ ] deploy web\n"
+    assert matched == {"deploy": 1}
+
+
+def test_tick_resolves_every_check_against_the_original_body():
+    """Order of --check flags must not change which items get ticked."""
+    body = "- [ ] deploy api\n- [ ] deploy web\n"
+    for checks in (["deploy api", "deploy"], ["deploy", "deploy api"]):
+        out, matched = vc.tick_items(body, checks)
+        assert out == "- [x] deploy api\n- [ ] deploy web\n"
+        assert matched == {"deploy api": 1, "deploy": 2}
 
 
 # --------------------------------------------------------------------------- #
@@ -170,7 +207,7 @@ def test_reword_fixes_a_self_describing_item_before_it_is_ticked():
     body, _ = vc.tick_items(body, ["CI on this PR"])
     assert "- [x] **CI on this PR** - 6/6 checks pass on 246a9b9" in body
     assert "not yet observed" not in body
-    assert reworded == {"not yet observed at the time of writing": True}
+    assert reworded == {"not yet observed at the time of writing": 1}
 
 
 def test_reword_touches_task_lines_only():
@@ -182,7 +219,30 @@ def test_reword_touches_task_lines_only():
 
 def test_reword_reports_no_match():
     _, reworded = vc.reword_items("- [ ] a\n", [("absent", "x")])
-    assert reworded == {"absent": False}
+    assert reworded == {"absent": 0}
+
+
+def test_reword_leaves_checked_items_byte_for_byte():
+    body = "- [x] CI - not yet observed\n- [ ] Deploy - not yet observed\n"
+    out, reworded = vc.reword_items(body, [("not yet observed", "6/6 pass")])
+    assert out == "- [x] CI - not yet observed\n- [ ] Deploy - 6/6 pass\n"
+    assert reworded == {"not yet observed": 1}
+
+
+def test_reword_selecting_several_items_changes_none():
+    """Rewording every "not yet observed" would make unverified items read as verified."""
+    body = "- [ ] CI - not yet observed\n- [ ] Deploy - not yet observed\n"
+    out, reworded = vc.reword_items(body, [("not yet observed", "6/6 pass")])
+    assert out == body
+    assert reworded == {"not yet observed": 2}
+
+
+def test_reword_then_tick_targets_the_new_wording():
+    body = "- [ ] CI - pending\n"
+    out, _ = vc.reword_items(body, [("pending", "6/6 pass")])
+    out, matched = vc.tick_items(out, ["CI - 6/6 pass"])
+    assert out == "- [x] CI - 6/6 pass\n"
+    assert matched == {"CI - 6/6 pass": 1}
 
 
 # --------------------------------------------------------------------------- #
@@ -226,6 +286,62 @@ def test_audit_skips_stems_too_short_to_match_meaningfully():
         "\n## Verification\n- [x] ok\n"
     )
     assert vc.audit_conflicts(body) == []
+
+
+# --------------------------------------------------------------------------- #
+# Generic test-plan bodies (pr-creator or hand-written)
+# --------------------------------------------------------------------------- #
+
+GENERIC_BODY = """# PR: add retry tests for the QA checklist importer
+
+Adds exponential backoff to the importer.
+
+## Test plan
+
+- [x] Unit suite green
+- [ ] Importer retries three times on 503
+- [ ] PM sign-off on the error copy
+
+## Notes
+
+Nothing else changes.
+"""
+
+
+def test_generic_h1_title_containing_test_is_not_an_anchor():
+    """An H1 anchor put the section between the title and the summary."""
+    out = vc.upsert_section(GENERIC_BODY, "verdict: PASS").splitlines()
+    last_task = max(i for i, ln in enumerate(out) if ln.startswith("- ["))
+    assert out.index("Adds exponential backoff to the importer.") < out.index(TITLE)
+    assert last_task < out.index(TITLE) < out.index("## Notes")
+
+
+def test_testing_checklist_heading_anchors_the_section():
+    body = "# PR\n\n## Testing Checklist\n- [ ] a\n- [x] b\n\n## Notes\nstuff\n"
+    out = vc.upsert_section(body, "method: pytest").splitlines()
+    assert out.index("- [x] b") < out.index(TITLE) < out.index("## Notes")
+
+
+def test_upsert_replaces_existing_section_without_duplicating():
+    once = vc.upsert_section(GENERIC_BODY, "verdict: first")
+    twice = vc.upsert_section(once, "verdict: second")
+    assert _count(twice, TITLE) == 1
+    assert "verdict: second" in twice
+    assert "verdict: first" not in twice
+
+
+def test_existing_section_is_bounded_by_a_thematic_break():
+    body = f"## Test plan\n- [ ] a\n\n{TITLE}\n\nold content\n\n---\n\n## Footer\n"
+    out = vc.upsert_section(body, "new content")
+    assert _count(out, TITLE) == 1
+    assert "old content" not in out
+    assert "new content" in out
+    assert "---" in out and "## Footer" in out
+
+
+def test_upsert_preserves_trailing_newline_state():
+    assert vc.upsert_section("## Test plan\n- [ ] a\n", "x").endswith("\n")
+    assert not vc.upsert_section("## Test plan\n- [ ] a", "x").endswith("\n")
 
 
 # --------------------------------------------------------------------------- #
@@ -278,7 +394,7 @@ def test_cli_full_dual_track_run_is_idempotent(tmp_path):
 def test_cli_strict_exits_2_on_unmatched_check(tmp_path):
     r = _run("--body-file", str(_body(tmp_path)), "--check", "absent", "--strict")
     assert r.returncode == 2
-    assert "no item matched" in r.stderr
+    assert "no unchecked item matched" in r.stderr
 
 
 def test_cli_strict_exits_3_on_audit_conflict(tmp_path):
@@ -307,3 +423,62 @@ def test_cli_missing_body_file_exits_1(tmp_path):
     r = _run("--body-file", str(tmp_path / "absent.md"), "--check", "x")
     assert r.returncode == 1
     assert "cannot read --body-file" in r.stderr
+
+
+def test_cli_writes_to_stdout_by_default(tmp_path):
+    body = tmp_path / "body.md"
+    body.write_text("- [ ] ship it\n")
+    r = _run("--body-file", str(body), "--check", "ship it")
+    assert r.returncode == 0
+    assert r.stdout == "- [x] ship it\n"
+
+
+def test_cli_unmatched_check_without_strict_warns_and_exits_0(tmp_path):
+    r = _run("--body-file", str(_body(tmp_path)), "--check", "absent")
+    assert r.returncode == 0
+    assert "no unchecked item matched" in r.stderr
+
+
+def test_cli_ambiguous_check_ticks_nothing(tmp_path):
+    body = tmp_path / "b.md"
+    body.write_text("- [ ] deploy api\n- [ ] deploy web\n")
+    r = _run("--body-file", str(body), "--check", "deploy")
+    assert r.returncode == 0
+    assert r.stdout == "- [ ] deploy api\n- [ ] deploy web\n"
+    assert "matched 2 unchecked items" in r.stderr
+
+
+def test_cli_strict_exits_2_on_ambiguous_check(tmp_path):
+    body = tmp_path / "b.md"
+    body.write_text("- [ ] deploy api\n- [ ] deploy web\n")
+    r = _run("--body-file", str(body), "--check", "deploy", "--strict")
+    assert r.returncode == 2
+
+
+def test_cli_strict_exits_2_on_ambiguous_reword(tmp_path):
+    body = tmp_path / "b.md"
+    body.write_text("- [ ] CI - not yet observed\n- [ ] Deploy - not yet observed\n")
+    r = _run("--body-file", str(body), "--reword", "not yet observed::done", "--strict")
+    assert r.returncode == 2
+    assert "not yet observed" in r.stdout
+
+
+def test_cli_full_generic_run_is_idempotent(tmp_path):
+    body = tmp_path / "body.md"
+    body.write_text(GENERIC_BODY)
+    section = tmp_path / "qa.md"
+    section.write_text("- Importer retries: PASS, 3 attempts logged on 503\n")
+    args = (
+        "--body-file", str(body),
+        "--check", "Importer retries three times on 503",
+        "--section-file", str(section),
+        "--in-place",
+    )
+    assert _run(*args).returncode == 0
+    first = body.read_text()
+    assert _run(*args).returncode == 0
+    assert body.read_text() == first
+    lines = first.splitlines()
+    assert lines.index("- [x] Importer retries three times on 503") < lines.index(TITLE)
+    assert lines.index(TITLE) < lines.index("## Notes")
+    assert "- [ ] PM sign-off on the error copy" in lines

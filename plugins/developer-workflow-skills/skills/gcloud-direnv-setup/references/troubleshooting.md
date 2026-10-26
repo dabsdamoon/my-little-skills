@@ -31,13 +31,23 @@ gcloud auth application-default login --project=PROJECT_ID
 FAILED_PRECONDITION: Key creation is not allowed on this service account.
 ```
 
-**Cause:** Organization policy `iam.disableServiceAccountKeyCreation` is enabled.
+**Cause:** An organization policy blocks key creation: the managed constraint `iam.managed.disableServiceAccountKeyCreation` or the legacy `iam.disableServiceAccountKeyCreation` (enforced by default in organizations created on or after May 3, 2024).
+
+**Check (read-only):**
+```bash
+gcloud org-policies describe iam.managed.disableServiceAccountKeyCreation \
+  --effective --project=PROJECT_ID
+gcloud org-policies describe iam.disableServiceAccountKeyCreation \
+  --effective --project=PROJECT_ID
+```
 
 **Solutions:**
 
-1. Use ADC instead of service account key
-2. Request exception from organization admin
-3. Use Workload Identity (for GKE)
+1. Use user ADC (`gcloud auth application-default login`)
+2. Use service-account impersonation (`gcloud auth application-default login --impersonate-service-account SA_EMAIL`), which needs `roles/iam.serviceAccountTokenCreator` on the service account
+3. Workload Identity Federation for GKE or CI (see advanced-patterns.md)
+
+Don't ask for a policy exception just to get a local key.
 
 ---
 
@@ -60,12 +70,19 @@ direnv allow
 # Check hook is in shell
 grep direnv ~/.zshrc  # or ~/.bashrc
 
+# Is the hook function loaded in interactive zsh? "function" = yes, "none" = no
+zsh -ic 'whence -w _direnv_hook' 2>/dev/null
+
 # Reload shell config
 source ~/.zshrc
 
 # Verify hook works
 cd .. && cd -
 ```
+
+If the hook is missing, add it as SKILL.md Step 1 shows (with Powerlevel10k instant prompt, one line above the instant-prompt block and one below).
+
+**Works in the terminal, not in Claude Code or Codex:** agent commands don't run the zsh prompt hook, so `.envrc` isn't loaded for them. Run `direnv exec . COMMAND`, or use the Claude Code `CLAUDE_ENV_FILE` hooks in SKILL.md "Agent Shells".
 
 ---
 
@@ -147,13 +164,12 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
 
 **Solutions:**
 
-1. **Use SA keys** (if allowed) - each project has own key
-2. **Manual ADC switch** when changing accounts:
+1. **Manual ADC switch** when changing accounts:
    ```bash
    gcloud config configurations activate OTHER_CONFIG
    gcloud auth application-default login --project=OTHER_PROJECT
    ```
-3. **Rename ADC files** (advanced):
+2. **Rename ADC files** (advanced):
    ```bash
    # Save current ADC
    mv ~/.config/gcloud/application_default_credentials.json \
@@ -162,6 +178,7 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
    # In .envrc, point to specific ADC
    export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/adc-account1.json"
    ```
+3. **Service account key** only as a last resort, when org policy allows it (see credential-strategies.md)
 
 ---
 
@@ -215,12 +232,13 @@ echo "=== gcloud config ==="
 gcloud config configurations list
 gcloud config list
 
-echo "=== ADC ==="
-cat ~/.config/gcloud/application_default_credentials.json | grep -E "(quota_project|client_id)"
+echo "=== ADC (type and quota project only; never print the whole file) ==="
+grep -oE '"(type|quota_project_id)": "[^"]*"' ~/.config/gcloud/application_default_credentials.json
 
 echo "=== Environment ==="
 echo "CLOUDSDK_ACTIVE_CONFIG_NAME: $CLOUDSDK_ACTIVE_CONFIG_NAME"
 echo "GOOGLE_CLOUD_PROJECT: $GOOGLE_CLOUD_PROJECT"
+echo "GOOGLE_CLOUD_LOCATION: $GOOGLE_CLOUD_LOCATION"
 echo "GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS:-"(not set)"}"
 
 echo "=== direnv ==="

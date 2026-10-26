@@ -1,10 +1,13 @@
 # Output Optimization Techniques
 
-Strategies to reduce output tokens and improve response structure.
+Output tokens cost several times more than input tokens on every major provider (see [provider-facts.md](provider-facts.md)), and on reasoning models the hidden thinking or reasoning tokens bill as output too. The levers, in order:
 
-## Structured Output Design
+1. Ask only for what the caller uses (schema design).
+2. Enforce the format with the provider's structured-output feature, not with prose and retries.
+3. Lower reasoning effort where the eval allows it.
+4. Keep the output-token cap as a backstop, not a tuning knob.
 
-### JSON Schema Optimization
+## Schema design
 
 **Verbose schema (avoid):**
 ```json
@@ -36,199 +39,63 @@ Strategies to reduce output tokens and improve response structure.
 }
 ```
 
-**Savings: ~70% on schema, ~50% on output**
+| Strategy | Example |
+|----------|---------|
+| Flat structure | Remove wrapper objects nobody reads |
+| Only consumed fields | Drop timestamps, versions, and "confidence" fields the caller ignores |
+| Enums for closed sets | `"sentiment": {"enum": ["positive", "negative", "neutral"]}` |
+| Nullable over optional | `"phone": {"type": ["string", "null"]}` for predictable parsing |
 
-### Field Optimization
+Keep field names readable. Cryptic keys (`"s": "pos"`) save a token or two per field and make the model and every downstream reader guess.
 
-| Strategy | Example | Impact |
-|----------|---------|--------|
-| Short field names | `full_name` → `name` | -2 tokens/field |
-| Flat structure | Remove unnecessary nesting | -20-40% |
-| Enums over strings | `"sentiment": "pos"` | -5 tokens |
-| Nullable vs optional | Use `null` instead of omitting | Predictable parsing |
-| No metadata | Remove timestamps, versions | -10-20% |
+## Enforce format with the API, not prose
 
-### Enum Design
+| Provider | Feature |
+|---|---|
+| Claude | `output_config.format` with `type: "json_schema"` |
+| OpenAI (Responses) | `text.format` with `type: "json_schema"`, `strict: true` |
+| Gemini | `response_mime_type="application/json"` with `response_json_schema` |
 
-```json
-// Verbose
-{"sentiment": "positive", "confidence": "high", "category": "product_review"}
+Examples are in the provider guides. A schema-enforced response removes the "Return ONLY valid JSON" instruction, assistant prefill, stop-sequence guards, and retry-on-parse loops - and the tokens those retries burn. Keep the schema stable across requests: on Claude, changing it invalidates the prompt cache.
 
-// Concise
-{"s": "pos", "c": "hi", "cat": "prod"}
+## Output length
 
-// With instruction
-"Use abbreviations: s=sentiment (pos/neg/neu), c=confidence (hi/med/lo)"
-```
+### The cap is a backstop
 
----
+`max_tokens` (Claude), `max_output_tokens` (OpenAI), and `max_output_tokens` in Gemini's config are hard limits on everything generated in the turn - on Claude and OpenAI that explicitly includes thinking or reasoning tokens. A cap sized to the visible answer (for example, 5-50 tokens for a classification) starves the reasoning and truncates the response, and a truncated response is a failed attempt you still pay for. Set the cap with generous headroom, stream large outputs, and treat a `max_tokens` / `max_output_tokens` stop as a failure to investigate, not a saving.
 
-## Response Format Control
+### Shorten what the model writes
 
-### Stop Sequences
+- **Specify the output shape**, ideally with a short example of the target format. This is the most reliable way to shorten visible output.
+- **Ask for no preamble** when the caller parses the result: "Answer directly, without introductions or restating the question."
+- **Prefer qualitative length guidance** ("one short paragraph") over hard word caps, which can cut off needed detail on hard inputs.
 
-Prevent over-generation:
+### Shorten reasoning
 
-```python
-# Claude
-response = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    stop_sequences=["\n\nNote:", "\n\nExplanation:", "---"]
-)
+Reasoning length is controlled by configuration, not prose:
 
-# OpenAI
-response = client.chat.completions.create(
-    model="gpt-4o",
-    stop=["\n\nNote:", "\n\nExplanation:"]
-)
-```
+| Provider | Control |
+|---|---|
+| Claude | `output_config.effort` (with adaptive thinking) |
+| OpenAI | `reasoning.effort` |
+| Gemini | `thinking_config` (`thinking_level` or `thinking_budget`, per model) |
 
-### Max Tokens Guidelines
+Lower one step at a time and re-run the quality check; the quality cost differs by workload.
 
-| Task Type | Recommended Max |
-|-----------|-----------------|
-| Classification | 10-50 |
-| Yes/No questions | 5-20 |
-| Entity extraction | 100-500 |
-| Short summaries | 200-500 |
-| Long summaries | 500-2000 |
-| Code generation | 500-4000 |
-| General Q&A | 500-2000 |
+### Stop sequences
 
-**Tip**: Set max_tokens slightly above expected output. Monitor for truncation.
+On Claude, a stop sequence is useful as an early-exit sentinel: tell the model to emit `<CANNOT_ANSWER>` when the input is out of scope and register it in `stop_sequences`, so it stops instead of explaining at length. Gemini's `GenerateContentConfig` also accepts `stop_sequences`. The OpenAI Responses API has no stop parameter.
 
-### Length Instructions
+## Format choice
 
-Be explicit about desired length:
+Formats differ in tokens per value: JSON repeats keys on every record, CSV states them once, prose has no structure overhead. When the caller parses the output, the structured-output feature decides the format (JSON). When a human reads it, plain text or light Markdown. For bulk tabular extraction a human will open in a spreadsheet, CSV can be cheaper - measure both with the token counter on a realistic sample before switching.
 
-```
-# Vague (unpredictable length)
-Summarize this article.
+## Checklist
 
-# Specific (controlled length)
-Summarize in 2-3 sentences (50-75 words max).
-```
-
----
-
-## Format Comparison
-
-| Format | Tokens | Use Case |
-|--------|--------|----------|
-| Plain text | Baseline | Human reading |
-| Markdown | +10-20% | Documentation, reports |
-| JSON | +20-40% | API integration |
-| YAML | +10-25% | Config, human-readable structured |
-| XML | +30-50% | Legacy systems |
-| CSV | -10-20% | Tabular data |
-
-### When to Use Each
-
-**Plain text**: Chatbots, simple Q&A
-```
-The answer is 42.
-```
-
-**Markdown**: Documentation, user-facing reports
-```markdown
-## Summary
-The main point is...
-```
-
-**JSON**: APIs, programmatic processing
-```json
-{"answer": 42, "confidence": 0.95}
-```
-
-**YAML**: Configuration, human-editable structured data
-```yaml
-answer: 42
-confidence: 0.95
-```
-
-**CSV**: Batch extraction, spreadsheet export
-```
-name,email,phone
-John,john@example.com,555-1234
-```
-
----
-
-## Token-Efficient Patterns
-
-### 1. Instruction to Be Concise
-
-Add to system prompt:
-```
-Be concise. No preamble or explanations unless asked.
-```
-
-### 2. Direct Answers Only
-
-```
-# Verbose response (typical)
-That's a great question! Let me help you with that.
-The capital of France is Paris. Paris has been the
-capital since... [continues]
-
-# Concise response (instructed)
-Paris
-```
-
-Instruction:
-```
-Answer directly. No introductions, acknowledgments, or elaborations.
-```
-
-### 3. Structured Response Templates
-
-Force specific structure:
-```
-Respond using ONLY this format:
-ANSWER: [your answer]
-CONFIDENCE: [high/medium/low]
-```
-
-### 4. Thinking vs Output Separation
-
-For Claude with extended thinking:
-```
-Use thinking for analysis. Keep final output under 100 words.
-```
-
----
-
-## Provider-Specific Output Features
-
-### Claude
-
-- Streaming for long responses
-- Stop sequences (up to 4)
-- JSON mode via instruction
-
-### OpenAI
-
-- Structured outputs (schema enforcement)
-- JSON mode
-- Function calling for structured data
-- Logprobs for confidence
-
-### Gemini
-
-- JSON mode (`response_mime_type`)
-- Schema enforcement
-- Grounding with citations
-
----
-
-## Quick Reference: Output Checklist
-
-- [ ] Use minimal JSON schema (flat, short names)
-- [ ] Set appropriate max_tokens
-- [ ] Add stop sequences for over-generation
-- [ ] Specify desired length explicitly
-- [ ] Choose format based on use case
-- [ ] Add "be concise" instruction
-- [ ] Remove metadata fields not needed
-- [ ] Use enums instead of long strings
-- [ ] Test output consistency
+- [ ] Schema contains only fields the caller reads
+- [ ] Format enforced with the provider's structured-output feature
+- [ ] No prose JSON instructions, prefill, or parse-retry loops left behind
+- [ ] Output shape specified (with an example where useful)
+- [ ] Reasoning effort swept on the eval, lowest passing level chosen
+- [ ] Output cap set with headroom; cap-hit stops monitored
+- [ ] Quality re-checked against the baseline (see quality-checklist.md)

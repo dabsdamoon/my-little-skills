@@ -1,106 +1,134 @@
 #!/usr/bin/env python3
 """
-Start one or more servers, wait for them to be ready, run a command, then clean up.
+Start one or more servers, wait for their ports, run a command, then stop the servers.
+
+Each server runs in its own process group with stdout and stderr written to a log
+file, so a chatty server cannot fill an unread pipe and stall, and cleanup reaches
+every process the server command started (npm -> node -> esbuild, `cd x && ...`).
 
 Usage:
     # Single server
-    python scripts/with_server.py --server "npm run dev" --port 5173 -- python automation.py
-    python scripts/with_server.py --server "npm start" --port 3000 -- python test.py
+    python3 with_server.py --server "npm run dev" --port 5173 -- python3 automation.py
 
     # Multiple servers
-    python scripts/with_server.py \
-      --server "cd backend && python server.py" --port 3000 \
+    python3 with_server.py \
+      --server "cd backend && python3 server.py" --port 3000 \
       --server "cd frontend && npm run dev" --port 5173 \
-      -- python test.py
+      -- python3 test.py
+
+    # Keep server logs somewhere specific (default: a new temp dir, printed at start)
+    python3 with_server.py --log-dir ./server-logs --server "npm run dev" --port 5173 -- python3 test.py
 """
 
-import subprocess
-import socket
-import time
-import sys
 import argparse
+import os
+import signal
+import socket
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
 
-def is_server_ready(port, timeout=30):
-    """Wait for server to be ready by polling the port."""
-    start_time = time.time()
-    while time.time() - start_time < timeout:
+
+def wait_for_port(port: int, process: subprocess.Popen, timeout: float) -> None:
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if process.poll() is not None:
+            raise RuntimeError(f"Server exited with code {process.returncode} before port {port} opened")
         try:
-            with socket.create_connection(('localhost', port), timeout=1):
-                return True
-        except (socket.error, ConnectionRefusedError):
-            time.sleep(0.5)
-    return False
+            with socket.create_connection(("localhost", port), timeout=1):
+                return
+        except OSError:
+            time.sleep(0.25)
+    raise RuntimeError(f"Server did not open port {port} within {timeout}s")
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Run command with one or more servers')
-    parser.add_argument('--server', action='append', dest='servers', required=True, help='Server command (can be repeated)')
-    parser.add_argument('--port', action='append', dest='ports', type=int, required=True, help='Port for each server (must match --server count)')
-    parser.add_argument('--timeout', type=int, default=30, help='Timeout in seconds per server (default: 30)')
-    parser.add_argument('command', nargs=argparse.REMAINDER, help='Command to run after server(s) ready')
+def group_alive(process: subprocess.Popen) -> bool:
+    process.poll()  # reap the leader so a zombie does not count as alive
+    try:
+        os.killpg(process.pid, 0)
+    except (ProcessLookupError, PermissionError):
+        return False
+    return True
 
+
+def stop_group(process: subprocess.Popen, grace: float = 5.0) -> None:
+    try:
+        os.killpg(process.pid, signal.SIGTERM)
+    except ProcessLookupError:
+        process.wait()
+        return
+    deadline = time.monotonic() + grace
+    while time.monotonic() < deadline:
+        if not group_alive(process):
+            return
+        time.sleep(0.1)
+    try:
+        os.killpg(process.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+    process.wait()
+
+
+def tail(path: Path, lines: int = 20) -> str:
+    return "\n".join(path.read_text(errors="replace").splitlines()[-lines:])
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Run a command with one or more servers running")
+    parser.add_argument("--server", action="append", dest="servers", required=True, help="Server shell command (repeatable)")
+    parser.add_argument("--port", action="append", dest="ports", type=int, required=True, help="Port for each server, in --server order")
+    parser.add_argument("--timeout", type=int, default=30, help="Seconds to wait for each server port (default: 30)")
+    parser.add_argument("--log-dir", type=Path, help="Directory for server-N.log files (default: new temp dir)")
+    parser.add_argument("command", nargs=argparse.REMAINDER, help="Command to run once every server is ready")
     args = parser.parse_args()
 
-    # Remove the '--' separator if present
-    if args.command and args.command[0] == '--':
+    if args.command and args.command[0] == "--":
         args.command = args.command[1:]
-
     if not args.command:
-        print("Error: No command specified to run")
-        sys.exit(1)
-
-    # Parse server configurations
+        parser.error("no command given after --")
     if len(args.servers) != len(args.ports):
-        print("Error: Number of --server and --port arguments must match")
-        sys.exit(1)
+        parser.error("the number of --server and --port arguments must match")
 
-    servers = []
-    for cmd, port in zip(args.servers, args.ports):
-        servers.append({'cmd': cmd, 'port': port})
+    log_dir = args.log_dir or Path(tempfile.mkdtemp(prefix="with_server-"))
+    log_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Server logs: {log_dir}", flush=True)
 
-    server_processes = []
+    # Turn SIGTERM into SystemExit so the finally block still stops the servers.
+    signal.signal(signal.SIGTERM, lambda signum, frame: sys.exit(128 + signum))
 
+    running: list[subprocess.Popen] = []
     try:
-        # Start all servers
-        for i, server in enumerate(servers):
-            print(f"Starting server {i+1}/{len(servers)}: {server['cmd']}")
-
-            # Use shell=True to support commands with cd and &&
-            process = subprocess.Popen(
-                server['cmd'],
-                shell=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
-            )
-            server_processes.append(process)
-
-            # Wait for this server to be ready
-            print(f"Waiting for server on port {server['port']}...")
-            if not is_server_ready(server['port'], timeout=args.timeout):
-                raise RuntimeError(f"Server failed to start on port {server['port']} within {args.timeout}s")
-
-            print(f"Server ready on port {server['port']}")
-
-        print(f"\nAll {len(servers)} server(s) ready")
-
-        # Run the command
-        print(f"Running: {' '.join(args.command)}\n")
-        result = subprocess.run(args.command)
-        sys.exit(result.returncode)
-
-    finally:
-        # Clean up all servers
-        print(f"\nStopping {len(server_processes)} server(s)...")
-        for i, process in enumerate(server_processes):
+        for i, (cmd, port) in enumerate(zip(args.servers, args.ports), start=1):
+            log_path = log_dir / f"server-{i}.log"
+            print(f"Starting server {i}/{len(args.servers)}: {cmd}", flush=True)
+            with log_path.open("wb") as log:
+                # shell=True allows `cd x && ...`; start_new_session puts the shell and
+                # everything it spawns in one process group that stop_group() can signal.
+                process = subprocess.Popen(
+                    cmd,
+                    shell=True,
+                    stdin=subprocess.DEVNULL,
+                    stdout=log,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
+                )
+            running.append(process)
             try:
-                process.terminate()
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait()
-            print(f"Server {i+1} stopped")
-        print("All servers stopped")
+                wait_for_port(port, process, args.timeout)
+            except RuntimeError as exc:
+                print(f"{exc}. Last lines of {log_path}:\n{tail(log_path)}", file=sys.stderr)
+                sys.exit(1)
+            print(f"Server ready on port {port}", flush=True)
+
+        print(f"Running: {' '.join(args.command)}\n", flush=True)
+        sys.exit(subprocess.run(args.command).returncode)
+    finally:
+        for i, process in enumerate(running, start=1):
+            stop_group(process)
+            print(f"Server {i} stopped", flush=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

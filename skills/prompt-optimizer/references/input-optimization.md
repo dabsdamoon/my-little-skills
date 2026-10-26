@@ -1,76 +1,119 @@
 # Input Optimization Techniques
 
-Strategies to reduce input tokens while preserving prompt effectiveness.
+Cut what the model is billed for on every request without cutting what it needs to know. Caching usually saves far more than trimming, so restructure for caching first, then trim.
 
-## Token Compression Strategies
+The rule that keeps trimming safe: **remove repetition and filler, never context.** Audience, product facts, constraints, and the reasons behind them are what only the author knows; deleting them makes outputs worse and often longer. Judging whether an instruction is dated or harmful is a prompt-quality question - hand it to the `claude-api` skill's `prompt-audit` subcommand rather than deleting by length.
 
-### 1. Remove Redundancy
+## Cache-friendly structure
 
-Identify and eliminate repeated concepts:
+Every provider caches a prefix. Order content by how often it changes:
 
-**Before (redundant):**
+```
+┌──────────────────────────────────────┐
+│ Never changes                        │
+│  - tool definitions                  │
+│  - system instructions and context   │
+│  - fixed examples                    │
+│  - shared reference documents        │
+├──── cache breakpoint ────────────────┤
+│ Changes per session                  │
+│  - user profile, account settings    │
+├──── cache breakpoint (optional) ─────┤
+│ Changes per request                  │
+│  - retrieved passages                │
+│  - the current question              │
+│  - timestamps, request IDs           │
+└──────────────────────────────────────┘
+```
+
+Template:
+
+```
+[STABLE - cached]
+<instructions>
+{what the task is, who the output is for, constraints and why they exist}
+</instructions>
+
+<examples>
+{fixed, varied examples}
+</examples>
+
+<reference>
+{shared documents every request needs}
+</reference>
+
+--- cache breakpoint ---
+
+[PER REQUEST - not cached]
+<context>{retrieved or user-specific context}</context>
+<question>{current question}</question>
+```
+
+### Anti-patterns
+
+**Dynamic content in the stable section:**
+```
+# BAD - the date changes the prefix every day
+You are a support assistant. Today is {current_date}.
+
+# GOOD - pass the date with the request
+You are a support assistant.
+...
+<context>Today is {current_date}.</context>
+```
+
+**User-specific data before instructions:**
+```
+# BAD - a different prefix per user, nothing shared
+User ID: {user_id}
+<instructions>...</instructions>
+
+# GOOD
+<instructions>...</instructions>
+...
+<context>User ID: {user_id}</context>
+```
+
+**Unstable ordering:** tools or sections assembled from a set, a dict without sorted keys, or conditional sections (`if flag: prompt += ...`) produce a different prefix per combination. Serialize deterministically and move optional sections after the breakpoint.
+
+## Trimming
+
+### 1. Remove repetition
+
+The same instruction stated three ways costs three times and makes the model reconcile the wordings.
+
+**Before:**
 ```
 You are a helpful assistant. You must always be helpful.
 Remember to be helpful in your responses. Your goal is to help users.
-When responding, make sure to provide helpful information.
 ```
 
-**After (concise):**
+**After:**
 ```
 You are a helpful assistant.
 ```
 
-**Savings: ~80%**
+### 2. Condense filler phrasing
 
-### 2. Condense Phrasing
+| Verbose | Concise |
+|---------|---------|
+| "You must always" | "Always" |
+| "Please make sure to" | (drop) |
+| "In order to" | "To" |
+| "I would like you to" | (drop) |
+| "Could you please" | (drop) |
+| "at this point in time" | "now" |
+| "due to the fact that" | "because" |
+| "in the event that" | "if" |
 
-Replace verbose constructions with concise equivalents:
+Do not condense a sentence that carries a reason or a constraint ("because refunds over $500 need approval") into a bare rule; the reason is what lets the model handle cases the rule does not name.
 
-| Verbose | Concise | Savings |
-|---------|---------|---------|
-| "You must always" | "Always" | 2 tokens |
-| "Please make sure to" | "" (implied) | 4 tokens |
-| "In order to" | "To" | 2 tokens |
-| "It is important that" | "" (implied) | 4 tokens |
-| "You should remember to" | "" (implied) | 4 tokens |
-| "Make sure that you" | "" (implied) | 4 tokens |
-| "I would like you to" | "" (implied) | 5 tokens |
-| "Could you please" | "" (implied) | 3 tokens |
-| "at this point in time" | "now" | 4 tokens |
-| "due to the fact that" | "because" | 4 tokens |
-| "in the event that" | "if" | 3 tokens |
+### 3. Fewer, more varied examples
 
-**Example:**
+Several near-identical examples cost tokens and teach one narrow pattern.
+
+**Before:**
 ```
-# Before
-I would like you to please make sure to analyze the following text
-and provide a comprehensive summary of the main points.
-
-# After
-Analyze this text. Summarize main points.
-
-# Savings: ~60%
-```
-
-### 3. Abbreviations (Use Sparingly)
-
-Define once, use throughout:
-
-```
-Definitions: usr=user, req=request, resp=response, ctx=context
-
-When usr sends req with ctx, generate resp following these rules:
-```
-
-**Warning**: May reduce clarity. Test thoroughly.
-
-### 4. Strategic Examples
-
-Quality over quantity. Remove redundant examples:
-
-**Before (redundant examples):**
-```
-Examples:
 1. "Great product!" -> positive
 2. "Love it!" -> positive
 3. "Amazing quality!" -> positive
@@ -79,170 +122,38 @@ Examples:
 6. "It's okay" -> neutral
 ```
 
-**After (diverse examples):**
+**After:**
 ```
-Examples:
 - "Great product!" -> positive
 - "Terrible service" -> negative
 - "It's okay" -> neutral
 ```
 
-**Savings: ~50%**
+Keep examples that pin a format the caller parses; drop examples of judgment the model already makes well.
 
----
+### 4. Reference material
 
-## Cache-Friendly Structure
+- Inlined on every call and read by most calls: keep it, inside the cached prefix.
+- Inlined on every call but read by few: move it behind retrieval or a tool.
+- Images and PDFs: downscale to what the task needs; vision tokens scale with resolution.
 
-### The Pattern
+### 5. Tool schemas
 
-```
-┌─────────────────────────────────┐
-│     STATIC PREFIX (cached)      │
-│  - System instructions          │
-│  - Role definition              │
-│  - Format requirements          │
-│  - Fixed examples               │
-│  - Reference documents          │
-├─────────────────────────────────┤
-│     DYNAMIC SUFFIX (not cached) │
-│  - User context                 │
-│  - Current query                │
-│  - Variable data                │
-└─────────────────────────────────┘
-```
+Tool definitions are billed on every request. Do not shorten descriptions to one-liners - an under-described tool causes wrong calls that cost more than the tokens saved. Instead load fewer tools per request (tool search or deferred loading), keep the list stable so it caches, and drop prose in the system prompt that restates the tool schemas.
 
-### Implementation Template
+### What not to do
 
-```
-[SYSTEM INSTRUCTIONS - STATIC]
-You are an expert {role}. Your task is to {mission}.
+- **Lossy token-dropping compressors** that delete "low-information" words produce text no author would write; current models follow instructions closely and literally, so mangled instructions are followed mangled. Prefer caching and removing whole redundant sections.
+- **Invented abbreviations** (`usr=user, req=request`) save a few tokens and cost clarity on every request.
+- **Shortening as a goal.** A shorter prompt is not automatically a cheaper task: the model may spend more turns or output tokens recovering context it used to have. Measure cost per completed task, not prompt length.
 
-[RULES - STATIC]
-1. Always {rule1}
-2. Never {rule2}
-3. Format output as {format}
+## Checklist
 
-[EXAMPLES - STATIC]
-Input: {example1_input}
-Output: {example1_output}
-
-Input: {example2_input}
-Output: {example2_output}
-
-[REFERENCE - STATIC, if needed]
-{large_reference_document}
-
---- END CACHED CONTENT ---
-
-[USER CONTEXT - DYNAMIC]
-{user_provided_context}
-
-[QUERY - DYNAMIC]
-{user_query}
-```
-
-### Anti-Patterns (Avoid)
-
-**1. Dynamic content in static section:**
-```
-# BAD - timestamp breaks cache
-You are an assistant. Today is {current_date}.
-System version: {version}
-
-# GOOD - no dynamic content in static section
-You are an assistant.
-```
-
-**2. User ID before instructions:**
-```
-# BAD - unique per user
-User ID: {user_id}
-You are a helpful assistant...
-
-# GOOD - user info after static content
-You are a helpful assistant...
-User ID: {user_id}
-```
-
-**3. Random ordering:**
-```
-# BAD - inconsistent order
-{context}
-{instructions}
-{examples}
-
-# GOOD - consistent order
-{instructions}
-{examples}
-{context}
-```
-
----
-
-## Advanced: LLMLingua Compression
-
-Microsoft Research tool achieving up to 20x compression.
-
-### How It Works
-
-1. Uses small model (e.g., LLaMA-7B) to calculate token importance
-2. Removes low-information tokens
-3. Preserves semantic meaning
-
-### Example
-
-**Original (100 tokens):**
-```
-I would like you to carefully analyze the following text document
-and provide me with a comprehensive and detailed summary that captures
-all of the main points and key information contained within the text.
-```
-
-**Compressed (~30 tokens):**
-```
-analyze text document provide summary main points key information
-```
-
-### When to Use
-
-- Very long prompts (>4000 tokens)
-- High-volume applications
-- Cost-sensitive deployments
-- RAG with large contexts
-
-### Risks
-
-- Quality degradation on nuanced tasks
-- Edge case failures
-- Requires validation testing
-- Additional infrastructure (compression model)
-
-### Implementation
-
-```python
-from llmlingua import PromptCompressor
-
-compressor = PromptCompressor(
-    model_name="microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank",
-    use_llmlingua2=True
-)
-
-compressed = compressor.compress_prompt(
-    original_prompt,
-    rate=0.5,  # 50% compression
-    force_tokens=["important", "critical"]  # Preserve these
-)
-```
-
----
-
-## Quick Reference: Compression Checklist
-
-- [ ] Remove duplicate/redundant phrases
-- [ ] Replace verbose constructions
-- [ ] Consolidate similar examples
-- [ ] Place static content before dynamic
-- [ ] Remove unnecessary pleasantries
-- [ ] Use concise variable names
-- [ ] Remove filler words
-- [ ] Test quality after each change
+- [ ] Stable content before dynamic content; breakpoint at the boundary
+- [ ] No timestamps, IDs, or per-user data in the stable section
+- [ ] Deterministic serialization of tools and JSON
+- [ ] Repeated instructions consolidated
+- [ ] Filler phrasing removed; reasons and constraints kept
+- [ ] Examples varied, not repeated
+- [ ] Reference material cached or retrieved, not both
+- [ ] Quality re-checked against the baseline (see quality-checklist.md)

@@ -24,7 +24,8 @@
 ### Transport
 - **Streamable HTTP**: For remote servers, multi-client scenarios
 - **stdio**: For local integrations, command-line tools
-- Avoid SSE (deprecated in favor of streamable HTTP)
+- Avoid HTTP+SSE (Deprecated in spec 2026-07-28)
+- Do not build on Logging, Sampling, or Roots (Deprecated in spec 2026-07-28)
 
 ---
 
@@ -107,15 +108,26 @@ Example pagination response:
 
 ## Transport Options
 
+This section follows spec revision 2026-07-28 (changelog: `https://modelcontextprotocol.io/specification/2026-07-28/changelog.md`). Both current SDKs also serve clients on 2025-11-25 and earlier from the same server code.
+
+### What changed in 2026-07-28
+
+- **Stateless protocol.** The `initialize` / `notifications/initialized` handshake is removed. Every request carries its protocol version and client capabilities in `_meta`.
+- **`server/discover` is required.** Servers MUST implement it to advertise supported versions, capabilities, and identity. The SDKs implement it for you.
+- **No sessions.** Streamable HTTP drops protocol-level sessions and the `Mcp-Session-Id` header. Keep cross-call state in explicit handles passed as ordinary tool arguments.
+- **No GET stream.** The standalone HTTP GET stream and `resources/subscribe` are replaced by `subscriptions/listen`, a long-lived POST response stream for opted-in change notifications. SSE resumability (`Last-Event-ID`) is gone.
+- **No server-initiated requests.** Elicitation, sampling, and roots requests travel inside an `InputRequiredResult` and the client retries the original request with the answers (Multi Round-Trip Requests). Use your SDK's era-portable form rather than pushing a request mid-call.
+- **Deprecated:** Logging, Sampling, and Roots (log to stderr or OpenTelemetry instead; call LLM provider APIs directly instead of Sampling; take paths as tool parameters instead of Roots), and the HTTP+SSE transport.
+
 ### Streamable HTTP
 
 **Best for**: Remote servers, web services, multi-client scenarios
 
 **Characteristics**:
-- Bidirectional communication over HTTP
-- Supports multiple simultaneous clients
-- Can be deployed as a web service
-- Enables server-to-client notifications
+- One MCP endpoint (e.g. `/mcp`) that accepts POST; every JSON-RPC message is its own POST
+- Each response is a single JSON object or an SSE stream scoped to that request (progress, then the result)
+- Stateless on 2026-07-28: any instance can serve any request, so it scales horizontally without sticky sessions
+- Request bodies are capped (both SDKs default to 4 MiB)
 
 **Use when**:
 - Serving multiple clients simultaneously
@@ -127,16 +139,16 @@ Example pagination response:
 **Best for**: Local integrations, command-line tools
 
 **Characteristics**:
-- Standard input/output stream communication
+- Newline-delimited JSON-RPC over the standard streams of a client-launched subprocess
 - Simple setup, no network configuration needed
-- Runs as a subprocess of the client
+- Credentials come from the environment the client launches the server with
 
 **Use when**:
 - Building tools for local development environments
 - Integrating with desktop applications
-- Single-user, single-session scenarios
+- Single-user scenarios
 
-**Note**: stdio servers should NOT log to stdout (use stderr for logging)
+**Note**: stdio servers must NOT write anything but protocol messages to stdout (log to stderr)
 
 ### Transport Selection
 
@@ -145,7 +157,7 @@ Example pagination response:
 | **Deployment** | Local | Remote |
 | **Clients** | Single | Multiple |
 | **Complexity** | Low | Medium |
-| **Real-time** | No | Yes |
+| **Auth** | Environment credentials | OAuth 2.1 (spec authorization) |
 
 ---
 
@@ -153,15 +165,21 @@ Example pagination response:
 
 ### Authentication and Authorization
 
-**OAuth 2.1**:
-- Use secure OAuth 2.1 with certificates from recognized authorities
-- Validate access tokens before processing requests
-- Only accept tokens specifically intended for your server
+Authorization is optional in MCP. HTTP-based servers that support it SHOULD follow the spec's authorization section (`https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization.md`); stdio servers SHOULD NOT, and read credentials from the environment instead. For an HTTP server that requires auth, the spec says:
 
-**API Keys**:
-- Store API keys in environment variables, never in code
-- Validate keys on server startup
-- Provide clear error messages when authentication fails
+- **Protected Resource Metadata is required.** MCP servers MUST implement OAuth 2.0 Protected Resource Metadata (RFC 9728) so clients can discover the authorization server.
+- **Validate the audience.** MCP servers MUST validate that each access token was issued specifically for them as the intended audience (RFC 8707 Section 2), and answer invalid or expired tokens with HTTP 401. Clients MUST send RFC 8707 resource indicators naming the server's canonical URI.
+- **No token passthrough.** MCP servers MUST NOT accept or transit tokens issued for anything else, and MUST NOT forward the token they received to upstream APIs. Call upstream APIs with a separate token issued by the upstream authorization server.
+- **Client registration.** Clients and authorization servers SHOULD support OAuth Client ID Metadata Documents. Dynamic Client Registration (RFC 7591) is Deprecated and kept only for backward compatibility. Pre-registration is the third option.
+- **Tokens stay out of URLs.** Access tokens MUST NOT appear in the URI query string.
+
+Both SDKs ship helpers for the resource-server side (bearer-token verification and the metadata endpoint); see their authorization docs rather than hand-rolling token checks.
+
+**API Keys** (for the upstream service the server wraps):
+- Read keys from the environment at startup, never from code or committed config files
+- Have the launcher supply them on demand (e.g. a `scripts/with-secrets.sh` wrapper that fetches from a secret manager) instead of exporting them in shell profiles
+- Never log or echo key values, and fail at startup with a message that names the missing variable
+- Never ask for a secret through form-mode elicitation: the spec forbids requesting passwords, API keys, access tokens, or payment credentials that way. Use URL-mode elicitation or server configuration
 
 ### Input Validation
 
@@ -180,10 +198,10 @@ Example pagination response:
 
 ### DNS Rebinding Protection
 
-For streamable HTTP servers running locally:
-- Enable DNS rebinding protection
-- Validate the `Origin` header on all incoming connections
-- Bind to `127.0.0.1` rather than `0.0.0.0`
+For Streamable HTTP servers:
+- Servers MUST validate the `Origin` header on all incoming connections
+- When running locally, bind to `127.0.0.1` rather than `0.0.0.0`
+- Python's `streamable_http_app()` and the TypeScript framework apps (`createMcpExpressApp`, Hono, Fastify) validate `Host` and `Origin` by default on localhost binds; the bare TypeScript `createMcpHandler` does not, so put the checks in front of it. Behind a real hostname, configure an explicit allowlist instead of turning the check off
 
 ---
 

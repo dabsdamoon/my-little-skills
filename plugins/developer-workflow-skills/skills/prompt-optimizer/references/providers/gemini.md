@@ -1,207 +1,78 @@
-# Google Gemini Optimization Guide
+# Google Gemini Cost Guide
 
-## Context Caching
+Model IDs, prices, cache minimums, and storage rates: [../provider-facts.md](../provider-facts.md). In the examples, `MODEL` stands for an ID from that table. Examples use the `google-genai` SDK (`from google import genai`); the older `google-generativeai` package is deprecated.
 
-Gemini offers explicit context caching with configurable TTL.
+## Implicit caching
 
-### How It Works
+Implicit caching is on by default for Gemini 2.5 and newer models; cost savings are passed on automatically when a request hits the cache. It is a prefix match, so the same structure rules apply as everywhere else: stable system instruction, tools, and shared documents first; the per-request question last. Each model has a minimum input size below which nothing caches (see the facts file).
 
-1. Create cached content with `CachedContent.create()`
-2. Specify TTL (up to 1 hour)
-3. Use cached content across multiple requests
-4. Pay storage costs for cached content
+For the newest models (`gemini-4-argon` and later), implicit caching is the only option - structure the prompt for it.
 
-### Requirements
+## Explicit caching
 
-- Minimum: 32,768 tokens
-- Best for: Large documents, knowledge bases, long conversations
-
-### Implementation
+On models that support it, create a cache object once and reference it from each request. Storage is billed for the TTL, so explicit caching pays only when enough requests read the cache within that window.
 
 ```python
-import google.generativeai as genai
-import datetime
+from google import genai
+from google.genai import types
 
-# Create cached content
-cache = genai.caching.CachedContent.create(
-    model="gemini-1.5-pro",
-    contents=[
-        {
-            "role": "user",
-            "parts": [large_document_content]
-        }
-    ],
-    ttl=datetime.timedelta(hours=1),
-    display_name="my-cached-content"
+client = genai.Client()
+
+cache = client.caches.create(
+    model=MODEL,
+    config=types.CreateCachedContentConfig(
+        system_instruction=STABLE_INSTRUCTIONS,
+        contents=[large_document],
+        ttl="3600s",
+    ),
 )
 
-# Use cached content
-model = genai.GenerativeModel.from_cached_content(cache)
-response = model.generate_content("Summarize the key points.")
-```
-
-### Managing Cache
-
-```python
-# List cached content
-for cache in genai.caching.CachedContent.list():
-    print(cache.name, cache.expire_time)
-
-# Delete cached content
-cache.delete()
-```
-
-### Pricing
-
-| Type | Cost (per 1M tokens) |
-|------|---------------------|
-| Input | $1.25 |
-| Cached input | $0.3125 |
-| Output | $5.00 |
-| Cache storage | $1.00/hour |
-
-**Break-even**: ~4 requests/hour with large cached content
-
----
-
-## System Instructions
-
-Gemini supports system instructions that persist across turns.
-
-### Implementation
-
-```python
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    system_instruction="You are a helpful coding assistant. Always provide concise code examples."
-)
-
-response = model.generate_content("How do I read a file in Python?")
-```
-
-### Combining with Cache
-
-```python
-# Cache large reference, use system instruction for behavior
-cache = genai.caching.CachedContent.create(
-    model="gemini-1.5-pro",
-    contents=[api_documentation],
-    system_instruction="You are an API expert. Answer questions using the provided documentation.",
-    ttl=datetime.timedelta(hours=1)
+response = client.models.generate_content(
+    model=MODEL,
+    contents="Summarize the key points.",
+    config=types.GenerateContentConfig(cached_content=cache.name),
 )
 ```
 
----
+- TTL defaults to 1 hour; set `ttl` (a duration string such as `"3600s"`) or `expire_time`. Delete caches you no longer need with `client.caches.delete(name=cache.name)` so storage stops billing.
+- Break-even: compare (requests per TTL window x input tokens saved x (input price - cached price)) against (cached tokens x storage price x hours).
 
-## Structured Output
-
-Gemini supports JSON mode and schema enforcement.
-
-### JSON Mode
+## Verify from usage
 
 ```python
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    generation_config={"response_mime_type": "application/json"}
-)
-
-response = model.generate_content(
-    "Extract name, email, phone from: John Doe, john@example.com, 555-1234"
-)
+print(response.usage_metadata.cached_content_token_count)
 ```
 
-### With Schema
+A zero or missing value on a request you expected to hit means the prefix changed or is below the model's minimum.
+
+## Structured output
 
 ```python
-import typing_extensions as typing
-
-class ContactInfo(typing.TypedDict):
-    name: str
-    email: str
-    phone: str | None
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    generation_config={
-        "response_mime_type": "application/json",
-        "response_schema": ContactInfo
-    }
-)
-```
-
----
-
-## Function Calling
-
-### Minimal Declarations
-
-```python
-get_weather = genai.protos.FunctionDeclaration(
-    name="get_weather",
-    description="Get weather for location",
-    parameters={
-        "type": "object",
-        "properties": {
-            "location": {"type": "string"}
+response = client.models.generate_content(
+    model=MODEL,
+    contents=f"Extract the contact details:\n{text}",
+    config=types.GenerateContentConfig(
+        response_mime_type="application/json",
+        response_json_schema={
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "email": {"type": "string"},
+            },
+            "required": ["name", "email"],
         },
-        "required": ["location"]
-    }
-)
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    tools=[get_weather]
+    ),
 )
 ```
 
----
+Request only the fields the caller reads.
 
-## Gemini-Specific Tips
+## Thinking and output length
 
-### Long Context Optimization
+Gemini bills thinking tokens at the output rate. Where the model supports it, lower thinking through `thinking_config` (`thinking_level` or `thinking_budget`, depending on the model) and measure quality on your eval. To shorten visible output, specify the output shape, ideally with an example.
 
-Gemini excels with long context (up to 2M tokens). For large documents:
+## Other levers
 
-1. Use context caching for repeated queries
-2. Place important content at start and end (avoid "lost in middle")
-3. Use clear section markers
-
-### Multimodal Prompts
-
-For image/video analysis, structure prompts clearly:
-
-```python
-response = model.generate_content([
-    "Analyze this image and extract:",
-    "1. Main subject",
-    "2. Text content",
-    "3. Key objects",
-    image_part
-])
-```
-
-### Safety Settings
-
-Adjust safety settings to reduce unnecessary refusals:
-
-```python
-from google.generativeai.types import HarmCategory, HarmBlockThreshold
-
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    safety_settings={
-        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_ONLY_HIGH,
-    }
-)
-```
-
-### Grounding
-
-Use Google Search grounding for factual queries:
-
-```python
-model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
-    tools=[genai.protos.Tool(google_search_retrieval={})]
-)
-```
+- **Batch**: 50% off for work nobody waits on.
+- **Token counting**: `client.models.count_tokens(model=MODEL, contents=...)` returns `.total_tokens`.
+- **Long context**: a large context window makes it tempting to inline everything on every call. Cache material that most requests read; retrieve material that only some requests need.
