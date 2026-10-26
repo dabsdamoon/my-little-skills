@@ -34,7 +34,7 @@ Out of scope:
 Divide the plan into:
 
 1. **Discovery:** investigate the riskiest assumption with the cheapest credible method.
-2. **Evidence gate:** choose `validated`, `rejected`, or `insufficient evidence` and record why.
+2. **Evidence gate:** choose `validated`, `rejected`, `insufficient`, or `provisional` and record why.
 3. **Delivery:** convert only accepted learning into observable acceptance criteria and implement it test-first.
 4. **Outcome check:** verify the delivered slice and identify the next discovery question.
 
@@ -78,14 +78,29 @@ For each acceptance criterion, deliver the thinnest vertical slice:
 
 1. Choose the narrowest stable boundary that proves user- or consumer-visible behavior.
 2. Write one failing test.
-3. Run it and confirm it fails for the intended missing behavior, not setup or syntax.
+3. Run it and confirm it fails for the intended missing behavior, not setup or syntax. Record the command and the failure line as red evidence.
 4. Implement the minimum behavior that passes.
-5. Run the focused test.
+5. Run the focused test and record the command and result as green evidence.
 6. Refactor while green.
-7. Run broader contract, integration, build, and browser checks in proportion to risk.
+7. Run broader contract, integration, build, and browser checks in proportion to risk, recording each command and result.
 8. Record discoveries that invalidate or extend the handoff and return those questions to Discovery.
 
 Use deterministic fixtures and clocks. Fake only external boundaries. Use real owned collaborators wherever practical.
+
+## Record red-green evidence
+
+Keep one row per acceptance criterion and fill each cell when the event happens, not afterwards:
+
+```text
+| Criterion (from handoff) | Test | Red evidence | Green evidence | Broader checks |
+|---|---|---|---|---|
+| Rejects an empty email | tests/test_signup.py::test_rejects_empty_email | `pytest tests/test_signup.py -k empty` -> `AssertionError: assert None == 'Email required'` | same command -> `1 passed` | `pytest` -> `142 passed` |
+```
+
+- Quote real output. Copy the actual failure or pass line; never paraphrase, predict, or fill a cell for a command that was not run.
+- A test that passes on its first run has no red evidence: it covers existing behavior or tests the wrong thing. Fix the test, or label it a characterization test.
+- A criterion without a row, or a row without red evidence, is not delivered. Write `not recorded` instead of reconstructing evidence from test files or commit order.
+- This table is the Delivery input for dual-track-pr-creator's acceptance trace and TDD evidence sections. Keep it in the session report or PR body. Write it to a repository file only when the project already keeps such reports, and do not create commits just to hold evidence.
 
 ## Compare implementation methods
 
@@ -104,7 +119,7 @@ Before declaring the slice complete, verify:
 
 - The evidence decision and its source are explicit.
 - Acceptance criteria trace to accepted learning or a fixed safety constraint.
-- Each new behavior was observed failing before its implementation passed.
+- Each new behavior has a red-green row with real red evidence recorded before its implementation passed and real green evidence after.
 - Tests remain valid across internal refactors.
 - The appropriate component, integration, build, and browser checks pass.
 - Missing customer evidence and remaining product risks are not disguised as engineering completion.
