@@ -1,7 +1,7 @@
 {
   "name": "config-skills",
-  "description": "Claude config migration and update notes",
-  "version": "1.0.1",
+  "description": "Claude config migration, update notes, and keeping Claude Code and Codex skills identical across machines",
+  "version": "1.1.0",
   "author": {
     "name": "dabsdamoon"
   }

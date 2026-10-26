@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent Setup Sync"
+  short_description: "Keep Claude Code and Codex skills identical across machines"
+  default_prompt: "Use $agent-setup-sync to audit this machine against my agent baseline, record the changes I decide on in the baseline, and apply them."
