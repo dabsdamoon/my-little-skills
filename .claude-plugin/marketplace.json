@@ -64,15 +64,6 @@
       "source": "./plugins/notion-workspace-skills"
     },
     {
-      "name": "claude-api",
-      "description": "Claude API and SDK documentation skill for building LLM-powered applications",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/claude-api"
-      ]
-    },
-    {
       "name": "analysis-skills",
       "description": "Critical thinking, evidence-backed decision reports, business scenario analysis, health statistics evidence reports, and context-preserving video Shorts selection",
       "source": "./plugins/analysis-skills"
