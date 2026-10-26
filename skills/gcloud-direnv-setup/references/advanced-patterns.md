@@ -8,7 +8,7 @@ direnv supports parent directory inheritance. Use this for shared settings.
 
 ```
 ~/projects/
-├── .envrc                          # Shared: credentials directory
+├── .envrc                          # Shared: region
 ├── company-a/
 │   ├── .envrc                      # Company A config
 │   ├── project-1/.envrc            # Project-specific overrides
@@ -22,7 +22,7 @@ direnv supports parent directory inheritance. Use this for shared settings.
 
 ```bash
 # Shared across all projects
-export CREDENTIALS_DIR="$HOME/.config/gcloud/credentials"
+export GOOGLE_CLOUD_LOCATION="us-central1"
 ```
 
 ### Child .envrc (~/projects/company-a/.envrc)
@@ -42,7 +42,6 @@ source_up  # Loads company-a/.envrc which loads projects/.envrc
 
 # Override project only
 export GOOGLE_CLOUD_PROJECT="project-1-id"
-export GOOGLE_APPLICATION_CREDENTIALS="$CREDENTIALS_DIR/project-1.json"
 ```
 
 ---
@@ -152,47 +151,61 @@ typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
 
 ## CI/CD Considerations
 
-### GitHub Actions
+Action versions and identifiers checked 2026-10-26 (see SKILL.md Sources).
+
+### GitHub Actions: Workload Identity Federation
+
+`google-github-actions/auth` prefers Direct Workload Identity Federation: GitHub's OIDC token is exchanged for Google credentials, so no service account key is stored as a secret.
 
 ```yaml
-- name: Authenticate to Google Cloud
-  uses: google-github-actions/auth@v2
-  with:
-    credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-- name: Set up Cloud SDK
-  uses: google-github-actions/setup-gcloud@v2
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    steps:
+      - uses: 'actions/checkout@v7'   # must come before auth
+      - uses: 'google-github-actions/auth@v3'
+        with:
+          project_id: 'PROJECT_ID'
+          workload_identity_provider: 'projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/providers/PROVIDER_ID'
+      - uses: 'google-github-actions/setup-gcloud@v3'
 ```
 
-### Workload Identity (Recommended for GKE)
+Create the pool and provider, and grant roles to the federated principal, as the [auth README](https://github.com/google-github-actions/auth#direct-wif) shows. The action's `credentials_json` input (a service account key in a GitHub secret) is its last listed option; use it only when federation isn't possible.
 
-Avoid SA keys entirely in production:
+### Workload Identity Federation for GKE
+
+Grant IAM roles directly to the Kubernetes ServiceAccount with a principal identifier. No Google service account or key is needed:
 
 ```bash
-# Bind K8s SA to GCP SA
-gcloud iam service-accounts add-iam-policy-binding \
-  GSA_NAME@PROJECT_ID.iam.gserviceaccount.com \
-  --role roles/iam.workloadIdentityUser \
-  --member "serviceAccount:PROJECT_ID.svc.id.goog[NAMESPACE/KSA_NAME]"
+gcloud projects add-iam-policy-binding projects/PROJECT_ID \
+  --role=ROLE \
+  --member=principal://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/PROJECT_ID.svc.id.goog/subject/ns/NAMESPACE/sa/KSA_NAME \
+  --condition=None
 ```
+
+GKE documents linking the Kubernetes ServiceAccount to an IAM service account (`roles/iam.workloadIdentityUser` plus the `iam.gke.io/gcp-service-account` annotation) as the alternative, for APIs where federated identities have limitations. That method needs both the IAM binding and the annotation.
 
 ---
 
 ## Terraform Integration
 
+Google recommends ADC for Terraform. After `gcloud auth application-default login` (optionally with `--impersonate-service-account SA_EMAIL`), the provider picks up the credentials with no key file. The provider's `impersonate_service_account` field is the alternative when each environment should use a different service account.
+
 ```hcl
-# Use environment variables
 provider "google" {
   project = var.project_id
   region  = var.region
-  # Credentials from GOOGLE_APPLICATION_CREDENTIALS
+  # Credentials from ADC
 }
 ```
 
 **.envrc for Terraform:**
 ```bash
 export CLOUDSDK_ACTIVE_CONFIG_NAME="my-config"
-export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/credentials/my-project.json"
+unset GOOGLE_APPLICATION_CREDENTIALS
 export TF_VAR_project_id="my-project"
 export TF_VAR_region="us-central1"
 ```
@@ -201,11 +214,20 @@ export TF_VAR_region="us-central1"
 
 ## Docker / Devcontainer Integration
 
-Mount credentials into containers:
+Mount only the one credential file, read-only, and point `GOOGLE_APPLICATION_CREDENTIALS` at the mount path. Never mount all of `~/.config/gcloud`: it holds every account's gcloud login, not just the one the container needs.
 
 ```bash
-docker run -v ~/.config/gcloud:/root/.config/gcloud \
-  -e GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/credentials/my-project.json \
+# ADC (user or impersonated)
+docker run \
+  -v "$HOME/.config/gcloud/application_default_credentials.json:/tmp/keys/adc.json:ro" \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/adc.json \
+  -e GOOGLE_CLOUD_PROJECT="$GOOGLE_CLOUD_PROJECT" \
+  my-image
+
+# Key file (last resort): same pattern with the key path
+docker run \
+  -v "$GOOGLE_APPLICATION_CREDENTIALS:/tmp/keys/key.json:ro" \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/key.json \
   my-image
 ```
 
@@ -213,10 +235,10 @@ docker run -v ~/.config/gcloud:/root/.config/gcloud \
 ```json
 {
   "mounts": [
-    "source=${localEnv:HOME}/.config/gcloud,target=/home/vscode/.config/gcloud,type=bind"
+    "source=${localEnv:HOME}/.config/gcloud/application_default_credentials.json,target=/tmp/keys/adc.json,type=bind,readonly"
   ],
   "containerEnv": {
-    "GOOGLE_APPLICATION_CREDENTIALS": "/home/vscode/.config/gcloud/credentials/my-project.json"
+    "GOOGLE_APPLICATION_CREDENTIALS": "/tmp/keys/adc.json"
   }
 }
 ```

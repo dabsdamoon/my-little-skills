@@ -1,54 +1,46 @@
 #!/usr/bin/env python3
 """Deterministically + idempotently update a PR body's checklist and evidence section.
 
-Successor to pr-checklist-verifier's update_pr_checklist.py, fixed to work on
-bodies produced by the dual-track-pr-creator skill. Three concrete problems in
-the original are addressed:
+Works on any PR test plan (`## Test plan`, `## Testing Checklist`, ...) and on
+bodies produced by dual-track-pr-creator (`## Verification` plus an
+acceptance-traceability table). It does the mechanical part; deciding what
+passed stays with the caller.
 
-  1. Anchor detection matched the H1 title. The old pattern was
-     `^#{1,6}\\s+.*(test|checklist|qa)\\b`, so a PR titled
-     "# PR: promote the refactoring-resistant test suite" matched at line 0 and
-     the section was inserted above the body's own header block. Titles of
-     testing PRs routinely contain "test", which is exactly this tool's
-     population. Anchors are now `##`..`######` only (`ANCHOR_HEADING_RE`).
-
-  2. `## Verification` was not recognised. That is the heading
-     dual-track-pr-creator emits, so the two skills could not compose. It is
-     now in the anchor vocabulary, and `--anchor-heading` overrides outright.
-
-  3. Idempotency broke as a consequence of (1). The upsert removes the section
-     and re-inserts it at the computed index, so a wrong index silently undid a
-     human's corrected placement on every re-run — while the docstring promised
-     a fixed point. With the anchor fixed, and with `--before-heading` to pin
-     placement, re-running is a genuine no-op.
-
-Also added, because a checklist is prose as well as state:
-
-  * `--reword OLD::NEW` rewrites an item's text in the same pass as the flip.
-    An item that describes its own unverified state ("not yet observed at the
-    time of writing") becomes self-contradictory the moment it is ticked.
+  * `--check TEXT` ticks the one unchecked item TEXT selects: the item whose
+    full text equals TEXT, else the only item containing TEXT. A substring
+    that hits several items ticks none of them and is reported, because
+    flipping every line containing "deploy" ticks items nobody verified.
+  * `--reword OLD::NEW` rewrites one unchecked item in the same pass as the
+    flip, under the same selection rule. An item that describes its own
+    unverified state ("not yet observed at the time of writing") contradicts
+    itself once ticked. Already-checked items are never rewritten.
+  * The evidence section is replaced, never stacked, and re-running is a
+    fixed point. It goes immediately before `--before-heading`, else after
+    the last task line under `--anchor-heading`, else after the first
+    `##`..`######` heading that looks like a checklist, else at EOF. H1 is
+    never an anchor: it is the PR title, and titles of testing PRs routinely
+    contain "test", which once put the section above the body's header block.
   * `--audit-table` warns when a ticked item's text also appears in an
-    acceptance-traceability row marked FAIL or MISSING. dual-track bodies record
-    status in two places; they must not disagree.
-
-What it does NOT do: decide what passed. Judgment stays with the caller.
+    acceptance-traceability row marked FAIL or MISSING. dual-track bodies
+    record status in two places; they must not disagree.
 
 Usage:
-  python verify_checklist.py --body-file BODY [--check TEXT ...]
+  python3 verify_checklist.py --body-file BODY [--check TEXT ...]
       [--reword 'OLD::NEW' ...] [--section-file S.md]
       [--section-title '## QA Verification'] [--anchor-heading '## Verification']
       [--before-heading '## Not included'] [--audit-table]
       [--out OUT | --in-place] [--strict]
 
-Exit codes: 0 ok; 2 a --check/--reword matched nothing (only with --strict);
-3 a ticked item contradicts a FAIL/MISSING audit row (only with --strict);
-1 usage/IO.
+Exit codes: 0 ok; 1 usage/IO; 2 a --check/--reword matched no unchecked item
+or more than one (only with --strict); 3 a ticked item contradicts a
+FAIL/MISSING audit row (only with --strict).
 """
 from __future__ import annotations
 
 import argparse
 import re
 import sys
+from pathlib import Path
 
 DEFAULT_SECTION_TITLE = "## QA Verification"
 
@@ -79,46 +71,70 @@ def _is_section_boundary(line: str) -> bool:
     )
 
 
-def reword_items(body: str, rewords: list[tuple[str, str]]) -> tuple[str, dict[str, bool]]:
-    """Replace item text on task lines only, leaving prose untouched.
+def _select(lines: list[str], needle: str) -> list[int]:
+    """Indices of the unchecked items `needle` selects.
+
+    An item whose full text equals `needle` wins; otherwise every item that
+    contains it. More than one index means the selection is ambiguous and the
+    caller must not act on it.
+    """
+    if not needle:
+        return []
+    items = [
+        (i, m.group("rest").strip())
+        for i, ln in enumerate(lines)
+        if (m := UNCHECKED_RE.match(ln))
+    ]
+    exact = [i for i, text in items if text == needle.strip()]
+    return exact or [i for i, text in items if needle in text]
+
+
+def reword_items(
+    body: str, rewords: list[tuple[str, str]]
+) -> tuple[str, dict[str, int]]:
+    """Rewrite text in the one unchecked item each OLD selects.
 
     Ticking an item whose text says "not yet observed" produces a line that
-    contradicts itself, so the rewrite has to happen alongside the flip rather
-    than as a separate manual step the caller may forget.
+    contradicts itself, so the rewrite happens alongside the flip. Checked
+    items are left byte-for-byte: nobody re-verified them in this run. A phrase
+    like "not yet observed" often sits on several items, and rewording all of
+    them would make unverified items read as verified, so an OLD that selects
+    more than one item changes nothing.
+
+    Returns the new body and, per OLD, how many unchecked items it selected.
     """
-    matched = {old: False for old, _ in rewords}
-    out = []
-    for line in body.splitlines():
-        if ANY_TASK_RE.match(line):
-            for old, new in rewords:
-                if old and old in line:
-                    line = line.replace(old, new)
-                    matched[old] = True
-        out.append(line)
+    lines = body.splitlines()
+    counts: dict[str, int] = {}
+    for old, new in rewords:
+        hits = _select(lines, old)
+        counts[old] = len(hits)
+        if len(hits) == 1:
+            m = UNCHECKED_RE.match(lines[hits[0]])
+            lines[hits[0]] = f"{m.group('prefix')}[ ]{m.group('rest').replace(old, new)}"
+    result = "\n".join(lines)
+    return (result + "\n" if body.endswith("\n") else result), counts
+
+
+def tick_items(body: str, checks: list[str]) -> tuple[str, dict[str, int]]:
+    """Flip the one unchecked item each check selects.
+
+    Every check is resolved against the body as given, so the outcome does not
+    depend on the order of --check flags. A check that selects several items
+    flips none of them.
+
+    Returns the new body and, per check, how many unchecked items it selected:
+    0 no match, 1 ticked, more than 1 ambiguous and left alone.
+    """
+    lines = body.splitlines()
+    hits = {c: _select(lines, c) for c in checks}
+    out = list(lines)
+    for idx in hits.values():
+        if len(idx) == 1:
+            m = UNCHECKED_RE.match(lines[idx[0]])
+            out[idx[0]] = f"{m.group('prefix')}[x]{m.group('rest')}"
     result = "\n".join(out)
-    return (result + "\n" if body.endswith("\n") else result), matched
-
-
-def tick_items(body: str, checks: list[str]) -> tuple[str, dict[str, bool]]:
-    """Flip unchecked lines whose text contains any check substring.
-
-    Returns the new body and a map of check-string -> whether it matched.
-    """
-    matched = {c: False for c in checks}
-    out_lines = []
-    for line in body.splitlines():
-        m = UNCHECKED_RE.match(line)
-        if m:
-            text = m.group("rest")
-            hit = next((c for c in checks if c and c in text), None)
-            if hit is not None:
-                matched[hit] = True
-                line = f"{m.group('prefix')}[x]{m.group('rest')}"
-        out_lines.append(line)
-    result = "\n".join(out_lines)
-    if body.endswith("\n"):
-        result += "\n"
-    return result, matched
+    counts = {c: len(idx) for c, idx in hits.items()}
+    return (result + "\n" if body.endswith("\n") else result), counts
 
 
 def audit_conflicts(body: str) -> list[str]:
@@ -258,11 +274,12 @@ def main() -> int:
     ap.add_argument("--body-file", required=True)
     ap.add_argument(
         "--check", action="append", default=[],
-        help="Substring of an item to tick. Repeatable.",
+        help="Unchecked item to tick: its full text, or text found in exactly "
+        "one unchecked item. Repeatable.",
     )
     ap.add_argument(
         "--reword", action="append", default=[], type=_parse_reword,
-        help="'OLD::NEW' text rewrite, task lines only. Repeatable.",
+        help="'OLD::NEW' rewrite in the one unchecked item OLD selects. Repeatable.",
     )
     ap.add_argument("--section-file", help="Markdown body for the evidence section.")
     ap.add_argument("--section-title", default=DEFAULT_SECTION_TITLE)
@@ -281,8 +298,7 @@ def main() -> int:
     args = ap.parse_args()
 
     try:
-        with open(args.body_file, encoding="utf-8") as f:
-            body = f.read()
+        body = Path(args.body_file).read_text(encoding="utf-8")
     except OSError as e:
         print(f"error: cannot read --body-file: {e}", file=sys.stderr)
         return 1
@@ -293,8 +309,7 @@ def main() -> int:
 
     if args.section_file:
         try:
-            with open(args.section_file, encoding="utf-8") as f:
-                section_md = f.read()
+            section_md = Path(args.section_file).read_text(encoding="utf-8")
         except OSError as e:
             print(f"error: cannot read --section-file: {e}", file=sys.stderr)
             return 1
@@ -303,27 +318,33 @@ def main() -> int:
             args.anchor_heading, args.before_heading,
         )
 
-    unmatched = [c for c, ok in matched.items() if not ok]
-    unmatched += [o for o, ok in reworded.items() if not ok]
-    for c in unmatched:
-        print(f"warning: no item matched: {c!r}", file=sys.stderr)
+    unresolved = []
+    for flag, counts in (("--check", matched), ("--reword", reworded)):
+        for text, n in counts.items():
+            if n == 0:
+                unresolved.append(f"{flag} {text!r}: no unchecked item matched")
+            elif n > 1:
+                unresolved.append(
+                    f"{flag} {text!r}: matched {n} unchecked items, changed none; "
+                    "pass the item's full text"
+                )
+    for msg in unresolved:
+        print(f"warning: {msg}", file=sys.stderr)
 
     conflicts = audit_conflicts(body) if args.audit_table else []
     for c in conflicts:
         print(f"warning: {c}", file=sys.stderr)
 
     if args.in_place:
-        with open(args.body_file, "w", encoding="utf-8") as f:
-            f.write(body)
+        Path(args.body_file).write_text(body, encoding="utf-8")
     elif args.out:
-        with open(args.out, "w", encoding="utf-8") as f:
-            f.write(body)
+        Path(args.out).write_text(body, encoding="utf-8")
     else:
         sys.stdout.write(body)
 
     if args.strict and conflicts:
         return 3
-    if args.strict and unmatched:
+    if args.strict and unresolved:
         return 2
     return 0
 

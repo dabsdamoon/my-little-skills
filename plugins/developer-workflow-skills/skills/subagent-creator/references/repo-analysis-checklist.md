@@ -22,7 +22,8 @@ Common patterns to identify:
 | `scripts/`, `bin/` | Utility scripts |
 | `config/`, `configs/` | Configuration |
 | `public/`, `static/`, `assets/` | Static files |
-| `.claude/agents/` | Existing subagents |
+| `.claude/agents/` | Existing Claude Code subagents |
+| `.codex/agents/` | Existing Codex custom agents |
 
 ## 2. Tech Stack Detection
 
@@ -98,17 +99,17 @@ Sample a few files to identify:
 | Go test | `*_test.go` |
 | RSpec | `spec/` directory, `*_spec.rb` |
 
-Note test file patterns for inclusion in subagent context.
+Note test file patterns and the exact test command for inclusion in subagent context. Reviewers and test writers need the command to verify their work.
 
 ## 5. Existing Subagents
 
-Check `.claude/agents/` for:
-- What agents already exist
+Run the roster commands in SKILL.md Step 1. They cover project `.claude/agents/` directories, `~/.claude/agents/`, every installed plugin's agents, and Codex `~/.codex/agents/` and `.codex/agents/`. For each agent, note:
+- Its `name` and where it lives (location decides precedence on a name clash)
 - Naming conventions used
 - Scope boundaries already defined
-- Gaps that new agent could fill
+- Gaps that a new agent could fill
 
-Avoid creating overlapping agents.
+Avoid creating overlapping agents. If one overlaps, propose extending or narrowing it instead.
 
 ## 6. Key Files to Reference
 
@@ -136,7 +137,7 @@ After analysis, summarize findings for use in subagent creation:
 
 ## Key Paths
 - Source: `[path]`
-- Tests: `[path]` ([framework], pattern: `[pattern]`)
+- Tests: `[path]` ([framework], pattern: `[pattern]`, run: `[command]`)
 - Config: `[files]`
 - Types/Models: `[path]`
 
@@ -146,8 +147,9 @@ After analysis, summarize findings for use in subagent creation:
 - Testing: [approach]
 
 ## Existing Agents
-- [agent-1]: [scope]
-- [agent-2]: [scope]
+- [agent-1] ([location]): [scope]
+- [agent-2] ([location]): [scope]
+- Uses Codex: [yes/no]
 
 ## Suggested Agent Opportunities
 - [gap-1]: [potential agent]

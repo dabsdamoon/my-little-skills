@@ -1,6 +1,8 @@
 # Quality Preservation Checklist
 
-Ensure optimization does not degrade prompt effectiveness.
+Ensure a cost optimization does not degrade prompt effectiveness. This checklist compares before and after; it does not judge whether the prompt's wording is good in the first place - that is the `claude-api` skill's `prompt-audit` subcommand.
+
+Every comparison run calls the model and costs money: estimate the spend and get the user's approval before running it.
 
 ## Pre-Optimization Baseline
 

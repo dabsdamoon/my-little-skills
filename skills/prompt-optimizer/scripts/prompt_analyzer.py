@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Comprehensive prompt analyzer for optimization opportunities.
+Find token-cost opportunities in a prompt: repetition, filler phrasing, and
+cache-hostile structure. Heuristic only (~4 characters per token, no network).
+It does not judge prompt quality; use the claude-api skill's prompt-audit for that.
 
 Usage:
-    python prompt_analyzer.py --input prompt.txt
-    python prompt_analyzer.py --input prompt.txt --output analysis.json
-    python prompt_analyzer.py "<prompt_text>"
-
-Note: This script uses basic analysis. For entropy-based analysis,
-install transformers (large dependency: ~2GB).
+    python3 prompt_analyzer.py --input prompt.txt
+    python3 prompt_analyzer.py --input prompt.txt --min-cache-tokens MIN
+    python3 prompt_analyzer.py --input prompt.txt --output analysis.json
+    python3 prompt_analyzer.py "<prompt_text>"
 """
 
 import argparse
@@ -121,7 +121,7 @@ def analyze_verbosity(text: str) -> dict:
     }
 
 
-def analyze_cache_structure(text: str) -> dict:
+def analyze_cache_structure(text: str, min_cache_tokens: int | None) -> dict:
     """Analyze cache-friendliness of prompt structure."""
     # Find first dynamic marker
     first_dynamic = len(text)
@@ -164,46 +164,10 @@ def analyze_cache_structure(text: str) -> dict:
         "estimated_static_tokens": static_tokens,
         "estimated_total_tokens": total_tokens,
         "first_dynamic_marker": first_marker,
-        "cache_friendly": static_ratio > 0.5 and static_tokens >= 1024,
+        "cache_friendly": static_ratio > 0.5 and static_tokens >= (min_cache_tokens or 0),
+        "min_cache_tokens": min_cache_tokens,
         "anti_patterns": anti_patterns,
         "cache_score": int(static_ratio * 100) - len(anti_patterns) * 10,
-    }
-
-
-def analyze_structure(text: str) -> dict:
-    """Analyze prompt structure and organization."""
-    lines = text.split('\n')
-
-    # Count sections (headers)
-    headers = [l for l in lines if l.strip().startswith('#') or
-               l.strip().startswith('[') and l.strip().endswith(']')]
-
-    # Check for XML-style tags
-    xml_tags = re.findall(r'<([a-z_]+)>', text, re.IGNORECASE)
-
-    # Check for common sections
-    has_system = bool(re.search(r'(system|role|you are)', text[:500], re.IGNORECASE))
-    has_examples = bool(re.search(r'(example|e\.g\.|for instance)', text, re.IGNORECASE))
-    has_format = bool(re.search(r'(format|output|respond)', text, re.IGNORECASE))
-    has_rules = bool(re.search(r'(rule|constraint|must|never|always)', text, re.IGNORECASE))
-
-    return {
-        "total_lines": len(lines),
-        "non_empty_lines": len([l for l in lines if l.strip()]),
-        "sections_found": len(headers),
-        "section_headers": headers[:10],
-        "uses_xml_tags": len(xml_tags) > 0,
-        "xml_tags": list(set(xml_tags))[:10],
-        "has_role_definition": has_system,
-        "has_examples": has_examples,
-        "has_format_spec": has_format,
-        "has_rules": has_rules,
-        "structure_score": sum([
-            has_system * 25,
-            has_examples * 25,
-            has_format * 25,
-            has_rules * 25,
-        ]),
     }
 
 
@@ -225,13 +189,13 @@ def estimate_optimization_potential(analyses: dict) -> dict:
         recommendations.append("High redundancy detected - consolidate repeated concepts")
 
     if verbosity > 30:
-        recommendations.append("Verbose phrasing found - use concise alternatives")
+        recommendations.append("Filler phrasing found - condense it, keeping reasons and constraints")
 
     if cache < 50:
         recommendations.append("Poor cache structure - restructure static/dynamic content")
 
-    if analyses["structure"]["structure_score"] < 75:
-        recommendations.append("Missing prompt sections - add role/examples/format specs")
+    if analyses["cache"]["min_cache_tokens"] is not None and not analyses["cache"]["cache_friendly"]:
+        recommendations.append("Static prefix below the model's cache minimum or under 50% of the prompt")
 
     return {
         "optimization_potential_score": optimization_potential,
@@ -242,13 +206,12 @@ def estimate_optimization_potential(analyses: dict) -> dict:
     }
 
 
-def full_analysis(text: str) -> dict:
-    """Run comprehensive analysis."""
+def full_analysis(text: str, min_cache_tokens: int | None) -> dict:
+    """Run all analyses."""
     analyses = {
         "redundancy": analyze_redundancy(text),
         "verbosity": analyze_verbosity(text),
-        "cache": analyze_cache_structure(text),
-        "structure": analyze_structure(text),
+        "cache": analyze_cache_structure(text, min_cache_tokens),
     }
 
     analyses["summary"] = estimate_optimization_potential(analyses)
@@ -308,44 +271,37 @@ def format_report(analysis: dict) -> str:
         f"CACHE STRUCTURE (Score: {analysis['cache']['cache_score']}/100)",
         "-" * 40,
         f"Static prefix: ~{analysis['cache']['estimated_static_tokens']} tokens ({analysis['cache']['static_ratio_percent']}%)",
-        f"Cache friendly: {'Yes' if analysis['cache']['cache_friendly'] else 'No'}",
     ])
+    if analysis["cache"]["min_cache_tokens"] is None:
+        lines.append("Cache friendly: unknown - pass --min-cache-tokens for the target model")
+    else:
+        lines.append(f"Cache friendly (minimum {analysis['cache']['min_cache_tokens']:,}): "
+                     f"{'Yes' if analysis['cache']['cache_friendly'] else 'No'}")
     if analysis["cache"]["anti_patterns"]:
         lines.append("Issues found:")
         for pattern in analysis["cache"]["anti_patterns"]:
             lines.append(f"  - {pattern}")
-    lines.append("")
-
-    # Structure
-    lines.extend([
-        "-" * 40,
-        f"STRUCTURE (Score: {analysis['structure']['structure_score']}/100)",
-        "-" * 40,
-        f"Has role definition: {'Yes' if analysis['structure']['has_role_definition'] else 'No'}",
-        f"Has examples: {'Yes' if analysis['structure']['has_examples'] else 'No'}",
-        f"Has format spec: {'Yes' if analysis['structure']['has_format_spec'] else 'No'}",
-        f"Has rules: {'Yes' if analysis['structure']['has_rules'] else 'No'}",
-        f"Uses XML tags: {'Yes' if analysis['structure']['uses_xml_tags'] else 'No'}",
-    ])
-
     return "\n".join(lines)
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Analyze prompts for optimization opportunities",
+        description="Find token-cost opportunities in a prompt",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    python prompt_analyzer.py --input prompt.txt
-    python prompt_analyzer.py --input prompt.txt --output analysis.json
-    python prompt_analyzer.py "Your prompt text here"
+    python3 prompt_analyzer.py --input prompt.txt
+    python3 prompt_analyzer.py --input prompt.txt --min-cache-tokens MIN
+    python3 prompt_analyzer.py --input prompt.txt --output analysis.json
+    python3 prompt_analyzer.py "Your prompt text here"
         """
     )
     parser.add_argument("text", nargs="?", help="Prompt text to analyze")
     parser.add_argument("--input", "-i", help="Read prompt from file")
     parser.add_argument("--output", "-o", help="Write JSON analysis to file")
     parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
+    parser.add_argument("--min-cache-tokens", type=int,
+                        help="Minimum cacheable prefix for the target model")
 
     args = parser.parse_args()
 
@@ -363,7 +319,7 @@ Examples:
         sys.exit(1)
 
     # Run analysis
-    analysis = full_analysis(text)
+    analysis = full_analysis(text, args.min_cache_tokens)
 
     # Output
     if args.output:

@@ -1,246 +1,214 @@
 #!/usr/bin/env python3
 """
-Token counter for multiple LLM providers.
+Count prompt tokens and estimate input cost with and without prompt caching.
 
 Usage:
-    python token_counter.py "<prompt_text>" --provider claude
-    python token_counter.py --file prompt.txt --provider openai
-    python token_counter.py "<prompt_text>" --provider all
+    python3 token_counter.py --provider estimate --file prompt.txt
+    python3 token_counter.py --provider claude --model MODEL --file prompt.txt \
+        --input-price IN --cache-write-price WRITE --cache-read-price READ --min-cache-tokens MIN
 
-Requirements:
-    - Claude: pip install anthropic
-    - OpenAI/Gemini: pip install tiktoken
+Providers:
+    estimate  ~4 characters per token, no dependencies, no network
+    claude    exact, Anthropic token counting endpoint (needs `anthropic`, ANTHROPIC_API_KEY)
+    openai    exact, Responses input-token count endpoint (needs `openai`, OPENAI_API_KEY)
+    gemini    exact, Gemini count_tokens (needs `google-genai`, GEMINI_API_KEY or GOOGLE_API_KEY)
+
+The API providers call a token-counting endpoint, not the model. Prices, cache
+minimums, and model IDs are passed in (per million tokens) - take them from
+references/provider-facts.md and re-check the provider's pricing page.
 """
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
-
-# Pricing per 1M tokens (as of Dec 2024)
-PRICING = {
-    "claude": {
-        "claude-3-5-sonnet": {"input": 3.00, "output": 15.00, "cache_write": 3.75, "cache_read": 0.30},
-        "claude-3-5-haiku": {"input": 1.00, "output": 5.00, "cache_write": 1.25, "cache_read": 0.10},
-        "claude-3-opus": {"input": 15.00, "output": 75.00, "cache_write": 18.75, "cache_read": 1.50},
-    },
-    "openai": {
-        "gpt-4o": {"input": 2.50, "output": 10.00, "cached": 1.25},
-        "gpt-4o-mini": {"input": 0.15, "output": 0.60, "cached": 0.075},
-        "gpt-4-turbo": {"input": 10.00, "output": 30.00},
-    },
-    "gemini": {
-        "gemini-1.5-pro": {"input": 1.25, "output": 5.00, "cached": 0.3125},
-        "gemini-1.5-flash": {"input": 0.075, "output": 0.30, "cached": 0.01875},
-    },
-}
-
-# Cache minimums (tokens)
-CACHE_MINIMUMS = {
-    "claude": {"sonnet": 1024, "haiku": 1024, "opus": 2048},
-    "openai": {"default": 0},  # Automatic caching
-    "gemini": {"default": 32768},  # 32K minimum for context caching
-}
-
-
-def count_tokens_claude(text: str) -> dict:
-    """Count tokens using Anthropic's tokenizer."""
-    try:
-        from anthropic import Anthropic
-        client = Anthropic()
-        count = client.count_tokens(text)
-        return {
-            "provider": "claude",
-            "tokens": count,
-            "model": "claude-3-5-sonnet",
-            "pricing": PRICING["claude"]["claude-3-5-sonnet"],
-            "cache_minimum": CACHE_MINIMUMS["claude"]["sonnet"],
-        }
-    except ImportError:
-        return {"error": "anthropic package not installed. Run: pip install anthropic"}
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def count_tokens_openai(text: str) -> dict:
-    """Count tokens using tiktoken (OpenAI's tokenizer)."""
-    try:
-        import tiktoken
-        enc = tiktoken.encoding_for_model("gpt-4o")
-        tokens = enc.encode(text)
-        return {
-            "provider": "openai",
-            "tokens": len(tokens),
-            "model": "gpt-4o",
-            "pricing": PRICING["openai"]["gpt-4o"],
-            "cache_minimum": CACHE_MINIMUMS["openai"]["default"],
-        }
-    except ImportError:
-        return {"error": "tiktoken package not installed. Run: pip install tiktoken"}
-    except Exception as e:
-        return {"error": str(e)}
-
-
-def count_tokens_gemini(text: str) -> dict:
-    """Estimate tokens for Gemini (uses similar tokenization to GPT-4)."""
-    try:
-        import tiktoken
-        enc = tiktoken.encoding_for_model("gpt-4")
-        tokens = enc.encode(text)
-        return {
-            "provider": "gemini",
-            "tokens": len(tokens),
-            "model": "gemini-1.5-pro",
-            "pricing": PRICING["gemini"]["gemini-1.5-pro"],
-            "cache_minimum": CACHE_MINIMUMS["gemini"]["default"],
-            "note": "Token count estimated using tiktoken (approximate)",
-        }
-    except ImportError:
-        return {"error": "tiktoken package not installed. Run: pip install tiktoken"}
-    except Exception as e:
-        return {"error": str(e)}
+DYNAMIC_MARKERS = [
+    "{user", "{context", "{query", "{input", "{message",
+    "{{", "[user", "[context", "[query", "[input",
+    "<user>", "<context>", "<query>", "<input>", "<question>",
+]
 
 
 def find_dynamic_boundary(text: str) -> int:
-    """Find where dynamic content begins in the prompt."""
-    markers = [
-        "{user", "{context", "{query", "{input", "{message",
-        "{{", "[USER", "[CONTEXT", "[QUERY", "[INPUT",
-        "<user>", "<context>", "<query>", "<input>",
-    ]
-    first_pos = len(text)
-    for marker in markers:
-        pos = text.lower().find(marker.lower())
-        if pos != -1 and pos < first_pos:
-            first_pos = pos
-    return first_pos
+    """Return the index where the first dynamic placeholder starts (len(text) if none)."""
+    lowered = text.lower()
+    positions = [lowered.find(marker) for marker in DYNAMIC_MARKERS]
+    return min([p for p in positions if p != -1], default=len(text))
 
 
-def analyze_cache_potential(text: str, tokens: int, cache_minimum: int) -> dict:
-    """Analyze caching potential of the prompt."""
-    boundary = find_dynamic_boundary(text)
-    static_ratio = boundary / len(text) if len(text) > 0 else 0
-    estimated_static_tokens = int(tokens * static_ratio)
-
-    cache_eligible = estimated_static_tokens >= cache_minimum
-
-    return {
-        "static_prefix_chars": boundary,
-        "estimated_static_tokens": estimated_static_tokens,
-        "static_ratio": round(static_ratio * 100, 1),
-        "cache_eligible": cache_eligible,
-        "cache_minimum": cache_minimum,
-    }
+def count_estimate(text: str, model: str | None) -> int:
+    return len(text) // 4
 
 
-def calculate_costs(tokens: int, pricing: dict, cache_info: dict) -> dict:
-    """Calculate costs with and without caching."""
-    input_cost = (tokens / 1_000_000) * pricing["input"]
+def count_claude(text: str, model: str | None) -> int:
+    from anthropic import Anthropic
 
-    costs = {
-        "per_request_no_cache": round(input_cost, 6),
-    }
+    client = Anthropic()
+    response = client.messages.count_tokens(
+        model=model,
+        messages=[{"role": "user", "content": text}],
+    )
+    return response.input_tokens
 
-    if cache_info["cache_eligible"]:
-        static_tokens = cache_info["estimated_static_tokens"]
-        dynamic_tokens = tokens - static_tokens
 
-        # First request (cache write)
-        if "cache_write" in pricing:
-            cache_write_cost = (static_tokens / 1_000_000) * pricing["cache_write"]
-            dynamic_cost = (dynamic_tokens / 1_000_000) * pricing["input"]
-            costs["first_request_with_cache"] = round(cache_write_cost + dynamic_cost, 6)
+def count_openai(text: str, model: str | None) -> int:
+    from openai import OpenAI
 
-        # Subsequent requests (cache read)
-        cache_read_price = pricing.get("cache_read", pricing.get("cached", pricing["input"] * 0.5))
-        cache_read_cost = (static_tokens / 1_000_000) * cache_read_price
-        dynamic_cost = (dynamic_tokens / 1_000_000) * pricing["input"]
-        costs["subsequent_with_cache"] = round(cache_read_cost + dynamic_cost, 6)
+    client = OpenAI()
+    response = client.responses.input_tokens.count(model=model, input=text)
+    return response.input_tokens
 
-        # Savings
-        if costs["per_request_no_cache"] > 0:
-            savings_pct = ((costs["per_request_no_cache"] - costs["subsequent_with_cache"])
-                          / costs["per_request_no_cache"] * 100)
-            costs["cache_savings_percent"] = round(savings_pct, 1)
 
+def count_gemini(text: str, model: str | None) -> int:
+    from google import genai
+
+    client = genai.Client()
+    response = client.models.count_tokens(model=model, contents=text)
+    return response.total_tokens
+
+
+COUNTERS = {
+    "estimate": (count_estimate, None),
+    "claude": (count_claude, "anthropic"),
+    "openai": (count_openai, "openai"),
+    "gemini": (count_gemini, "google-genai"),
+}
+
+
+def per_mtok(tokens: int, price: float) -> float:
+    return tokens / 1_000_000 * price
+
+
+def calculate_costs(total: int, static: int, args: argparse.Namespace) -> dict | None:
+    if args.input_price is None:
+        return None
+    dynamic = total - static
+    costs = {"per_request_no_cache": per_mtok(total, args.input_price)}
+    if args.cache_read_price is None:
+        return costs
+
+    write_price = args.cache_write_price if args.cache_write_price is not None else args.input_price
+    miss = per_mtok(static, write_price) + per_mtok(dynamic, args.input_price)
+    hit = per_mtok(static, args.cache_read_price) + per_mtok(dynamic, args.input_price)
+    costs["cache_miss_write"] = miss
+    costs["cache_hit"] = hit
+    costs["monthly_no_cache"] = costs["per_request_no_cache"] * args.requests_per_month
+    costs["monthly_with_cache"] = (
+        args.hit_rate * hit + (1 - args.hit_rate) * miss
+    ) * args.requests_per_month
     return costs
 
 
-def format_result(result: dict, text: str) -> str:
-    """Format the result for display."""
-    if "error" in result:
-        return f"Error ({result.get('provider', 'unknown')}): {result['error']}"
+def analyze(text: str, args: argparse.Namespace) -> dict:
+    counter, package = COUNTERS[args.provider]
+    if args.provider != "estimate" and not args.model:
+        return {"provider": args.provider, "error": "--model is required for API token counting"}
 
+    boundary = find_dynamic_boundary(text)
+    try:
+        total = counter(text, args.model)
+        if boundary == len(text):
+            static = total
+        elif boundary == 0:
+            static = 0
+        else:
+            static = counter(text[:boundary], args.model)
+    except ImportError:
+        return {
+            "provider": args.provider,
+            "error": f"the `{package}` package is not installed in this Python environment; "
+                     "use --provider estimate, or install a pinned, vetted version",
+        }
+    except Exception as e:
+        return {"provider": args.provider, "error": f"{type(e).__name__}: {e}"}
+
+    if args.min_cache_tokens is None:
+        eligible = None
+    else:
+        eligible = static >= args.min_cache_tokens
+
+    return {
+        "provider": args.provider,
+        "model": args.model,
+        "method": "approximate (chars/4)" if args.provider == "estimate" else "provider token-count endpoint",
+        "total_tokens": total,
+        "static_prefix_tokens": static,
+        "static_prefix_chars": boundary,
+        "static_ratio_percent": round(static / total * 100, 1) if total else 0.0,
+        "min_cache_tokens": args.min_cache_tokens,
+        "cache_eligible": eligible,
+        "costs": calculate_costs(total, static, args),
+        "requests_per_month": args.requests_per_month,
+        "hit_rate": args.hit_rate,
+    }
+
+
+def format_result(result: dict) -> str:
+    if "error" in result:
+        return f"Error ({result['provider']}): {result['error']}"
+
+    label = result["provider"].upper() + (f" ({result['model']})" if result["model"] else "")
     lines = [
-        f"\n{'='*60}",
-        f"Provider: {result['provider'].upper()} ({result['model']})",
-        f"{'='*60}",
-        f"Total tokens: {result['tokens']:,}",
+        "=" * 60,
+        label,
+        f"Method: {result['method']}",
+        "=" * 60,
+        f"Total input tokens: {result['total_tokens']:,}",
+        f"Static prefix: {result['static_prefix_tokens']:,} tokens ({result['static_ratio_percent']}%)",
     ]
 
-    # Cache analysis
-    cache_info = analyze_cache_potential(text, result["tokens"], result["cache_minimum"])
-    lines.extend([
-        f"\nCache Analysis:",
-        f"  Static prefix: ~{cache_info['estimated_static_tokens']:,} tokens ({cache_info['static_ratio']}%)",
-        f"  Minimum for caching: {cache_info['cache_minimum']:,} tokens",
-        f"  Cache eligible: {'Yes' if cache_info['cache_eligible'] else 'No'}",
-    ])
+    if result["cache_eligible"] is None:
+        lines.append("Cache eligible: unknown - pass --min-cache-tokens for the target model")
+    else:
+        verdict = "yes" if result["cache_eligible"] else "no - prefix is below the minimum and will not cache"
+        lines.append(f"Cache eligible (minimum {result['min_cache_tokens']:,}): {verdict}")
 
-    # Cost analysis
-    costs = calculate_costs(result["tokens"], result["pricing"], cache_info)
+    costs = result["costs"]
+    if costs is None:
+        lines.append("\nCost: pass --input-price (and cache prices) per million tokens to estimate")
+        return "\n".join(lines)
+
     lines.extend([
-        f"\nCost Analysis (per request):",
+        "\nInput cost per request (output tokens not included):",
         f"  Without caching: ${costs['per_request_no_cache']:.6f}",
     ])
-
-    if cache_info["cache_eligible"]:
-        if "first_request_with_cache" in costs:
-            lines.append(f"  First request (cache write): ${costs['first_request_with_cache']:.6f}")
+    if "cache_hit" in costs:
         lines.extend([
-            f"  Subsequent (cache hit): ${costs['subsequent_with_cache']:.6f}",
-            f"  Savings with cache: {costs.get('cache_savings_percent', 0):.1f}%",
+            f"  Cache miss (writes prefix): ${costs['cache_miss_write']:.6f}",
+            f"  Cache hit: ${costs['cache_hit']:.6f}",
+            f"\nMonthly input cost ({result['requests_per_month']:,} requests, "
+            f"{result['hit_rate']:.0%} hit rate):",
+            f"  Without caching: ${costs['monthly_no_cache']:.2f}",
+            f"  With caching: ${costs['monthly_with_cache']:.2f}",
         ])
-
-    # Monthly estimate
-    lines.extend([
-        f"\nMonthly Estimates (10,000 requests):",
-        f"  Without caching: ${costs['per_request_no_cache'] * 10000:.2f}",
-    ])
-    if cache_info["cache_eligible"] and "subsequent_with_cache" in costs:
-        monthly_cached = costs["subsequent_with_cache"] * 10000
-        lines.append(f"  With caching (95% hit rate): ${monthly_cached * 0.95 + costs['per_request_no_cache'] * 0.05 * 10000:.2f}")
-
-    if "note" in result:
-        lines.append(f"\nNote: {result['note']}")
-
+        if result["cache_eligible"] is False:
+            lines.append("  (Caching figures assume the prefix caches; it currently does not.)")
+    else:
+        lines.append("  Pass --cache-read-price to estimate caching savings")
     return "\n".join(lines)
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Count tokens and analyze caching potential for LLM prompts",
+        description="Count prompt tokens and estimate input cost with prompt caching",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Examples:
-    python token_counter.py "Your prompt text here" --provider claude
-    python token_counter.py --file prompt.txt --provider openai
-    python token_counter.py "Your prompt" --provider all
-        """
+        epilog=__doc__,
     )
     parser.add_argument("text", nargs="?", help="Prompt text to analyze")
     parser.add_argument("--file", "-f", help="Read prompt from file")
-    parser.add_argument(
-        "--provider", "-p",
-        choices=["claude", "openai", "gemini", "all"],
-        default="all",
-        help="LLM provider (default: all)"
-    )
+    parser.add_argument("--provider", "-p", choices=list(COUNTERS), default="estimate")
+    parser.add_argument("--model", "-m", help="Model ID (required for claude, openai, gemini)")
+    parser.add_argument("--min-cache-tokens", type=int, help="Model's minimum cacheable prefix")
+    parser.add_argument("--input-price", type=float, help="Uncached input price per million tokens")
+    parser.add_argument("--cache-write-price", type=float,
+                        help="Cache write price per million tokens (default: same as input)")
+    parser.add_argument("--cache-read-price", type=float, help="Cache read price per million tokens")
+    parser.add_argument("--requests-per-month", type=int, default=10_000)
+    parser.add_argument("--hit-rate", type=float, default=0.95, help="Expected cache hit rate, 0-1")
     parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
-
     args = parser.parse_args()
 
-    # Get text
     if args.file:
         try:
             text = Path(args.file).read_text()
@@ -253,34 +221,13 @@ Examples:
         print("Error: Provide prompt text or --file argument", file=sys.stderr)
         sys.exit(1)
 
-    # Count tokens
-    providers = [args.provider] if args.provider != "all" else ["claude", "openai", "gemini"]
-    results = []
-
-    for provider in providers:
-        if provider == "claude":
-            result = count_tokens_claude(text)
-        elif provider == "openai":
-            result = count_tokens_openai(text)
-        elif provider == "gemini":
-            result = count_tokens_gemini(text)
-        results.append(result)
-
-    # Output
+    result = analyze(text, args)
     if args.json:
-        import json
-        output = []
-        for result in results:
-            if "error" not in result:
-                cache_info = analyze_cache_potential(text, result["tokens"], result["cache_minimum"])
-                costs = calculate_costs(result["tokens"], result["pricing"], cache_info)
-                result["cache_analysis"] = cache_info
-                result["cost_analysis"] = costs
-            output.append(result)
-        print(json.dumps(output, indent=2))
+        print(json.dumps(result, indent=2))
     else:
-        for result in results:
-            print(format_result(result, text))
+        print(format_result(result))
+    if "error" in result:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

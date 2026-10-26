@@ -28,3 +28,5 @@ docs/superpowers
 # model-quality-compare experiment outputs
 output/
 tmp/
+# claude plugin eval run output
+plugins/*/evals/results/

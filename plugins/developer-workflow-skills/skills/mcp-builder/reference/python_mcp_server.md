@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document provides Python-specific best practices and examples for implementing MCP servers using the MCP Python SDK. It covers server setup, tool registration patterns, input validation with Pydantic, error handling, and complete working examples.
+This document provides Python-specific best practices and examples for implementing MCP servers using the MCP Python SDK 2.x (`mcp>=2,<3`; the version checked is in the table in SKILL.md). It covers server setup, tool registration patterns, input validation with Pydantic, error handling, and complete working examples.
 
 ---
 
@@ -10,7 +10,8 @@ This document provides Python-specific best practices and examples for implement
 
 ### Key Imports
 ```python
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer, Context
+from mcp.types import ToolAnnotations
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from enum import Enum
@@ -19,12 +20,12 @@ import httpx
 
 ### Server Initialization
 ```python
-mcp = FastMCP("service_mcp")
+mcp = MCPServer("service_mcp")
 ```
 
 ### Tool Registration Pattern
 ```python
-@mcp.tool(name="tool_name", annotations={...})
+@mcp.tool(name="tool_name", annotations=ToolAnnotations(...))
 async def tool_function(params: InputModel) -> str:
     # Implementation
     pass
@@ -32,15 +33,19 @@ async def tool_function(params: InputModel) -> str:
 
 ---
 
-## MCP Python SDK and FastMCP
+## MCP Python SDK and MCPServer
 
-The official MCP Python SDK provides FastMCP, a high-level framework for building MCP servers. It provides:
+The official MCP Python SDK provides `MCPServer`, a high-level framework for building MCP servers. It provides:
 - Automatic description and inputSchema generation from function signatures and docstrings
 - Pydantic model integration for input validation
 - Decorator-based tool registration with `@mcp.tool`
 
+**Coming from SDK 1.x:** `FastMCP` was renamed to `MCPServer`, and `mcp.server.fastmcp` now raises `ModuleNotFoundError`; import from `mcp.server.mcpserver` instead. `ctx.fastmcp` is now `ctx.mcp_server`, transport settings (`host`, `port`, `json_response`, `stateless_http`) moved from the constructor to `run()`, and protocol types use snake_case fields (`tool.input_schema`, `result.is_error`). The full list is in the migration guide: `https://py.sdk.modelcontextprotocol.io/migration/`.
+
+**Dependencies:** `mcp` 2.x no longer installs `httpx`; it depends on `httpx2`. Declare `httpx` in your own dependencies if your server imports it, as the examples below do.
+
 **For complete SDK documentation, use WebFetch to load:**
-`https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/main/README.md`
+`https://py.sdk.modelcontextprotocol.io/`
 
 ## Server Naming Convention
 
@@ -65,16 +70,17 @@ Use snake_case for tool names (e.g., "search_users", "create_project", "get_chan
 - Use "github_create_issue" instead of just "create_issue"
 - Use "asana_list_tasks" instead of just "list_tasks"
 
-### Tool Structure with FastMCP
+### Tool Structure with MCPServer
 
 Tools are defined using the `@mcp.tool` decorator with Pydantic models for input validation:
 
 ```python
 from pydantic import BaseModel, Field, ConfigDict
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
+from mcp.types import ToolAnnotations
 
 # Initialize the MCP server
-mcp = FastMCP("example_mcp")
+mcp = MCPServer("example_mcp")
 
 # Define Pydantic model for input validation
 class ServiceToolInput(BaseModel):
@@ -87,17 +93,17 @@ class ServiceToolInput(BaseModel):
 
     param1: str = Field(..., description="First parameter description (e.g., 'user123', 'project-abc')", min_length=1, max_length=100)
     param2: Optional[int] = Field(default=None, description="Optional integer parameter with constraints", ge=0, le=1000)
-    tags: Optional[List[str]] = Field(default_factory=list, description="List of tags to apply", max_items=10)
+    tags: Optional[List[str]] = Field(default_factory=list, description="List of tags to apply", max_length=10)
 
 @mcp.tool(
     name="service_tool_name",
-    annotations={
-        "title": "Human-Readable Tool Title",
-        "readOnlyHint": True,     # Tool does not modify environment
-        "destructiveHint": False,  # Tool does not perform destructive operations
-        "idempotentHint": True,    # Repeated calls have no additional effect
-        "openWorldHint": False     # Tool does not interact with external entities
-    }
+    title="Human-Readable Tool Title",
+    annotations=ToolAnnotations(
+        read_only_hint=True,       # Tool does not modify environment
+        destructive_hint=False,    # Tool does not perform destructive operations
+        idempotent_hint=True,      # Repeated calls have no additional effect
+        open_world_hint=False      # Tool does not interact with external entities
+    )
 )
 async def service_tool_name(params: ServiceToolInput) -> str:
     '''Tool description automatically becomes the 'description' field.
@@ -344,10 +350,11 @@ from typing import Optional, List, Dict, Any
 from enum import Enum
 import httpx
 from pydantic import BaseModel, Field, field_validator, ConfigDict
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
+from mcp.types import ToolAnnotations
 
 # Initialize the MCP server
-mcp = FastMCP("example_mcp")
+mcp = MCPServer("example_mcp")
 
 # Constants
 API_BASE_URL = "https://api.example.com/v1"
@@ -408,13 +415,13 @@ def _handle_api_error(e: Exception) -> str:
 # Tool definitions
 @mcp.tool(
     name="example_search_users",
-    annotations={
-        "title": "Search Example Users",
-        "readOnlyHint": True,
-        "destructiveHint": False,
-        "idempotentHint": True,
-        "openWorldHint": True
-    }
+    title="Search Example Users",
+    annotations=ToolAnnotations(
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True
+    )
 )
 async def example_search_users(params: UserSearchInput) -> str:
     '''Search for users in the Example system by name, email, or team.
@@ -473,72 +480,99 @@ if __name__ == "__main__":
 
 ---
 
-## Advanced FastMCP Features
+## Advanced MCPServer Features
 
 ### Context Parameter Injection
 
-FastMCP can automatically inject a `Context` parameter into tools for advanced capabilities like logging, progress reporting, resource reading, and user interaction:
+`MCPServer` injects a `Context` into any tool, resource, or prompt parameter annotated with `Context`, for progress reporting, resource reading, and server access:
 
 ```python
-from mcp.server.fastmcp import FastMCP, Context
+import logging
 
-mcp = FastMCP("example_mcp")
+from mcp.server.mcpserver import MCPServer, Context
+
+mcp = MCPServer("example_mcp")
+logger = logging.getLogger(__name__)
 
 @mcp.tool()
 async def advanced_search(query: str, ctx: Context) -> str:
-    '''Advanced tool with context access for logging and progress.'''
+    '''Advanced tool with context access for progress reporting.'''
 
-    # Report progress for long operations
-    await ctx.report_progress(0.25, "Starting search...")
+    # Report progress for long operations (absolute value, not a delta)
+    await ctx.report_progress(25, 100, message="Starting search...")
 
-    # Log information for debugging
-    await ctx.log_info("Processing query", {"query": query, "timestamp": datetime.now()})
+    # Log with the standard library; it goes to stderr, never stdout
+    logger.info(f"Processing query: {query}")
 
     # Perform search
     results = await search_api(query)
-    await ctx.report_progress(0.75, "Formatting results...")
+    await ctx.report_progress(75, 100, message="Formatting results...")
 
-    # Access server configuration
-    server_name = ctx.fastmcp.name
+    # Access the server instance
+    server_name = ctx.mcp_server.name
 
     return format_results(results)
-
-@mcp.tool()
-async def interactive_tool(resource_id: str, ctx: Context) -> str:
-    '''Tool that can request additional input from users.'''
-
-    # Request sensitive information when needed
-    api_key = await ctx.elicit(
-        prompt="Please provide your API key:",
-        input_type="password"
-    )
-
-    # Use the provided key
-    return await api_call(resource_id, api_key)
 ```
 
 **Context capabilities:**
-- `ctx.report_progress(progress, message)` - Report progress for long operations
-- `ctx.log_info(message, data)` / `ctx.log_error()` / `ctx.log_debug()` - Logging
-- `ctx.elicit(prompt, input_type)` - Request input from users
-- `ctx.fastmcp.name` - Access server configuration
+- `ctx.report_progress(progress, total=None, message=None)` - Report progress; a no-op when the client did not ask for progress
 - `ctx.read_resource(uri)` - Read MCP resources
+- `ctx.mcp_server` - The `MCPServer` instance (was `ctx.fastmcp` in 1.x)
+- `ctx.request_context.lifespan_context` - Whatever your lifespan yielded
+- `ctx.elicit(message, schema)` - Push an elicitation request mid-call. It raises `NoBackChannelError` on 2026-07-28 connections; prefer the `Resolve`/`Elicit` form below
+- `ctx.info()` / `ctx.debug()` / `ctx.warning()` / `ctx.error()` / `ctx.log()` - Deprecated with the MCP Logging feature (they emit `MCPDeprecationWarning`, and 2026-07-28 clients receive them only if the request opted in); use `logging` instead
+
+### Asking the User (Elicitation)
+
+Declare the question as a resolver. The SDK sends it as a standalone elicitation request to 2025-era clients and as an `InputRequiredResult` multi-round trip to 2026-07-28 clients, with one tool body for both:
+
+```python
+from typing import Annotated
+
+from pydantic import BaseModel
+from mcp.server.mcpserver import Elicit, Resolve
+
+class Confirmation(BaseModel):
+    confirm: bool
+
+async def ask_to_confirm(resource_id: str) -> Elicit[Confirmation]:
+    return Elicit(f"Delete {resource_id}? This cannot be undone.", Confirmation)
+
+@mcp.tool()
+async def delete_resource(
+    resource_id: str,
+    answer: Annotated[Confirmation, Resolve(ask_to_confirm)],
+) -> str:
+    '''Delete a resource after the user confirms.'''
+    if not answer.confirm:
+        return "Deletion cancelled."
+    await api_delete(resource_id)
+    return f"Deleted {resource_id}."
+```
+
+The resolver receives tool arguments by parameter name. With the unwrapped type (`Confirmation`), a decline or cancel aborts the call; annotate `ElicitationResult[Confirmation]` instead to branch on `accept` / `decline` / `cancel` yourself. Elicitation schemas may use only primitive fields.
+
+**Never elicit secrets in a form.** The spec forbids form-mode elicitation for passwords, API keys, access tokens, or payment credentials. Read service credentials from the environment, or use URL-mode elicitation so the secret goes to your site, not through the client.
 
 ### Resource Registration
 
 Expose data as resources for efficient, template-based access:
 
 ```python
+from pathlib import Path
+
+DOCS_DIR = Path("./docs").resolve()
+
 @mcp.resource("file://documents/{name}")
-async def get_document(name: str) -> str:
+def get_document(name: str) -> str:
     '''Expose documents as MCP resources.
 
     Resources are useful for static or semi-static data that doesn't
     require complex parameters. They use URI templates for flexible access.
     '''
-    document_path = f"./docs/{name}"
-    with open(document_path, "r") as f:
-        return f.read()
+    # The default ResourceSecurity policy already rejects "..", absolute paths,
+    # and NUL bytes in template parameters. Sync handlers run on a worker thread.
+    return (DOCS_DIR / name).read_text()
 
 @mcp.resource("config://settings/{key}")
 async def get_setting(key: str, ctx: Context) -> str:
@@ -553,7 +587,7 @@ async def get_setting(key: str, ctx: Context) -> str:
 
 ### Structured Output Types
 
-FastMCP supports multiple return types beyond strings:
+`MCPServer` supports multiple return types beyond strings, and derives an output schema from the return annotation:
 
 ```python
 from typing import TypedDict
@@ -568,7 +602,7 @@ class UserData(TypedDict):
 
 @mcp.tool()
 async def get_user_typed(user_id: str) -> UserData:
-    '''Returns structured data - FastMCP handles serialization.'''
+    '''Returns structured data - MCPServer handles serialization.'''
     return {"id": user_id, "name": "John Doe", "email": "john@example.com"}
 
 # Pydantic models for complex validation
@@ -591,34 +625,39 @@ async def get_user_detailed(user_id: str) -> DetailedUser:
 Initialize resources that persist across requests:
 
 ```python
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
 @asynccontextmanager
-async def app_lifespan():
+async def app_lifespan(server: MCPServer) -> AsyncIterator[dict[str, Any]]:
     '''Manage resources that live for the server's lifetime.'''
     # Initialize connections, load config, etc.
     db = await connect_to_database()
     config = load_configuration()
 
-    # Make available to all tools
-    yield {"db": db, "config": config}
+    try:
+        # Make available to all tools
+        yield {"db": db, "config": config}
+    finally:
+        # Cleanup on shutdown
+        await db.close()
 
-    # Cleanup on shutdown
-    await db.close()
-
-mcp = FastMCP("example_mcp", lifespan=app_lifespan)
+mcp = MCPServer("example_mcp", lifespan=app_lifespan)
 
 @mcp.tool()
 async def query_data(query: str, ctx: Context) -> str:
     '''Access lifespan resources through context.'''
-    db = ctx.request_context.lifespan_state["db"]
+    db = ctx.request_context.lifespan_context["db"]
     results = await db.query(query)
     return format_results(results)
 ```
 
+The lifespan function receives the server instance. On Streamable HTTP it is entered once when the server starts and its state is shared by every request, so keep per-request resources out of it.
+
 ### Transport Options
 
-FastMCP supports two main transport mechanisms:
+`MCPServer` supports two main transport mechanisms. Transport settings go to `run()`, not the constructor:
 
 ```python
 # stdio transport (for local tools) - default
@@ -627,12 +666,18 @@ if __name__ == "__main__":
 
 # Streamable HTTP transport (for remote servers)
 if __name__ == "__main__":
-    mcp.run(transport="streamable_http", port=8000)
+    mcp.run(transport="streamable-http", host="127.0.0.1", port=8000)
 ```
 
 **Transport selection:**
 - **stdio**: Command-line tools, local integrations, subprocess execution
 - **Streamable HTTP**: Web services, remote access, multiple clients
+
+**Deploying Streamable HTTP:**
+- On a localhost bind the server turns on DNS-rebinding protection and accepts only `127.0.0.1`, `localhost`, and `[::1]` `Host` headers. Behind a real hostname every request gets `421 Invalid Host header` until you pass `transport_security=TransportSecuritySettings(allowed_hosts=[...], allowed_origins=[...])` (from `mcp.server.transport_security`) to `run()` or `streamable_http_app()`.
+- 2026-07-28 clients are sessionless, so any worker can serve any request. `stateless_http=True` affects only clients on 2025-11-25 and earlier, where it removes sticky sessions at the cost of the server-to-client back-channel.
+- Request bodies are limited to 4 MiB by default (`max_request_body_size=`).
+- To mount in an existing Starlette/FastAPI app, use `mcp.streamable_http_app()` and enter `mcp.session_manager.run()` in the host app's lifespan.
 
 ---
 
@@ -697,11 +742,12 @@ Before finalizing your Python MCP server implementation, ensure:
 - [ ] Pydantic models handle input validation (no manual validation needed)
 
 ### Advanced Features (where applicable)
-- [ ] Context injection used for logging, progress, or elicitation
+- [ ] Context injection used for progress; elicitation declared with `Resolve`/`Elicit`
+- [ ] Logging goes through the `logging` module to stderr, not the deprecated `ctx.info()` helpers
 - [ ] Resources registered for appropriate data endpoints
 - [ ] Lifespan management implemented for persistent connections
 - [ ] Structured output types used (TypedDict, Pydantic models)
-- [ ] Appropriate transport configured (stdio or streamable HTTP)
+- [ ] Appropriate transport configured (stdio or streamable HTTP), with a `transport_security` allowlist for any non-localhost deployment
 
 ### Code Quality
 - [ ] File includes proper imports including Pydantic imports
@@ -713,7 +759,7 @@ Before finalizing your Python MCP server implementation, ensure:
 - [ ] Constants are defined at module level in UPPER_CASE
 
 ### Testing
-- [ ] Server runs successfully: `python your_server.py --help`
-- [ ] All imports resolve correctly
-- [ ] Sample tool calls work as expected
+- [ ] Syntax check passes: `python3 -m py_compile your_server.py`
+- [ ] All imports resolve correctly (no `mcp.server.fastmcp` imports remain)
+- [ ] Sample tool calls work in the MCP Inspector: `uv run mcp dev your_server.py` (needs the `mcp[cli]` extra)
 - [ ] Error scenarios handled gracefully
