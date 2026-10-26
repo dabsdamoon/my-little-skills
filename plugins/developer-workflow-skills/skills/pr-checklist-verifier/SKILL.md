@@ -2,7 +2,6 @@
 name: pr-checklist-verifier
 description: Verifies the unchecked items in a pull request's testing checklist by actually running the appropriate tool (browser/webapp-testing for UI behavior, the test suite for "tests pass", curl for endpoints, a build for "compiles"), then closes the loop by updating the PR body — ticking only the items it proved and recording the evidence. Use this whenever someone asks to "verify the PR checklist", "check off the test plan", "confirm the manual QA items", "verify and update the PR", or runs QA against a PR and wants the description brought up to date. Reach for it any time a PR has `- [ ]` checklist items that ought to be confirmed before merge, even if the user only says "make sure the PR is actually tested."
 argument-hint: [pr-number]
-model: sonnet
 ---
 
 # PR Checklist Verifier
@@ -95,10 +94,10 @@ This is the half people skip. Always do it when at least one item passed.
 2. Optionally append a short evidence note to the ticked line itself (e.g. `— Playwright 320/375/414px, single-row + scrolls`), keeping it terse.
 3. Add or update a `## QA Verification` section near the testing checklist documenting, per verified item: the method, key evidence/metrics, and verdict. Include FAIL and BLOCKED items here too so the reviewer sees the full picture.
 
-Use the bundled helper to do the body edit deterministically and **idempotently** (re-running must not double-tick or stack duplicate QA sections):
+Use the bundled helper to do the body edit deterministically and **idempotently** (re-running must not double-tick or stack duplicate QA sections). Set `SKILL_DIR` to this skill directory, then run:
 
 ```bash
-python scripts/update_pr_checklist.py \
+python3 "$SKILL_DIR/scripts/update_pr_checklist.py" \
   --body-file /tmp/pr_body_current.md \
   --check "Visual QA of the tab strip on mobile widths" \
   --check "Confirm category persistence across a full page reload" \
