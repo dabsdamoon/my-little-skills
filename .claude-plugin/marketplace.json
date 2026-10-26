@@ -74,7 +74,7 @@
     },
     {
       "name": "analysis-skills",
-      "description": "Critical thinking, evidence-backed decision reports, business scenario analysis, and health statistics evidence reports",
+      "description": "Critical thinking, evidence-backed decision reports, business scenario analysis, health statistics evidence reports, and context-preserving video Shorts selection",
       "source": "./plugins/analysis-skills"
     },
     {
