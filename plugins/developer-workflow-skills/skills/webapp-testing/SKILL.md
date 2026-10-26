@@ -73,19 +73,19 @@ After running all tests, produce an **Audit Report** summarizing:
 
 ## Step 0: Bootstrap the testing environment (before any Python invocation)
 
-The skill uses a dedicated user-scoped venv so it does not pollute the system Python or any project venv. Run the bootstrap script ONCE per session and capture the venv path it prints:
+The skill uses a dedicated user-scoped venv so it does not pollute the system Python or any project venv. Set `SKILL_DIR` to this skill directory, then run the bootstrap script ONCE per session and capture the venv path it prints:
 
 ```bash
-VENV="$(scripts/ensure_playwright.sh)" || exit 1
+VENV="$("$SKILL_DIR/scripts/ensure_playwright.sh")" || exit 1
 echo "Using venv: $VENV"
 ```
 
 - **First run** takes 30-90s (creates venv, installs `playwright`, downloads chromium ~170MB).
 - **Subsequent runs** are no-ops (~400ms) — safe to call before every test invocation.
 - The venv lives at `${XDG_CACHE_HOME:-$HOME/.cache}/claude-skills/webapp-testing/venv` and persists across projects and sessions.
-- Override the playwright version with `PLAYWRIGHT_VERSION=1.55.0 scripts/ensure_playwright.sh` if your project pins a specific one.
+- Override the playwright version with `PLAYWRIGHT_VERSION=1.55.0 "$SKILL_DIR/scripts/ensure_playwright.sh"` if your project pins a specific one.
 
-**Always invoke Python via `$VENV/bin/python`** — never `python3` directly — to ensure you get the playwright install. The `with_server.py` helper below should also be invoked via `$VENV/bin/python scripts/with_server.py`.
+**Always invoke Python via `$VENV/bin/python`** — never `python3` directly — to ensure you get the playwright install. The `with_server.py` helper below should also be invoked via `"$VENV/bin/python" "$SKILL_DIR/scripts/with_server.py"`.
 
 If the script fails, it reports the cause on stderr (missing `python3`, Python too old, chromium launch failure). Do not proceed to writing tests until it succeeds.
 
@@ -100,11 +100,14 @@ grep -r "session\|SESSION_SECRET\|createCookie\|jwt" app/lib/ --include="*.ts" -
 ```
 
 ### 2. Check ALL secret sources for mismatches
+Compare fingerprints, never the values. Printing a secret puts it in the transcript and any log the session writes.
 ```bash
-# These three can have DIFFERENT values — compare them:
-grep SESSION_SECRET .env .env.local .env.development 2>/dev/null   # Vite loads these automatically
-grep SESSION docker-compose.yml 2>/dev/null                         # Docker env vars
-grep -r "SESSION_SECRET\|secrets:" app/lib/ --include="*.ts"        # Code defaults
+# These sources can hold DIFFERENT values. Print a short hash per source, not the secret:
+for f in .env .env.local .env.development; do
+  [ -f "$f" ] && printf '%s: %s\n' "$f" "$(sed -n 's/^SESSION_SECRET=//p' "$f" | shasum -a 256 | cut -c1-12)"
+done                                                                 # Vite loads these automatically
+grep -l SESSION docker-compose.yml 2>/dev/null                       # Docker env vars: which file sets it
+grep -rl "SESSION_SECRET\|secrets:" app/lib/ --include="*.ts"        # Code defaults: which file has a fallback
 ```
 **The #1 cause of silent auth failure is secret mismatch between `.env` and code defaults.** Vite auto-loads `.env` files, so the running app may use a different secret than the code's fallback value.
 
@@ -153,7 +156,7 @@ User task → Is it static HTML?
     │         └─ Fails/Incomplete → Treat as dynamic (below)
     │
     └─ No (dynamic webapp) → Is the server already running?
-        ├─ No → Run: "$VENV/bin/python" scripts/with_server.py --help
+        ├─ No → Run: "$VENV/bin/python" "$SKILL_DIR/scripts/with_server.py" --help
         │        Then use the helper + write simplified Playwright script
         │
         └─ Yes → Reconnaissance-then-action:
@@ -169,12 +172,12 @@ To start a server, run `--help` first, then use the helper:
 
 **Single server:**
 ```bash
-"$VENV/bin/python" scripts/with_server.py --server "npm run dev" --port 5173 -- "$VENV/bin/python" your_automation.py
+"$VENV/bin/python" "$SKILL_DIR/scripts/with_server.py" --server "npm run dev" --port 5173 -- "$VENV/bin/python" your_automation.py
 ```
 
 **Multiple servers (e.g., backend + frontend):**
 ```bash
-"$VENV/bin/python" scripts/with_server.py \
+"$VENV/bin/python" "$SKILL_DIR/scripts/with_server.py" \
   --server "cd backend && python server.py" --port 3000 \
   --server "cd frontend && npm run dev" --port 5173 \
   -- "$VENV/bin/python" your_automation.py

@@ -261,7 +261,15 @@ git cherry-pick <fix-commit-sha>
 git push origin production
 ```
 
-Only use this when there is truly no time for the preferred path. Immediately back-port the fix to `main` and `develop`; otherwise future releases can drop the hotfix.
+Only use this when there is truly no time for the preferred path. Then merge `production` back into `main` with a merge commit so the hotfix commit itself is on `main`:
+
+```bash
+git switch main
+git pull --ff-only origin main
+git merge --no-ff origin/production -m "Merge production hotfix back into main"
+```
+
+Push that through the normal `main` flow, then merge `main` into `develop`. Do not cherry-pick or squash the hotfix onto `main`: the copy gets a new SHA, `production` stays unreachable from `main`, and every later release fails the invariant check.
 
 ## 11. Rollback
 

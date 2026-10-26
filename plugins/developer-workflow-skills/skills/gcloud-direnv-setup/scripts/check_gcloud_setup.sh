@@ -115,7 +115,8 @@ echo "----------------------------------------"
 print_info "Directory: $(pwd)"
 if [[ -f ".envrc" ]]; then
     print_ok ".envrc file exists"
-    if direnv status 2>/dev/null | grep -q "Found RC allowed true"; then
+    # direnv >= 2.33 prints an allow status (0 = allowed); older releases print true.
+    if direnv status 2>/dev/null | grep -Eq "^Found RC allowed (0|true)$"; then
         print_ok ".envrc is allowed"
     else
         print_warn ".envrc is NOT allowed"

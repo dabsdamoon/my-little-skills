@@ -2,7 +2,6 @@
 name: dual-track-checklist-verifier
 description: Verifies the unchecked items in a pull request's checklist by actually running the appropriate tool (browser/webapp-testing for UI behavior, the test suite for "tests pass", curl for endpoints, a build for "compiles", gh for CI status), then closes the loop by updating the PR body — ticking only what it proved, rewording items that described themselves as unverified, and recording the evidence. Built to work on bodies written by dual-track-pr-creator, so it honors the evidence gate: automated results never tick an item that claims customer, usability, or production validation. Use whenever someone asks to "verify the PR checklist", "check off the test plan", "confirm the QA items", "verify and update the PR", or when a PR has `- [ ]` items that should be confirmed before merge.
 argument-hint: [pr-number]
-model: sonnet
 ---
 
 # Dual-Track Checklist Verifier
@@ -143,8 +142,10 @@ An item written as `- [ ] CI on this PR — not yet observed at the time of writ
 
 Write a section documenting every item — PASS, FAIL, and both BLOCKED kinds — so the reviewer sees the whole picture, not just the wins. On a dual-track body, place it between the checklist and `## Not included / out of scope` with `--before-heading`.
 
+Set `SKILL_DIR` to this skill directory, then run:
+
 ```bash
-python scripts/verify_checklist.py \
+python3 "$SKILL_DIR/scripts/verify_checklist.py" \
   --body-file /tmp/pr_body.md \
   --reword 'not yet observed at the time of writing::6/6 checks pass on 246a9b9' \
   --check "CI on this PR" \
