@@ -45,7 +45,7 @@
     },
     {
       "name": "config-skills",
-      "description": "Claude config migration and update notes",
+      "description": "Claude config migration, update notes, and keeping Claude Code and Codex skills identical across machines",
       "source": "./plugins/config-skills"
     },
     {

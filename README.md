@@ -205,7 +205,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **fde-estimation-skills** | capture-customer-outcomes, document-field-discovery, collect-as-built-evidence, define-estimation-policy, reconcile-scope-delta, generate-estimate-package | Interactive, evidence-backed FDE discovery, reviewed staffing, seniority, rate, scope, and effort reconciliation, budgetary estimates, and basis-of-estimate reports |
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean, explain-simply | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing, decoding jargon-heavy work summaries |
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
-| **config-skills** | claude-config-migrator, update-notes, update-houmy-notes | Migrate Claude Code config between repos, write update notes |
+| **config-skills** | claude-config-migrator, agent-setup-sync, update-notes, update-houmy-notes | Migrate Claude Code config between repos, keep Claude Code and Codex skills identical across machines, write update notes |
 | **llm-wiki-skills** | make-llm-wiki-raw, wikify-raw | Capture raw LLM-Wiki sources and turn them into linked Obsidian wiki pages |
 | **houmy-skills** | houmlike-design, houm-cohort, houm-refactoring | Houm brand and UI design system, operational-document typography, cohort metrics, and systematic codebase refactoring |
 | **notion-workspace-skills** | notion-dashboard-builder | Create root-owned Notion databases and organize safe migrations, timelines, boards, approvals, and role-aware views |
@@ -305,6 +305,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 | Skill | What It Does |
 |-------|-------------|
 | **claude-config-migrator** | Transfers Claude Code config (rules, skills, hooks, MCP) between repositories |
+| **agent-setup-sync** | Records which skills and plugins Claude Code and Codex load in a dotfiles baseline and applies it on any machine with `agent-sync` |
 | **system-prompt-creator** | Guides creation of production system prompts following OpenAI, Anthropic, Google, and OWASP best practices |
 | **update-notes** | Writes concise release/update notes for projects |
 
