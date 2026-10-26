@@ -33,9 +33,11 @@ docker images <app-name>-test --format "table {{.Repository}}\t{{.Tag}}\t{{.Size
 docker run -d --name <app-name>-test \
   --memory=<limit>g \
   -p <host-port>:<container-port> \
-  --env-file .env \
+  -e <VAR_NAME> \
   <app-name>-test:latest
 ```
+
+Pass only the variables the app needs to start, one `-e <VAR_NAME>` each; with no `=value`, Docker copies the value from the calling shell. If the project ships `scripts/with-secrets.sh`, run the whole command through it (`scripts/with-secrets.sh docker run ...`) so secrets are fetched on demand. Do not use `--env-file .env`: it loads every value in the file, including secrets the container does not need.
 
 Common memory limits: `512m`, `1g`, `2g`, `4g`
 

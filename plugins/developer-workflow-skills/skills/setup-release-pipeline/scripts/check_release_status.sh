@@ -39,7 +39,7 @@ echo "origin/production: ${PROD_SHA:0:7}"
 
 if ! git merge-base --is-ancestor "$PROD_SHA" "$MAIN_SHA"; then
   echo -e "${RED}Invariant violation: origin/production is not reachable from origin/main.${NC}"
-  echo "A production hotfix may not have been back-ported to main. Investigate before releasing."
+  echo "A production hotfix may not have been merged back into main (a cherry-pick does not count). Investigate before releasing."
   exit 1
 fi
 
@@ -51,9 +51,9 @@ echo "Pending commits from main to production: ${PENDING_COUNT}"
 if [ "$PENDING_COUNT" -gt 0 ]; then
   echo ""
   echo "Pending commits:"
-  git log --oneline --decorate origin/production..origin/main | head -50
+  git log -n 50 --oneline --decorate origin/production..origin/main
 
-  OLDEST_TS="$(git log --reverse --format=%ct origin/production..origin/main | head -1)"
+  OLDEST_TS="$(git log --format=%ct origin/production..origin/main | tail -1)"
   NOW_TS="$(date +%s)"
   AGE_DAYS="$(( (NOW_TS - OLDEST_TS) / 86400 ))"
   echo ""

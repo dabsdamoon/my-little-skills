@@ -252,7 +252,7 @@ For `production`, prefer:
 - allow the release maintainer to use `--force-with-lease` if the platform requires pointer movement;
 - do not require PRs into `production`;
 - do not require duplicate status checks if `main` already passed them;
-- document that emergency direct production changes must be back-ported immediately.
+- document that emergency direct production changes must be merged back into `main` immediately.
 
 If org policy forbids force pushes entirely, this strategy may need adaptation: use a PR/merge into `production`, a GitHub Environment deployment workflow, or a host-supported manual promote feature instead.
 
@@ -271,7 +271,7 @@ fix/* from main
 → merge/cherry-pick the fix back to develop if develop exists
 ```
 
-Emergency direct-to-`production` changes should be rare. If they happen, immediately back-port the same commit to `main` and `develop`. Otherwise the invariant check will fail later, or worse, a future release can drop the emergency fix.
+Emergency direct-to-`production` changes should be rare. If they happen, immediately merge `production` into `main` with a real merge commit (`git switch main && git merge --no-ff origin/production`, pushed through the normal `main` flow; never cherry-pick or squash it, because that creates a new SHA and leaves `production` unreachable from `main`), then merge `main` into `develop`. Otherwise every later release fails the invariant check, or worse, a future release can drop the emergency fix.
 
 ## Rollback Policy
 
@@ -296,7 +296,7 @@ The host redeploys from the rewound `production` pointer. `main` remains untouch
 - **Forgetting that `main` may be ahead of live.** Only `production` reflects live after cutover.
 - **Saying tag push triggers deploy.** In this model, the push to `production` triggers the host deploy. The tag is release metadata unless the project has separate tag-triggered automation.
 - **Skipping host dashboard cutover.** If the host still watches `main`, merging to `main` still ships.
-- **Breaking the invariant with hotfixes.** Always back-port emergency production fixes to `main` and `develop`.
+- **Breaking the invariant with hotfixes.** Merge emergency production fixes back into `main` with a merge commit, then into `develop`. A cherry-pick copies the change but not the commit, so the invariant still fails.
 - **Over-protecting `production`.** Requiring PRs/status checks on a pointer branch can block the release script. Protect it by restricting who can move it, not by making normal PR flow mandatory.
 - **Tag push fails after production moved.** The live deploy may already be running. Retry `git push origin vX.Y.Z`; if the local tag is wrong, delete it with `git tag -d vX.Y.Z` before rerunning.
 - **Ignoring preview builds.** This strategy controls production reflection. It may not eliminate provider preview builds for `main` or PR branches.

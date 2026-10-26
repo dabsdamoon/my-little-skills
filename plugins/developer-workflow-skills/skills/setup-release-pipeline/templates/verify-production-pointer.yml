@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout full history
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -38,7 +38,7 @@ jobs:
             echo "OK: origin/production is reachable from origin/main."
           else
             echo "ERROR: origin/production has commits that are not on origin/main."
-            echo "Back-port production-only hotfixes to main before releasing."
+            echo "Merge production into main (merge commit, not cherry-pick or squash) before releasing."
             exit 1
           fi
 
@@ -48,5 +48,5 @@ jobs:
           if git rev-parse --verify --quiet origin/production >/dev/null; then
             echo "Pending commits from main to production:"
             git rev-list --count origin/production..origin/main
-            git log --oneline --decorate origin/production..origin/main | head -50 || true
+            git log -n 50 --oneline --decorate origin/production..origin/main
           fi

@@ -27,7 +27,7 @@ production must always be reachable from main
 
 Immediately after a release, `production` and `main` may point to the same commit.
 
-If an emergency fix is pushed directly to `production`, back-port it to `main` and `develop` immediately. Otherwise the next normal release can drop the fix.
+If an emergency fix is pushed directly to `production`, merge `production` back into `main` with a merge commit (`git merge --no-ff origin/production`), then merge `main` into `develop`. A cherry-pick or squash is not enough: the release script requires the hotfix commit itself to be on `main`.
 
 ## Host configuration
 
@@ -166,4 +166,4 @@ fix/* from main
 → back-port to develop if needed
 ```
 
-Emergency direct-to-`production` changes are allowed only when unavoidable. If used, immediately back-port the fix to `main` and `develop`.
+Emergency direct-to-`production` changes are allowed only when unavoidable. If used, immediately merge `production` back into `main` with a merge commit, then merge `main` into `develop`.

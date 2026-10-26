@@ -129,7 +129,7 @@ gcloud auth application-default login --project=PROJECT_ID
 ```bash
 export CLOUDSDK_ACTIVE_CONFIG_NAME="CONFIG_NAME"
 
-# Load .env file first (if exists)
+# Load .env file first (if exists). Non-secret config only: no API keys or tokens.
 dotenv_if_exists .env
 
 # Override: use ADC (unset any SA key from .env)
@@ -167,6 +167,8 @@ python3 -c "import google.auth; creds, proj = google.auth.default(); print(f'Pro
 
 ## .envrc Templates
 
+direnv exports everything in `.envrc`, and in any `.env` it loads, to every process started in the directory. Keep both files to non-secret settings: config name, project, region, and credential file *paths*. Fetch API keys and tokens on demand from Secret Manager through the repo's wrapper (`scripts/with-secrets.sh <command>`) instead of exporting them here.
+
 ### Template 1: Service Account Key
 
 ```bash
@@ -184,7 +186,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/credentials/PROJECT_
 # GCP Configuration: PROJECT_NAME
 export CLOUDSDK_ACTIVE_CONFIG_NAME="CONFIG_NAME"
 
-# Load .env first
+# Load .env first. Non-secret config only: no API keys or tokens.
 dotenv_if_exists .env
 
 # Override credentials to use ADC
@@ -233,8 +235,8 @@ gcloud auth application-default set-quota-project PROJECT_ID
 # direnv not loading
 direnv allow
 
-# Check current state
-${CLAUDE_SKILL_DIR}/scripts/check_gcloud_setup.sh
+# Check current state (SKILL_DIR = this skill directory)
+"$SKILL_DIR/scripts/check_gcloud_setup.sh"
 ```
 
 ## References

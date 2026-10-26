@@ -96,7 +96,7 @@ if remote_ref_exists origin/production; then
   if ! git merge-base --is-ancestor "$REMOTE_PROD_SHA" "$REMOTE_MAIN_SHA"; then
     echo -e "${RED}origin/production has commits that are not on origin/main.${NC}"
     echo -e "${RED}This violates the 'production must be reachable from main' rule.${NC}"
-    echo -e "${RED}Likely cause: a hotfix was applied to production without being back-ported.${NC}"
+    echo -e "${RED}Likely cause: a production hotfix was not merged back into main (a cherry-pick does not count).${NC}"
     exit 1
   fi
   echo -e "${GREEN}[OK] origin/production is reachable from origin/main${NC}"
@@ -110,7 +110,7 @@ if [ "$PRODUCTION_EXISTS" -eq 1 ]; then
   PENDING_COUNT="$(git rev-list --count origin/production..origin/main)"
   echo "Pending commits from main to production: ${PENDING_COUNT}"
   if [ "$PENDING_COUNT" -gt 0 ]; then
-    OLDEST_PENDING="$(git log --reverse --format='%ci %h %s' origin/production..origin/main | head -1)"
+    OLDEST_PENDING="$(git log --format='%ci %h %s' origin/production..origin/main | tail -1)"
     echo "Oldest pending commit: ${OLDEST_PENDING}"
   fi
 else
@@ -120,7 +120,7 @@ else
 fi
 
 section "Previous release tags"
-TAGS="$(git tag -l "$TAG_PATTERN" --sort=-version:refname | head -10)"
+TAGS="$(git for-each-ref --count=10 --sort=-version:refname --format='%(refname:short)' "refs/tags/${TAG_PATTERN}")"
 if [ -z "$TAGS" ]; then
   echo -e "${YELLOW}No previous release tags found.${NC}"
   echo -e "${YELLOW}Suggested first tag: v0.1.0${NC}"
@@ -167,10 +167,10 @@ if [ "$PRODUCTION_EXISTS" -eq 1 ]; then
   if [ "$(git rev-list --count "$RANGE")" -eq 0 ]; then
     echo -e "${YELLOW}No new commits between origin/production and origin/main.${NC}"
   else
-    git log --oneline --decorate --no-merges "$RANGE" | head -50
+    git log -n 50 --oneline --decorate --no-merges "$RANGE"
   fi
 else
-  git log --oneline --decorate --no-merges origin/main | head -50
+  git log -n 50 --oneline --decorate --no-merges origin/main
 fi
 
 echo ""
@@ -182,7 +182,7 @@ if [ "$PRODUCTION_EXISTS" -eq 1 ]; then
     git diff --stat origin/production..origin/main
   fi
 else
-  git show --stat --oneline --summary origin/main | head -80
+  sed -n '1,80p' <<< "$(git show --stat --oneline --summary origin/main)"
 fi
 
 section "Planned release actions"

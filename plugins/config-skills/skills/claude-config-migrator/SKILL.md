@@ -35,10 +35,10 @@ Collect source and target repository paths. Both must be local filesystem direct
 
 ### Step 2: Scan Source Repository
 
-Run the scanner script to produce a structured JSON inventory:
+Set `SKILL_DIR` to this skill directory, then run the scanner script to produce a structured JSON inventory:
 
 ```bash
-python skills/claude-config-migrator/scripts/scan_claude_config.py <source-path> --pretty
+python3 "$SKILL_DIR/scripts/scan_claude_config.py" <source-path> --pretty
 ```
 
 The scanner:
@@ -67,7 +67,7 @@ Examine the target repository to understand its context. Gather:
 2. **Project structure** — Key directories (`src/`, `lib/`, `tests/`, `app/`), entry points
 3. **Existing Claude Code config** — Run the scanner on the target too, to detect conflicts:
    ```bash
-   python skills/claude-config-migrator/scripts/scan_claude_config.py <target-path> --pretty
+   python3 "$SKILL_DIR/scripts/scan_claude_config.py" <target-path> --pretty
    ```
 4. **Conventions** — Linting config (`.eslintrc`, `ruff.toml`, `.prettierrc`), CI setup (`.github/workflows/`), coding style indicators
 

@@ -105,12 +105,12 @@ Request from user:
 
 ### 3.3 Token Counting (Minimal/Full Tier)
 
-Run the token counter script:
+Set `SKILL_DIR` to this skill directory, then run the token counter script:
 
 ```bash
-python scripts/token_counter.py "<prompt_text>" --provider claude
+python3 "$SKILL_DIR/scripts/token_counter.py" "<prompt_text>" --provider claude
 # Or from file:
-python scripts/token_counter.py --file prompt.txt --provider all
+python3 "$SKILL_DIR/scripts/token_counter.py" --file prompt.txt --provider all
 ```
 
 Output includes:
@@ -124,7 +124,7 @@ Output includes:
 Run the prompt analyzer:
 
 ```bash
-python scripts/prompt_analyzer.py --input prompt.txt
+python3 "$SKILL_DIR/scripts/prompt_analyzer.py" --input prompt.txt
 ```
 
 Output includes:
@@ -256,7 +256,7 @@ Monthly savings = token_reduction × requests/month × cost/token
 ### 5.4 Cache Structure Validation (Minimal/Full Tier)
 
 ```bash
-python scripts/cache_structure_validator.py --prompt optimized_prompt.txt --provider claude
+python3 "$SKILL_DIR/scripts/cache_structure_validator.py" --prompt optimized_prompt.txt --provider claude
 ```
 
 Validates:
