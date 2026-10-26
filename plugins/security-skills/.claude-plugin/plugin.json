@@ -1,0 +1,8 @@
+{
+  "name": "security-skills",
+  "description": "Web security review checklist for Next.js, Supabase, Python, and Go apps: Secret Manager secrets, SQL injection, RLS and server-side auth, CSP nonces, CSRF, cookies, uploads, rate limiting, and a greppable diff-review procedure",
+  "version": "1.0.0",
+  "author": {
+    "name": "dabsdamoon"
+  }
+}
