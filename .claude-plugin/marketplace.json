@@ -25,7 +25,7 @@
     },
     {
       "name": "developer-workflow-skills",
-      "description": "PR creation, release pipelines, deploy checks, Git-based work reports, testing workflows, Docker analysis, MCP building, prompt optimization, and debugging retrospectives",
+      "description": "PR creation, release pipelines, deploy checks, Git-based work reports, testing workflows, Docker analysis, Postgres/Supabase migrations, MCP building, prompt optimization, and debugging retrospectives",
       "source": "./plugins/developer-workflow-skills"
     },
     {
@@ -76,6 +76,11 @@
       "name": "analysis-skills",
       "description": "Critical thinking, evidence-backed decision reports, business scenario analysis, health statistics evidence reports, and context-preserving video Shorts selection",
       "source": "./plugins/analysis-skills"
+    },
+    {
+      "name": "security-skills",
+      "description": "Security review checklist and greppable diff review for Next.js, Supabase, Python, and Go apps",
+      "source": "./plugins/security-skills"
     },
     {
       "name": "translation-skills",
