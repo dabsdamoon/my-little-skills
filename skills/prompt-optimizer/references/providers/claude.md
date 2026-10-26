@@ -1,25 +1,16 @@
-# Claude/Anthropic Optimization Guide
+# Claude (Anthropic API) Cost Guide
 
-## Prompt Caching
+Model IDs, prices, and cache minimums: [../provider-facts.md](../provider-facts.md). In the examples, `MODEL` stands for an ID from that table.
 
-Claude's prompt caching reduces input costs by up to 90% and latency by up to 85%.
+For deeper Claude-only work, the bundled `claude-api` skill has the authoritative references: `shared/prompt-caching.md` (placement patterns, silent invalidators, invalidation hierarchy) and `shared/cost-optimization.md`, which `/claude-api cost-optimize` runs as a full cost pass over existing Claude code.
 
-### How It Works
+## Prompt caching
 
-1. Mark cacheable content with `cache_control`
-2. First request: cache write (25% premium)
-3. Subsequent requests: cache read (90% discount)
-4. Cache TTL: 5 minutes (refreshed on each hit)
+Caching is a prefix match over the rendered request, in the order `tools` -> `system` -> `messages`. A one-byte change at position N invalidates every cache entry at or after N.
 
-### Requirements
+### Explicit breakpoints
 
-| Model | Minimum Tokens |
-|-------|----------------|
-| Sonnet | 1,024 |
-| Haiku | 1,024 |
-| Opus | 2,048 |
-
-### Implementation
+Put `cache_control` on the last block of each stable section. Up to 4 breakpoints per request.
 
 ```python
 from anthropic import Anthropic
@@ -27,188 +18,115 @@ from anthropic import Anthropic
 client = Anthropic()
 
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
-    max_tokens=1024,
+    model=MODEL,
+    max_tokens=16000,
     system=[
         {
             "type": "text",
-            "text": """You are a helpful assistant specialized in...""",
-            "cache_control": {"type": "ephemeral"}
+            "text": STABLE_INSTRUCTIONS_AND_REFERENCE,
+            "cache_control": {"type": "ephemeral"},
         }
     ],
-    messages=[
-        {"role": "user", "content": user_query}  # Dynamic content
-    ]
+    messages=[{"role": "user", "content": per_request_input}],
 )
 ```
 
-### Multi-Component Caching
+A breakpoint on the last system block caches tools and system together. For a shared preamble followed by a varying question in the same user turn, put the marker on the shared block, not the last block, or every request writes a new entry that is never read.
 
-Cache up to 4 breakpoints:
+### Automatic caching
 
-```python
-system=[
-    {
-        "type": "text",
-        "text": "System instructions...",
-        "cache_control": {"type": "ephemeral"}  # Breakpoint 1
-    },
-    {
-        "type": "text",
-        "text": "Large reference document...",
-        "cache_control": {"type": "ephemeral"}  # Breakpoint 2
-    },
-    {
-        "type": "text",
-        "text": "Few-shot examples...",
-        "cache_control": {"type": "ephemeral"}  # Breakpoint 3
-    }
-]
-```
+A top-level `cache_control` field on the request places one breakpoint on the last cacheable block and moves it forward as a conversation grows. It is the simplest choice for multi-turn chat. It is the wrong choice when the prompt ends in unique per-request content: every request then pays the write premium on bytes nobody reads. It uses one of the 4 breakpoint slots and is rejected (400) on the legacy Amazon Bedrock integration for Opus 4.6 and earlier.
 
-### Best Practices
+The robust shape for agent loops: one explicit breakpoint on the static system prefix, plus top-level automatic caching for the growing tail.
 
-1. **Static first, dynamic last**: Place all cacheable content before dynamic content
-2. **Natural breakpoints**: Set cache_control at logical boundaries
-3. **Multi-turn optimization**: Cache system prompt + conversation prefix
-4. **Tools caching**: Cache tool definitions separately
-
-### Monitoring
-
-Check cache effectiveness via response:
+### TTL
 
 ```python
-usage = response.usage
-print(f"Cache write: {usage.cache_creation_input_tokens}")
-print(f"Cache read: {usage.cache_read_input_tokens}")
-print(f"Uncached: {usage.input_tokens}")
+{"type": "ephemeral"}               # 5-minute TTL (default), write 1.25x
+{"type": "ephemeral", "ttl": "1h"}  # 1-hour TTL, write 2x
 ```
 
-### Pricing (per 1M tokens, Sonnet)
+A cache read refreshes the timer at no extra cost, and the lifetime counts from the start of the request. Choose by the start-to-start gap between requests that share the prefix:
 
-| Type | Cost |
-|------|------|
-| Regular input | $3.00 |
-| Cache write | $3.75 |
-| Cache read | $0.30 |
+| Gap | TTL |
+|---|---|
+| Under 5 minutes | 5-minute (every request refreshes it) |
+| 5 to 60 minutes | 1-hour |
+| Over an hour | Neither; re-warm on a schedule or accept the miss |
 
-**Break-even**: ~2 requests with same cached content
+Break-even: with the 5-minute TTL, two requests (1.25x + 0.1x against 2x uncached); with the 1-hour TTL, three. On models with cheaper reads (see the facts file) the break-even comes sooner.
 
----
+### What silently breaks the cache
 
-## Token-Efficient Tool Use
+- Timestamps, request IDs, or user names interpolated into `system`
+- `json.dumps` without `sort_keys=True`, or tool lists built per user
+- Adding, removing, or reordering tools, or switching models mid-conversation
+- Changing `thinking` or top-level `output_config.effort` between requests
+- Changing `output_config.format` (the structured-output schema)
+- A prefix below the model's minimum: no error, just `cache_creation_input_tokens: 0`
 
-Built into Claude 4 models. Reduces tool-related output tokens by 14-70%.
+Move dynamic content after the last breakpoint, or into a later message.
 
-### Behavior
+### Verify from usage, not from code review
 
-- Tool call XML is condensed
-- Function names and parameters optimized
-- No configuration needed (automatic)
-
-### Note for Claude 3.x
-
-Requires beta header:
 ```python
-client.messages.create(
-    model="claude-3-7-sonnet-20250219",
-    betas=["token-efficient-tools-2025-02-19"],
-    ...
-)
+u = response.usage
+print(u.cache_creation_input_tokens, u.cache_read_input_tokens, u.input_tokens)
 ```
 
----
+`input_tokens` is only the uncached remainder; total prompt size is the sum of the three. On the second identical request, `cache_read_input_tokens` must be non-zero. Re-check after every change to prompt assembly - regressions are silent and only show on the bill.
 
-## Extended Thinking
+## Thinking and effort
 
-For complex tasks, extended thinking improves quality but affects caching.
-
-### Impact on Caching
-
-- Thinking blocks stripped when new non-tool content added
-- Consider trade-off: quality vs cache efficiency
-- Best for single-turn complex reasoning
-
-### Implementation
+Thinking tokens bill as output and count toward `max_tokens`. On current models, use adaptive thinking and steer cost with effort; `budget_tokens` returns a 400 on newer models (see the facts file).
 
 ```python
 response = client.messages.create(
-    model="claude-sonnet-4-5-20250929",
+    model=MODEL,
     max_tokens=16000,
-    thinking={"type": "enabled", "budget_tokens": 10000},
-    messages=[...]
+    thinking={"type": "adaptive"},
+    output_config={"effort": "medium"},
+    messages=[{"role": "user", "content": task}],
 )
 ```
 
----
+Lower effort first when thinking dominates the bill; it scales thinking, tool calls, and text together. Sweep effort on your own eval - quality cost varies by workload. Keep effort constant within a cached conversation (or use per-message effort where the model supports it) because a top-level change invalidates the messages cache.
 
-## Structured Outputs
+## Structured outputs
 
-Claude supports JSON mode for reliable structured responses.
-
-### Implementation
+Use `output_config.format` instead of "return JSON only" instructions, prefill, or retry-on-parse loops:
 
 ```python
 response = client.messages.create(
-    model="claude-sonnet-4-20250514",
+    model=MODEL,
     max_tokens=1024,
-    system="Return valid JSON only.",
-    messages=[
-        {
-            "role": "user",
-            "content": "Extract: name, email, phone from this text..."
+    messages=[{"role": "user", "content": f"Extract the contact details:\n{text}"}],
+    output_config={
+        "format": {
+            "type": "json_schema",
+            "schema": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "email": {"type": "string"},
+                },
+                "required": ["name", "email"],
+                "additionalProperties": False,
+            },
         }
-    ]
+    },
 )
 ```
 
-### Tips
+Structured outputs add a small injected system prompt (billed as input). Keep the schema stable: changing it invalidates the prompt cache and the compiled-grammar cache.
 
-1. Specify schema in system prompt
-2. Use examples for complex structures
-3. Request minimal fields only
-4. Consider YAML for simpler structures (fewer tokens)
+## Sampling parameters
 
----
+Do not send `temperature`, `top_p`, or `top_k` to control cost or output format. They are removed in API version `2026-10-21` and rejected with non-default values on Claude 4.7 and later under earlier versions.
 
-## Claude-Specific Prompt Tips
+## Other levers
 
-### Concise Instructions
-
-Claude responds well to direct, concise instructions:
-
-```
-# Verbose (avoid)
-I would like you to please help me by summarizing the following text.
-Please make sure to capture the main points and key details.
-
-# Concise (preferred)
-Summarize this text. Include main points and key details.
-```
-
-### XML Tags
-
-Claude excels with XML-structured prompts:
-
-```xml
-<instructions>
-Analyze the document and extract key information.
-</instructions>
-
-<document>
-{document_content}
-</document>
-
-<output_format>
-- Title
-- Main points (3-5)
-- Conclusion
-</output_format>
-```
-
-### System vs User Prompt
-
-- **System**: Role, constraints, format requirements
-- **User**: Task-specific content, context, queries
-
-Keep system prompt stable for caching; vary user content.
+- **Batch API**: 50% off every token, cache reads and writes included, for work nobody waits on (results within 24 hours).
+- **Token counting**: `client.messages.count_tokens(model=MODEL, system=..., messages=[...])` returns `.input_tokens`. It is free (rate-limited) and counts with the tokenizer of the model you pass. Do not use `tiktoken` for Claude.
+- **Large reference documents**: cache them when most requests read most of them; move them behind a tool or retrieval when requests need only a section.
+- **Many tool schemas**: cache the tool block (tools render first) and keep the list stable; past roughly 10K schema tokens consider tool search with `defer_loading`.

@@ -71,6 +71,12 @@ else
     print_info "GOOGLE_CLOUD_PROJECT: (not set)"
 fi
 
+if [[ -n "$GOOGLE_CLOUD_LOCATION" ]]; then
+    print_ok "GOOGLE_CLOUD_LOCATION: $GOOGLE_CLOUD_LOCATION"
+else
+    print_info "GOOGLE_CLOUD_LOCATION: (not set)"
+fi
+
 if [[ -n "$PROJECT_ID" ]]; then
     print_ok "PROJECT_ID: $PROJECT_ID"
 else
@@ -99,6 +105,10 @@ echo "----------------------------------------"
 ADC_FILE="$HOME/.config/gcloud/application_default_credentials.json"
 if [[ -f "$ADC_FILE" ]]; then
     print_ok "ADC file exists"
+    ADC_TYPE=$(grep -o '"type": "[^"]*"' "$ADC_FILE" 2>/dev/null | head -1 | cut -d'"' -f4)
+    if [[ -n "$ADC_TYPE" ]]; then
+        print_info "Type: $ADC_TYPE"
+    fi
     QUOTA_PROJECT=$(grep -o '"quota_project_id": "[^"]*"' "$ADC_FILE" 2>/dev/null | cut -d'"' -f4)
     if [[ -n "$QUOTA_PROJECT" ]]; then
         print_info "Quota project: $QUOTA_PROJECT"
@@ -116,8 +126,15 @@ print_info "Directory: $(pwd)"
 if [[ -f ".envrc" ]]; then
     print_ok ".envrc file exists"
     # direnv >= 2.33 prints an allow status (0 = allowed); older releases print true.
-    if direnv status 2>/dev/null | grep -Eq "^Found RC allowed (0|true)$"; then
+    DIRENV_STATUS=$(direnv status 2>/dev/null || true)
+    if grep -Eq "^Found RC allowed (0|true)$" <<< "$DIRENV_STATUS"; then
         print_ok ".envrc is allowed"
+        FOUND_RC=$(sed -n 's/^Found RC path //p' <<< "$DIRENV_STATUS")
+        LOADED_RC=$(sed -n 's/^Loaded RC path //p' <<< "$DIRENV_STATUS")
+        if [[ "$LOADED_RC" != "$FOUND_RC" ]]; then
+            print_warn ".envrc is not loaded in this shell (no direnv hook, e.g. an agent shell)"
+            print_info "Run commands as: direnv exec . <command>"
+        fi
     else
         print_warn ".envrc is NOT allowed"
         print_info "Run: direnv allow"

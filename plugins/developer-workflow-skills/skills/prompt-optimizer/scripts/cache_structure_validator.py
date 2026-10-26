@@ -3,9 +3,12 @@
 Validate cache-friendly prompt structure.
 
 Usage:
-    python cache_structure_validator.py --prompt prompt.txt
-    python cache_structure_validator.py --prompt prompt.txt --provider claude
-    python cache_structure_validator.py "<prompt_text>" --provider openai
+    python3 cache_structure_validator.py --prompt prompt.txt
+    python3 cache_structure_validator.py --prompt prompt.txt --provider claude --min-cache-tokens MIN
+    python3 cache_structure_validator.py "<prompt_text>" --provider openai
+
+Token counts are estimates (~4 characters per token). Cache minimums are
+model-specific: pass --min-cache-tokens from references/provider-facts.md.
 """
 
 import argparse
@@ -14,25 +17,19 @@ import sys
 from pathlib import Path
 
 
-# Cache requirements by provider
+# Structural caching facts by provider; minimums and TTLs are per model, see references/provider-facts.md
 CACHE_REQUIREMENTS = {
     "claude": {
-        "minimum_tokens": 1024,
-        "ttl_minutes": 5,
         "max_breakpoints": 4,
-        "description": "Explicit caching with cache_control parameter",
+        "description": "Prefix cache; cache_control breakpoints or top-level automatic caching",
     },
     "openai": {
-        "minimum_tokens": 0,
-        "ttl_minutes": None,  # Automatic
-        "max_breakpoints": None,
-        "description": "Automatic caching (no explicit control)",
+        "max_breakpoints": 4,
+        "description": "Prefix cache; implicit by default, prompt_cache_breakpoint on GPT-5.6 and later",
     },
     "gemini": {
-        "minimum_tokens": 32768,
-        "ttl_minutes": 60,
         "max_breakpoints": 1,
-        "description": "Context caching API with storage costs",
+        "description": "Implicit prefix cache on 2.5 and newer; explicit cache objects where supported",
     },
 }
 
@@ -55,7 +52,7 @@ DYNAMIC_PATTERNS = [
 CACHE_BREAKERS = [
     (r"\d{4}-\d{2}-\d{2}", "Hardcoded date (YYYY-MM-DD)"),
     (r"\d{1,2}/\d{1,2}/\d{2,4}", "Hardcoded date (MM/DD/YYYY)"),
-    (r"(today|now|current date)", "Temporal reference"),
+    (r"\b(today|now|current date)\b", "Temporal reference"),
     (r"user[_-]?id:\s*\S+", "User ID"),
     (r"session[_-]?id:\s*\S+", "Session ID"),
     (r"request[_-]?id:\s*\S+", "Request ID"),
@@ -106,10 +103,11 @@ def find_cache_breakers(text: str) -> list:
     return sorted(breakers, key=lambda x: x["position"])
 
 
-def suggest_breakpoints(text: str, provider: str) -> list:
-    """Suggest optimal cache breakpoints."""
+def suggest_breakpoints(text: str, provider: str, min_tokens: int | None, boundary: int) -> list:
+    """Suggest cache breakpoints at section ends inside the static prefix, ending at the static/dynamic boundary."""
     suggestions = []
     lines = text.split('\n')
+    min_tokens = min_tokens or 1
 
     # Find section boundaries
     section_patterns = [
@@ -125,27 +123,39 @@ def suggest_breakpoints(text: str, provider: str) -> list:
         for pattern, desc in section_patterns:
             if re.match(pattern, line, re.IGNORECASE):
                 tokens_so_far = estimate_tokens(text[:current_pos])
-                if tokens_so_far >= CACHE_REQUIREMENTS[provider]["minimum_tokens"]:
+                if current_pos < boundary and tokens_so_far >= min_tokens:
                     suggestions.append({
-                        "line": i + 1,
+                        "line": i,
                         "position": current_pos,
                         "tokens_before": tokens_so_far,
-                        "reason": f"After {desc}",
+                        "reason": f"End of section (next line {i + 1} starts a {desc})",
                         "text_preview": line[:40],
                     })
+                break
         current_pos += len(line) + 1  # +1 for newline
 
-    # Limit to max breakpoints
-    max_bp = CACHE_REQUIREMENTS[provider].get("max_breakpoints")
-    if max_bp and len(suggestions) > max_bp:
-        # Keep evenly distributed breakpoints
-        step = len(suggestions) // max_bp
-        suggestions = [suggestions[i * step] for i in range(max_bp)]
+    static_tokens = estimate_tokens(text[:boundary])
+    if boundary < len(text) and static_tokens >= min_tokens:
+        suggestions.append({
+            "line": text[:boundary].count('\n') + 1,
+            "position": boundary,
+            "tokens_before": static_tokens,
+            "reason": "End of static prefix (this line holds the first dynamic placeholder; break just before it)",
+            "text_preview": text[boundary:boundary + 40],
+        })
+
+    # Keep the static/dynamic boundary and spread the rest up to the provider's limit
+    max_bp = CACHE_REQUIREMENTS[provider]["max_breakpoints"]
+    if len(suggestions) > max_bp:
+        last = suggestions[-1]
+        rest = suggestions[:-1]
+        step = len(rest) / (max_bp - 1) if max_bp > 1 else len(rest)
+        suggestions = [rest[int(i * step)] for i in range(max_bp - 1)] + [last]
 
     return suggestions
 
 
-def validate(text: str, provider: str) -> dict:
+def validate(text: str, provider: str, min_tokens: int | None) -> dict:
     """Validate cache structure for given provider."""
     requirements = CACHE_REQUIREMENTS[provider]
     total_tokens = estimate_tokens(text)
@@ -162,8 +172,13 @@ def validate(text: str, provider: str) -> dict:
     checks = []
 
     # Check 1: Minimum tokens
-    min_tokens = requirements["minimum_tokens"]
-    if min_tokens > 0:
+    if min_tokens is None:
+        checks.append({
+            "check": "Minimum token threshold",
+            "status": "SKIP",
+            "detail": "Pass --min-cache-tokens for the target model (references/provider-facts.md)",
+        })
+    else:
         if static_tokens >= min_tokens:
             checks.append({
                 "check": "Minimum token threshold",
@@ -232,7 +247,7 @@ def validate(text: str, provider: str) -> dict:
         overall = "VALID"
 
     # Get breakpoint suggestions
-    breakpoints = suggest_breakpoints(text, provider)
+    breakpoints = suggest_breakpoints(text, provider, min_tokens, boundary)
 
     return {
         "provider": provider,
@@ -267,8 +282,7 @@ def format_result(result: dict) -> str:
     ]
 
     for check in result["checks"]:
-        status_icon = {"PASS": "PASS", "FAIL": "FAIL", "WARN": "WARN"}[check["status"]]
-        lines.append(f"  [{status_icon}] {check['check']}")
+        lines.append(f"  [{check['status']}] {check['check']}")
         lines.append(f"        {check['detail']}")
 
     lines.extend([
@@ -276,8 +290,9 @@ def format_result(result: dict) -> str:
         "METRICS:",
         f"  Total tokens: ~{result['metrics']['total_tokens']:,}",
         f"  Static prefix: ~{result['metrics']['static_tokens']:,} tokens ({result['metrics']['static_ratio_percent']}%)",
-        f"  Minimum required: {result['metrics']['minimum_required']:,} tokens",
     ])
+    if result["metrics"]["minimum_required"] is not None:
+        lines.append(f"  Minimum required: {result['metrics']['minimum_required']:,} tokens")
 
     if result["cache_breakers"]:
         lines.extend(["", "CACHE BREAKERS FOUND:"])
@@ -303,9 +318,9 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    python cache_structure_validator.py --prompt prompt.txt
-    python cache_structure_validator.py --prompt prompt.txt --provider openai
-    python cache_structure_validator.py "Your prompt" --provider gemini
+    python3 cache_structure_validator.py --prompt prompt.txt
+    python3 cache_structure_validator.py --prompt prompt.txt --provider openai --min-cache-tokens MIN
+    python3 cache_structure_validator.py "Your prompt" --provider gemini
         """
     )
     parser.add_argument("text", nargs="?", help="Prompt text to validate")
@@ -316,6 +331,8 @@ Examples:
         default="claude",
         help="Target provider (default: claude)"
     )
+    parser.add_argument("--min-cache-tokens", type=int,
+                        help="Minimum cacheable prefix for the target model")
     parser.add_argument("--json", "-j", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
@@ -334,7 +351,7 @@ Examples:
         sys.exit(1)
 
     # Validate
-    result = validate(text, args.provider)
+    result = validate(text, args.provider, args.min_cache_tokens)
 
     # Output
     if args.json:

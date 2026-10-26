@@ -200,7 +200,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
 | **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
 | **character-production-skills** | layered-character-production | Project MagicGirlSquad character continuity, layered rigs, costume damage, expressions, and playable review |
-| **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, pr-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
+| **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, dual-track-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **analysis-skills** | analytique, building-decision-reports, building-health-evidence-reports, selecting-video-shorts | Critical analysis, evidence-backed business decision reports, scenario modeling, health statistics evidence packs, and context-preserving Shorts selection |
 | **fde-estimation-skills** | capture-customer-outcomes, document-field-discovery, collect-as-built-evidence, define-estimation-policy, reconcile-scope-delta, generate-estimate-package | Interactive, evidence-backed FDE discovery, reviewed staffing, seniority, rate, scope, and effort reconciliation, budgetary estimates, and basis-of-estimate reports |
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean, explain-simply | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing, decoding jargon-heavy work summaries |
@@ -251,14 +251,15 @@ These skills are original to this marketplace — not available in Anthropic's o
 |-------|-------------|
 | **dual-track-tdd** | Runs product discovery and test-driven delivery as linked tracks, with explicit evidence, handoff, acceptance, and feedback gates |
 | **pr-creator** | Generates PR documentation with blast radius analysis (how many files depend on your changes) and OWASP security scanning of the diff |
+| **dual-track-checklist-verifier** | Re-runs a PR's unchecked test-plan items on the current head commit and ticks only what it proved, for any PR or dual-track bodies |
 | **setup-release-pipeline** | Sets up an opinionated production-pointer release workflow for branch-tracking hosts: `main` stays latest-code/release-candidate, `production` is the live branch, and `run_deploy.sh` ships explicitly without deploy secrets |
 | **deploy-check** | Checks deployment readiness and records a concise deploy report |
 | **docker-ram-checker** | Tests Docker container memory usage before deploying to Cloud Run, ECS, or Kubernetes |
-| **prompt-optimizer** | Reduces token usage and improves cache efficiency for production LLM prompts |
-| **subagent-creator** | Generates repository-specific Claude Code subagents tailored to your tech stack |
+| **prompt-optimizer** | Cuts LLM API cost across Claude, OpenAI, and Gemini with cache-friendly prompt structure and token trimming; prompt-quality audits go to `claude-api prompt-audit` |
+| **subagent-creator** | Generates repository-specific Claude Code subagents and matching Codex custom agents, after checking the existing roster for duplicates |
 | **debugging-retrospective** | Summarizes debugging sessions into educational postmortems with lessons learned |
 | **generate-git-work-report** | Produces timestamped external and internal Git work reports from a verifiable evidence snapshot, with conservative Korean narrative editing and reference-matched DOCX/PDF QA |
-| **gcloud-direnv-setup** | Configures per-directory GCP credentials with direnv for multi-account setups |
+| **gcloud-direnv-setup** | Configures per-directory GCP credentials with direnv, preferring ADC and impersonation over key files, including commands run by coding agents |
 | **refactoring-resistant-tests** | Builds behavior-focused tests that survive internal refactors and use stable observable boundaries |
 
 ### FDE Estimation

@@ -381,22 +381,19 @@ After creating your evaluation file, you can use the provided evaluation harness
 
 ## Setup
 
-1. **Install Dependencies**
+Set `SKILL_DIR` to this skill directory.
+
+1. **Install dependencies** into a virtualenv. The harness needs Python 3.11+ and the MCP Python SDK 2.x; `requirements.txt` pins compatible ranges (see the version table in SKILL.md).
 
    ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
    pip install -r "$SKILL_DIR/scripts/requirements.txt"
    ```
 
-   Or install manually:
-   ```bash
-   pip install anthropic mcp
-   ```
+2. **Provide the API key to this process only.** The script reads `ANTHROPIC_API_KEY` from its environment. Do not add it to a shell profile or `.env` file. If the repo ships a secrets wrapper such as `scripts/with-secrets.sh`, run the commands below through it (`scripts/with-secrets.sh python3 ...`) so the key is fetched on demand.
 
-2. **Set API Key**
-
-   ```bash
-   export ANTHROPIC_API_KEY=your_api_key_here
-   ```
+3. **Pass server secrets by name.** A stdio server inherits only `HOME`, `LOGNAME`, `PATH`, `SHELL`, `TERM`, and `USER` from the harness. Give `-e VAR_NAME` without `=value` to copy one variable from the harness environment, so the secret never appears on the command line.
 
 ## Evaluation File Format
 
@@ -417,7 +414,7 @@ Evaluation files use XML format with `<qa_pair>` elements:
 
 ## Running Evaluations
 
-The evaluation script (`scripts/evaluation.py`) supports three transport types. Set `SKILL_DIR` to the mcp-builder skill directory before running the commands below.
+The evaluation script (`scripts/evaluation.py`) supports three transport types. Put the evaluation file first: `-a`, `-e`, and `-H` take one or more values and would otherwise swallow it.
 
 **Important:**
 - **stdio transport**: The evaluation script automatically launches and manages the MCP server process for you. Do not run the server manually.
@@ -428,47 +425,42 @@ The evaluation script (`scripts/evaluation.py`) supports three transport types. 
 For locally-run MCP servers (script launches the server automatically):
 
 ```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
+python3 "$SKILL_DIR/scripts/evaluation.py" evaluation.xml \
   -t stdio \
-  -c python \
-  -a my_mcp_server.py \
-  evaluation.xml
+  -c python3 \
+  -a my_mcp_server.py
 ```
 
-With environment variables:
+With environment variables (`EXAMPLE_API_KEY` is copied from the harness environment; `DEBUG` is set literally):
 ```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
+scripts/with-secrets.sh python3 "$SKILL_DIR/scripts/evaluation.py" evaluation.xml \
   -t stdio \
-  -c python \
+  -c python3 \
   -a my_mcp_server.py \
-  -e API_KEY=abc123 \
-  -e DEBUG=true \
-  evaluation.xml
+  -e EXAMPLE_API_KEY \
+  -e DEBUG=true
 ```
 
-### 2. Server-Sent Events (SSE)
-
-For SSE-based MCP servers (you must start the server first):
-
-```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
-  -t sse \
-  -u https://example.com/mcp \
-  -H "Authorization: Bearer token123" \
-  -H "X-Custom-Header: value" \
-  evaluation.xml
-```
-
-### 3. HTTP (Streamable HTTP)
+### 2. HTTP (Streamable HTTP)
 
 For HTTP-based MCP servers (you must start the server first):
 
 ```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
+python3 "$SKILL_DIR/scripts/evaluation.py" evaluation.xml \
   -t http \
-  -u https://example.com/mcp \
-  -H "Authorization: Bearer token123" \
-  evaluation.xml
+  -u http://127.0.0.1:8000/mcp
+```
+
+`-H "Key: Value"` adds request headers. A header value on the command line is visible in shell history and the process list, so do not pass long-lived tokens this way.
+
+### 3. Server-Sent Events (legacy)
+
+HTTP+SSE is deprecated in the 2026-07-28 spec. Use this only for older servers (you must start the server first):
+
+```bash
+python3 "$SKILL_DIR/scripts/evaluation.py" evaluation.xml \
+  -t sse \
+  -u http://127.0.0.1:8000/sse
 ```
 
 ## Command-Line Options
@@ -480,23 +472,25 @@ usage: evaluation.py [-h] [-t {stdio,sse,http}] [-m MODEL] [-c COMMAND]
                      eval_file
 
 positional arguments:
-  eval_file             Path to evaluation XML file
+  eval_file             Path to evaluation XML file (pass it before -a/-e/-H)
 
 optional arguments:
   -h, --help            Show help message
   -t, --transport       Transport type: stdio, sse, or http (default: stdio)
-  -m, --model           Claude model to use (default: claude-3-7-sonnet-20250219)
+  -m, --model           Claude model to use (default: claude-sonnet-5-5)
   -o, --output          Output file for report (default: print to stdout)
 
 stdio options:
-  -c, --command         Command to run MCP server (e.g., python, node)
+  -c, --command         Command to run MCP server (e.g., python3, node)
   -a, --args            Arguments for the command (e.g., server.py)
-  -e, --env             Environment variables in KEY=VALUE format
+  -e, --env             KEY=VALUE, or a bare KEY to copy it from this environment
 
 sse/http options:
   -u, --url             MCP server URL
   -H, --header          HTTP headers in 'Key: Value' format
 ```
+
+`-a`, `-e`, and `-H` can be repeated; values accumulate. The harness sends up to 16,000 output tokens per turn (thinking tokens count toward `max_tokens`) and answers every `tool_use` block in a turn.
 
 ## Output
 
@@ -519,12 +513,11 @@ The evaluation script generates a detailed report including:
 ### Save Report to File
 
 ```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
+python3 "$SKILL_DIR/scripts/evaluation.py" evaluation.xml \
   -t stdio \
-  -c python \
+  -c python3 \
   -a my_server.py \
-  -o evaluation_report.md \
-  evaluation.xml
+  -o evaluation_report.md
 ```
 
 ## Complete Example Workflow
@@ -550,23 +543,23 @@ Here's a complete example of creating and running an evaluation:
 </evaluation>
 ```
 
-2. **Install dependencies**:
+2. **Install dependencies** (see [Setup](#setup)):
 
 ```bash
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r "$SKILL_DIR/scripts/requirements.txt"
-export ANTHROPIC_API_KEY=your_api_key
 ```
 
-3. **Run evaluation**:
+3. **Run evaluation** through the repo's secrets wrapper, which supplies `ANTHROPIC_API_KEY` and `GITHUB_TOKEN` to this one process:
 
 ```bash
-python3 "$SKILL_DIR/scripts/evaluation.py" \
+scripts/with-secrets.sh python3 "$SKILL_DIR/scripts/evaluation.py" my_evaluation.xml \
   -t stdio \
-  -c python \
+  -c python3 \
   -a github_mcp_server.py \
-  -e GITHUB_TOKEN=ghp_xxx \
-  -o github_eval_report.md \
-  my_evaluation.xml
+  -e GITHUB_TOKEN \
+  -o github_eval_report.md
 ```
 
 4. **Review the report** in `github_eval_report.md` to:
@@ -580,9 +573,9 @@ python3 "$SKILL_DIR/scripts/evaluation.py" \
 ### Connection Errors
 
 If you get connection errors:
-- **STDIO**: Verify the command and arguments are correct
-- **SSE/HTTP**: Check the URL is accessible and headers are correct
-- Ensure any required API keys are set in environment variables or headers
+- **STDIO**: Verify the command and arguments are correct, and that every variable the server needs is forwarded with `-e`
+- **SSE/HTTP**: Check the URL is accessible and headers are correct. A Python SDK server behind a non-localhost hostname answers `421 Invalid Host header` until its `transport_security` allowlist includes that host
+- `ModuleNotFoundError: No module named 'mcp.server.fastmcp'` means the server was written for SDK 1.x; see the Python guide
 
 ### Low Accuracy
 
@@ -596,7 +589,7 @@ If many evaluations fail:
 ### Timeout Issues
 
 If tasks are timing out:
-- Use a more capable model (e.g., `claude-3-7-sonnet-20250219`)
+- Try a more capable model (e.g., `-m claude-opus-5-5`)
 - Check if tools are returning too much data
 - Verify pagination is working correctly
 - Consider simplifying complex questions

@@ -9,11 +9,11 @@
 # Output: prints the venv root path on stdout. Diagnostics go to stderr.
 #
 # Usage:
-#   VENV="$(scripts/ensure_playwright.sh)" || exit 1
+#   VENV="$("$SKILL_DIR/scripts/ensure_playwright.sh")" || exit 1
 #   "$VENV/bin/python" your_test.py
 #
 # Environment overrides:
-#   PLAYWRIGHT_VERSION   Pin a different playwright version (default: 1.49.1)
+#   PLAYWRIGHT_VERSION   Pin a different playwright version (default: see below)
 #   WEBAPP_TESTING_VENV  Override the venv path entirely
 #   XDG_CACHE_HOME       Standard XDG cache root (default: $HOME/.cache)
 #
@@ -22,27 +22,34 @@
 #     installed, this script exits in <100ms with no work done.
 #   - First-run takes ~30-60s (pip install playwright + chromium download).
 #   - Re-runs after a Python version upgrade trigger a full rebuild.
+#
+# Browser: installs only chromium's headless shell (`--only-shell`), which is what
+# a headless launch without `channel` uses. For headed debugging run
+# "$VENV/bin/playwright" install chromium once.
 
 set -euo pipefail
 
-PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.60.0}"
+# Checked 2026-10-26 against https://pypi.org/pypi/playwright/json:
+# 1.64.1 is the latest release (2026-10-22) and requires Python >=3.10.
+PLAYWRIGHT_VERSION="${PLAYWRIGHT_VERSION:-1.64.1}"
+MIN_PY_MINOR=10
 CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 VENV="${WEBAPP_TESTING_VENV:-$CACHE_HOME/claude-skills/webapp-testing/venv}"
 
 log() { printf '[ensure_playwright] %s\n' "$*" >&2; }
 
-# 1. Python 3.9+ is required. We don't hard-cap the upper bound — pip's resolver
+# 1. Enforce the Python floor (MIN_PY_MINOR above). We don't hard-cap the upper bound — pip's resolver
 # decides whether the requested playwright version has a compatible wheel.
 if ! command -v python3 >/dev/null 2>&1; then
-  log "ERROR: python3 not found. Install Python 3.9+ before using this skill."
+  log "ERROR: python3 not found. Install Python 3.$MIN_PY_MINOR+ before using this skill."
   exit 1
 fi
 
 py_version="$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
 py_major="$(python3 -c 'import sys; print(sys.version_info.major)')"
 py_minor="$(python3 -c 'import sys; print(sys.version_info.minor)')"
-if [ "$py_major" -lt 3 ] || { [ "$py_major" = "3" ] && [ "$py_minor" -lt 9 ]; }; then
-  log "ERROR: Playwright requires Python 3.9+; found $py_version."
+if [ "$py_major" -lt 3 ] || { [ "$py_major" = "3" ] && [ "$py_minor" -lt "$MIN_PY_MINOR" ]; }; then
+  log "ERROR: Playwright requires Python 3.$MIN_PY_MINOR+; found $py_version."
   exit 1
 fi
 
@@ -80,8 +87,8 @@ if [ "$current" != "$PLAYWRIGHT_VERSION" ]; then
   log "Installing playwright==$PLAYWRIGHT_VERSION (current: ${current:-none})"
   "$VENV/bin/pip" install --quiet --upgrade pip >&2
   "$VENV/bin/pip" install --quiet "playwright==$PLAYWRIGHT_VERSION" >&2
-  log "Installing chromium browser (this may take a minute on first run)"
-  "$VENV/bin/playwright" install chromium >&2
+  log "Installing chromium headless shell (this may take a minute on first run)"
+  "$VENV/bin/playwright" install --only-shell chromium >&2
 fi
 
 # 4. Confirm chromium is actually launchable. If not, try install once more.
@@ -92,8 +99,8 @@ with sync_playwright() as p:
     b.close()
 PY
 then
-  log "Chromium launch failed; re-running 'playwright install chromium'"
-  "$VENV/bin/playwright" install chromium >&2
+  log "Chromium launch failed; re-running 'playwright install --only-shell chromium'"
+  "$VENV/bin/playwright" install --only-shell chromium >&2
   if ! "$VENV/bin/python" - <<'PY' >/dev/null 2>&1
 from playwright.sync_api import sync_playwright
 with sync_playwright() as p:
