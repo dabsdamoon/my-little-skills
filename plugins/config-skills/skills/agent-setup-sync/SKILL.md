@@ -41,7 +41,7 @@ Check that `command -v agent-sync` succeeds and the baseline file exists. If eit
 
    Show the baseline diff to the user before applying.
 4. **Dry run.** `agent-sync apply` prints the plan without changing anything. Anything it replaces moves to `~/.local/state/agent-sync/backup/<timestamp>/`, along with a copy of each settings file before its first edit; the only deletions are symlinks that duplicate a plugin skill or command.
-5. **Apply** with `agent-sync apply --yes` once the user agrees, then run `agent-sync audit` again. `--yes` first refreshes the marketplaces and updates installed baseline plugins (`claude plugin marketplace update`, `claude plugin update`, `codex plugin marketplace upgrade`), then recomputes the plan, so it can do more than the dry run showed. A plugin's skills are only visible after it is installed, so a second pass can reveal duplicates.
+5. **Apply** with `agent-sync apply --yes` once the user agrees, then run `agent-sync audit` again. `--yes` first refreshes the marketplaces and updates installed baseline plugins (`claude plugin marketplace update`, `claude plugin update`, `codex plugin marketplace upgrade`), then recomputes the plan, so it can do more than the dry run showed. It does not update a plugin whose `package.json` lists dependencies, because `claude plugin update` would install those npm packages; it prints the plugin instead. Review the packages under the user's package-safety rule before running that update by hand. A plugin's skills are only visible after it is installed, so a second pass can reveal duplicates.
 6. **Say when changes take effect.** Claude Code loads plugins at session start (`/reload-plugins` in an open session). Codex reads its config when it starts.
 7. **Hand back the commit.** The baseline is in a git repository. Do not commit or push unless asked; name the changed file and suggest committing it so other machines pick it up.
 
@@ -58,4 +58,5 @@ Check these when asked to clean up, or when a skill is not picked up or misbehav
 
 - Codex reads user skills from `~/.agents/skills`; `~/.codex/skills` is not in its documented locations, so agent-sync moves everything except `.system` out of it.
 - Listing a plugin in `enabledPlugins` does not download it; agent-sync runs `claude plugin install` and `codex plugin add` for missing plugins.
-- agent-sync never installs packages. Its network use is marketplace refreshes, plugin installs and updates, and downloading pinned skills from `codeload.github.com`.
+- agent-sync never runs a package manager itself. Its network use is marketplace refreshes, plugin installs and updates, and downloading pinned skills from `codeload.github.com`.
+- `claude plugin install` and `claude plugin update` install the npm packages a plugin's lockfile lists, with install scripts disabled (`bun install --frozen-lockfile --ignore-scripts` or `npm ci --ignore-scripts`, read from Claude Code 2.1.310). Before approving a dry run that installs a new plugin, check the plugin's `package.json`.
