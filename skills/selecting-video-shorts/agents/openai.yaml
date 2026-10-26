@@ -1,0 +1,4 @@
+interface:
+  display_name: "Select Video Shorts"
+  short_description: "Select complete, purpose-aware video excerpts"
+  default_prompt: "Use $selecting-video-shorts to select excerpts for my stated purpose, preserve the source dialogue and times, and finish each promised explanation before inviting further viewing."
