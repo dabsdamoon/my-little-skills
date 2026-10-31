@@ -12,6 +12,15 @@ Baseline repository commit: `6d2d539007d6c3ab57646d726054ba47e3f68ac1`. The old 
 
 The four groups are no-guidance 5, old-plugin 5, historical guided-v1 5, final guided-v2 5, plus three separate smoke responses. Agents did not receive rubrics or earlier outputs. These are no-history subagents sharing a parent runtime, not separate model weights or an alternate clean harness. The author was not blinded. The model identifier was not independently recorded; do not infer it from agent names. This evaluation is separate from the 27-run research reported in the updated issue; those data were not rerun or independently verified here.
 
+## Limits found in code review
+
+These limits apply to every observation below. Re-measurement is tracked in [issue #47](https://github.com/dabsdamoon/my-little-skills/issues/47).
+
+- **Possible control contamination.** `brief.md` names no characters, yet Mira/Adela appear in three no-guidance responses (control-1, -3, -4), four old-plugin responses (old-1, -3, -4, -5), two v1 responses and one v2 response. The names match a skill listed in the parent session, so parent context reached the "no-history" subagents. Whether the no-guidance arm could see an installed design skill was not recorded. The no-guidance versus guided contrast is therefore not a clean guidance effect.
+- **Cross-run final diversity.** The five old-plugin runs end on five different organizations (instrument panel around the arena, thumb-side portrait cluster, right-side swap paddles, bottom-left roster, lower-right stacked selector). All five v2 runs end on player-following HP with right-side reserves. On the cross-run measure issue #45 targets, this evaluation shows no improvement for v2 and may show a narrowing.
+- **Reference preloaded.** Guided runs received `references/structural-exploration.md` directly, including for the narrow edit. The scope table's routing, which should load the reference only for open exploration, was not exercised.
+- **Shipped text differs from the evaluated v2.** After code review, v3 restores upstream calibration (generated-page looks, typographic tells, the two-pass plan review with the similar-prompt check, note-keeping, line length, CSS specificity), broadens the trigger description, and removes game-specific and maintainer-only wording from the runtime text. v3 was not re-evaluated.
+
 ## Primary observations
 
 | Observable | No guidance, 5 runs | Old plugin, 5 runs | Final v2, 5 runs |
@@ -38,11 +47,11 @@ Inputs are in [additional-briefs.md](additional-briefs.md).
 
 ## Interpretation and remaining work
 
-The observations support provisional use of scope routing, explicit structural comparisons, and novelty-aware final-selection reasoning. They do not prove visual originality, better usability, aesthetic quality, statistical significance, or a particular model/harness cause. Repeated palette/instrument language persists. V2 final choices still converge on this primary brief. Explicitly comparing a baseline is a bounded process improvement, not a validated creativity score.
+Within the limits above, the observations support only provisional use of scope routing, explicit structural comparisons, and novelty-aware final-selection reasoning. They do not prove visual originality, better usability, aesthetic quality, statistical significance, or a particular model/harness cause. Repeated palette/instrument language persists. V2 final choices still converge on this primary brief. Explicitly comparing a baseline is a bounded process improvement, not a validated creativity score.
 
 Remaining in issue #45: representative rendered comparisons, automatic skill-selection/installation checks, more domains and repeats, independent quality/functional judgments, comparison-metric validation, and costs/acceptance rates for an external selection procedure. No universal role set, fixed candidate count or distance threshold is imported from the issue's pilot. These guides do not require five-run benchmarks or automatic extra tools for ordinary UI work.
 
-All examples are synthetic. No private customer assets, production data, hidden prompts, credentials or generated images are included. Text samples are evidence, not reusable visual templates. Explicit brand choices, fixed layouts and user-authorized scope retain priority.
+The briefs are synthetic; some responses contain character names that leaked from the parent session (see the limits above). No private customer assets, production data, hidden prompts, credentials or generated images are included. Text samples are evidence, not reusable visual templates. Explicit brand choices, fixed layouts and user-authorized scope retain priority.
 
 ## Packaging verification
 
