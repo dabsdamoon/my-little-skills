@@ -218,7 +218,9 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 
 This marketplace tracks [anthropics/skills](https://github.com/anthropics/skills) as an upstream remote. The following skills come directly from Anthropic's official repository:
 
-academy-guide, algorithmic-art, brand-guidelines, canvas-design, claude-api, discernment-nudge, doc-coauthoring, docx, frontend-design, internal-comms, mcp-builder, pdf, pptx, skill-creator, slack-gif-creator, theme-factory, web-artifacts-builder, webapp-testing, xlsx
+academy-guide, algorithmic-art, brand-guidelines, canvas-design, claude-api, discernment-nudge, doc-coauthoring, docx, internal-comms, mcp-builder, pdf, pptx, skill-creator, slack-gif-creator, theme-factory, web-artifacts-builder, webapp-testing, xlsx
+
+`frontend-design` is a [local adaptation](skills/frontend-design/NOTICE.md) of Anthropic's skill. It adds scope-aware structural exploration while preserving approved designs for small edits. Its canonical source and published `design-skills` copy stay identical. Run `python3 plugins/design-skills/evals/check_distribution.py` before publishing; the [behavioral evaluation](plugins/design-skills/evals/frontend-design/EVALUATION.md) separates synthetic planning observations from visual or user validation. `design-skills` 1.1.0 carries this adaptation for Codex and Claude Code.
 
 `skills/claude-api` stays in the tree for upstream syncs but is not published as a plugin here: plugin names starting with `claude-` are reserved for Anthropic, and Claude Code already bundles its own `claude-api` skill.
 

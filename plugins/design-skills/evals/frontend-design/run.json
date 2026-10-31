@@ -1,0 +1,14 @@
+{
+  "date": "2026-10-31",
+  "baseline_repository_commit": "6d2d539007d6c3ab57646d726054ba47e3f68ac1",
+  "control": "no design guidance",
+  "guided": "revised SKILL.md plus relevant linked reference",
+  "fresh_runs_per_arm": 5,
+  "extra_heldout_runs": 1,
+  "model_identifier": null,
+  "runtime_notes": "No-history subagents sharing the parent runtime; not a separate harness or weights-only experiment.",
+  "entry_sha256": "cdf85bbb74bfda660a4ef24f5f742159d498e1bf78e1a8363292930420439925",
+  "reference_sha256": "232de0b23282ed978d7a6edaf6399a7c344eea7933b410e9ea15731a8f9269d5",
+  "brief_sha256": "403871c4042960017120fd1a078a3f0ad267b0cdc39def8f8c9991cd313fc8fc",
+  "rubric_sha256": "91fee4dd52641e5b3ef123993925cbab948ce351abc4d388c70fd89288216b69"
+}
