@@ -1,0 +1,25 @@
+{
+  "name": "design-skills",
+  "description": "Frontend UI design and structural exploration, algorithmic art, canvas design, brand guidance, and theme styling",
+  "version": "1.1.0",
+  "author": {
+    "name": "dabsdamoon"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Design Skills",
+    "shortDescription": "Create distinctive interfaces and visual artifacts",
+    "longDescription": "Frontend interfaces, proportionate structural exploration, algorithmic and canvas art, brand guidance, and visual artifact creation.",
+    "developerName": "dabsdamoon",
+    "category": "Design",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Execute"
+    ],
+    "defaultPrompt": [
+      "Use $frontend-design to explore distinct, usable structures for this interface.",
+      "Use $frontend-design to implement this selected design while preserving its approved structure."
+    ]
+  }
+}

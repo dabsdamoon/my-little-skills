@@ -1,0 +1,7 @@
+Create the following two small UI design responses. These are synthetic briefs; no product code, browsing, images, or external actions are needed. Keep the complete response under 500 words. Use plain text and compact wireframes where useful. Make concrete design decisions rather than describing a process you might use.
+
+A. Open design request
+We are making a survival-action game. One character moves while two others wait for a swap. Each has individual HP, swapping shares a 1.25-second cooldown, attacks are automatic, and the player must see remaining time, experience, nearby danger and which teammate is ready. Desktop keyboard and a future landscape touch screen matter. Our last mockup used a dark field, a small English label above a poetic heading, a timer on top and three equal cards below. It works but our designs keep feeling alike. Explore a fresh direction, then give the next designer a short build brief. The old placement and copy are an unapproved starting sketch, not requirements. Keep the actual game information and actions usable. The team has limited time and would like useful direction without an extra approval meeting.
+
+B. Narrow edit request
+An unrelated library search screen has an approved layout, colors, content and interactions. Its search button is 36 pixels high. Change only that button's hit area to at least 44 pixels without moving surrounding elements or changing its visible design. State what you would change and verify. The edit is already authorized; do not expand the assignment.
