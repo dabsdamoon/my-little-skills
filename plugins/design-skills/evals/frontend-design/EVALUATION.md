@@ -1,39 +1,48 @@
-# frontend-design structural exploration evaluation
+# frontend-design structural exploration and selection evaluation
 
 Date: 2026-10-31. Scope: [issue #45](https://github.com/dabsdamoon/my-little-skills/issues/45). Decision: **provisional**.
 
-## Question and procedure
+## Procedure and revisions
 
-Does the revised guidance make an agent compare usable structural candidates and distinguish requirements from recommendations, without expanding an approved local edit?
+The [primary brief](brief.md) and [original criteria](rubric.md) were written before editing the skill. Five independent no-history agents received the same two synthetic requests without a design skill, followed by five agents using the initial revised guidance (v1). Each response was limited to 500 words. The author read every complete response.
 
-The [brief](brief.md) and [criteria](rubric.md) were written before modifying the skill. Baseline repository commit: `6d2d539007d6c3ab57646d726054ba47e3f68ac1`; exact guidance and input hashes are in [run.json](run.json). Five independent, no-conversation-history agents received the same two synthetic requests with no design skill; five new agents then received the same requests plus the revised skill and its conditional reference. Each was limited to a 500-word text response. They did not receive the grading rubric or previous outputs. The author read every full response. Responses are retained under [samples/](samples/), with sizes and SHA-256 values in [samples.json](samples.json). Stored responses retain all content and normalize trailing blank lines to one final newline; hashes describe these stored copies.
+Independent review then identified a selection gap: comparing candidates did not ensure the final recommendation considered previous results. Issue #45 had also been expanded during the work to explicitly distinguish candidate exploration from novelty-aware selection. V2 adds that comparison and bounded unmet-goal reporting. A [supplemental criterion](rubric-v2.md) was recorded before five fresh v2 runs. A separate five-run old-plugin arm was added on the identical primary brief. The original rubric remains unchanged; the selection criterion was not preregistered for the earlier arms.
 
-These are no-history subagents in the same runtime environment, not isolated model weights or a clean alternate harness. The control is **no design guidance**, not the old packaged skill. The earlier reported single-layout failure motivates the work but is not an extra controlled sample. No claim is made that the revised guidance outperforms the old skill or the latest upstream skill in a head-to-head trial.
+Baseline repository commit: `6d2d539007d6c3ab57646d726054ba47e3f68ac1`. The old plugin arm uses its 583-word distribution copy, not the different canonical file. Initial guidance is preserved in commit `87468b2782e630f80d5a7083a66d5fb7e721076a` and [initial-run.json](initial-run.json). Final guidance/input hashes and conditions are in [run.json](run.json). All 23 responses are retained under [samples/](samples/), with word counts and SHA-256 values in [samples.json](samples.json). Stored responses retain all content and normalize trailing blank lines to one final newline.
 
-## Observations
+The four groups are no-guidance 5, old-plugin 5, historical guided-v1 5, final guided-v2 5, plus three separate smoke responses. Agents did not receive rubrics or earlier outputs. These are no-history subagents sharing a parent runtime, not separate model weights or an alternate clean harness. The author was not blinded. The model identifier was not independently recorded; do not infer it from agent names. This evaluation is separate from the 27-run research reported in the updated issue; those data were not rerun or independently verified here.
 
-| Observable | Control runs 1–5 | Revised runs 1–5 |
-| --- | --- | --- |
-| Structural candidates described before choosing | 1, 1, 1, 1, 1 | 2, 3, 2, 2, 2 |
-| Compares at least two structures in request A | 0/5 | 5/5 |
-| Local hit-area request preserves approved visible layout | 5/5 | 5/5 |
-| Forces another approval meeting | 0/5 | 0/5 |
+## Primary observations
 
-All control responses went directly to one composition. Four placed reserve actions on the right and one on the left; all used related field-instrument language and pale/sage/ivory styling. For example, [control 2](samples/control-2.md) directs the builder to “deliver one responsive HUD composition.”
+| Observable | No guidance, 5 runs | Old plugin, 5 runs | Final v2, 5 runs |
+| --- | --- | --- | --- |
+| Structural exploration before choosing | One composition each | One main composition each; run 2 briefly contrasts a second structure | Two explicit structural candidates each |
+| Local hit-area edit preserves approved visible layout | 5/5 plans | 5/5 plans | 5/5 plans |
+| Forces another approval meeting | 0/5 | 0/5 | 0/5 |
 
-All revised responses described distinct organizations before recommending one. [Revised 2](samples/revised-2.md) compares a bottom rail, distributed controls, and a roster column. The responses explicitly identify functional requirements and label placement/styling as recommendations. Their stated plans retain individual HP, active/reserve identity, shared cooldown, time, XP, danger feedback, and input considerations; these behaviors were not implemented or executed.
+[Old run 1](samples/old-1.md) mentions a second theatrical/neon direction without explaining another information organization. [Old run 2](samples/old-2.md) briefly rejects a full-width strip before proposing a compact cluster; this is a genuine structural contrast, not scored as no exploration merely because it is short. The other old responses directly describe one composition. The original no-guidance responses all go straight to a single structure.
 
-Both arms preserve the approved search button's visible 36-pixel layout and propose a larger hit region with overlap/clipping checks. This is scope-preservation evidence from plans, not a rendered hit-target test.
+The historical v1 runs described 2, 3, 2, 2, 2 structural candidates, but comparison focused on those candidates rather than the old layout. The reviewer identified that distinction before the v2 change. All five final v2 plans explicitly compare their recommendation with the supplied timer-over-three-equal-cards sketch and describe a useful relationship change: active health follows its subject while reserve actions remain separate. They label positions and styling as recommendations and retain the required HP/readiness/cooldown/time/XP/danger/input information in their stated plans.
 
-A [held-out film-program request](samples/heldout-film.md) produced a chronological ledger, venue timetable and title/detail screen, then recommended one under the existing authorization. It preserves access/capacity/booking information in its plan. This is one non-game smoke sample, not a generalization result.
+**Final-selection convergence remains visible:** all five v2 runs recommend a field-local/player-following HP organization. Candidate count is therefore not evidence of diverse final choices across repeated runs. The supplemental criterion verifies an explicit, task-relevant comparison against this brief's supplied baseline; it does not establish broad or cross-run novelty.
 
-## Interpretation and limits
+Both primary requests are text plans, not implemented behavior. Hit-area geometry, overlap, gameplay readability, contrast and accessibility were not executed or rendered. The author checked scope and stated functional coverage rather than matching a mandatory phrase or template.
 
-The observations support keeping this wording provisionally for low-cost structural exploration and scope routing. They do not establish perceived originality, visual quality, accessibility compliance, gameplay readability, production impact, or statistical significance. The author graded the outputs and was not blinded; no sample-independent judging model was used. Same-brief repetition is narrow coverage.
+## Additional smoke observations
 
-Related palette and instrument-style language persists across revised runs. Increasing the number of feasible structures is not proof that aesthetic convergence has been solved. Rendered comparisons, additional domains, input modes, and representative users remain future evaluation. There is no validated creativity score or invented generation probability.
+Inputs are in [additional-briefs.md](additional-briefs.md).
 
-No production UI, private customer assets, model/system prompts, or credentials are included. All retained examples are synthetic. The guidance preserves user-specified layouts and preferences; explicit palette-only work remains palette-only work.
+- [Film program, v1](samples/heldout-film.md): chronological ledger, venue timetable and title/detail screen; preserves access/capacity/booking information in the plan. This is one non-game smoke response, not generalization evidence.
+- [Novelty limits and fixed palettes, v2](samples/novelty-edges.md): recognizes recoloring/mirroring of the same list as insufficient novelty, reports the exhausted budget and unmet goal, and uses the authorized functional fallback. It keeps a separate explicit palette-only request within the approved fixed layout.
+- [Changed baseline, v2](samples/selection-shift.md): when the existing prototype already uses player-following HP and lower-right reserves, recommends a consolidated squad rail instead. It explains how comparing HP and selecting a reserve become one action surface. This shows baseline-sensitive selection in one case; it does not establish a novelty success rate.
+
+## Interpretation and remaining work
+
+The observations support provisional use of scope routing, explicit structural comparisons, and novelty-aware final-selection reasoning. They do not prove visual originality, better usability, aesthetic quality, statistical significance, or a particular model/harness cause. Repeated palette/instrument language persists. V2 final choices still converge on this primary brief. Explicitly comparing a baseline is a bounded process improvement, not a validated creativity score.
+
+Remaining in issue #45: representative rendered comparisons, automatic skill-selection/installation checks, more domains and repeats, independent quality/functional judgments, comparison-metric validation, and costs/acceptance rates for an external selection procedure. No universal role set, fixed candidate count or distance threshold is imported from the issue's pilot. These guides do not require five-run benchmarks or automatic extra tools for ordinary UI work.
+
+All examples are synthetic. No private customer assets, production data, hidden prompts, credentials or generated images are included. Text samples are evidence, not reusable visual templates. Explicit brand choices, fixed layouts and user-authorized scope retain priority.
 
 ## Packaging verification
 
@@ -45,12 +54,10 @@ uv run --with pyyaml python skills/skill-creator/scripts/quick_validate.py skill
 uv run --with pyyaml python skills/skill-creator/scripts/quick_validate.py plugins/design-skills/skills/frontend-design
 ```
 
-The distribution check compares the complete canonical and plugin trees and the public plugin metadata; it does not match prose phrases or headings. [Recorded fixture outcomes](distribution-checks.json): original `origin/main` is rejected for a divergent entrypoint and missing Codex manifest; matching revised copies pass; a deliberately stale mirrored notice and a mismatched manifest version are rejected. The old entrypoints already pass frontmatter validation, showing why schema validation alone did not catch the original distribution problem.
+The distribution check compares the complete canonical/plugin file trees and public plugin metadata rather than prose phrases. [Recorded fixture outcomes](distribution-checks.json): original main is rejected for a divergent entrypoint and missing Codex manifest; matching revised copies pass; a deliberately stale mirror notice and a mismatched version are rejected. Both original entrypoints already passed frontmatter validation, so schema checks alone did not detect the distribution defect.
 
-Both manifests declare design-skills 1.1.0. Existing Apache licenses remain unchanged and [the notice](../../../../skills/frontend-design/NOTICE.md) records the upstream revision and local adaptation. Package metadata parsing and directory agreement are not end-to-end Codex/Claude installation tests. Installation/cache refresh is deliberately separate from this PR and follows merge; the current session's loaded skill is not retroactively replaced.
+Both manifests declare design-skills 1.1.0. Existing Apache licenses are unchanged; [NOTICE](../../../../skills/frontend-design/NOTICE.md) records the reviewed upstream revision and local adaptation. Metadata/directory checks are not end-to-end Codex/Claude installation tests. This PR does not overwrite an installed cache or the skill already loaded in this session. Merge, marketplace refresh, and a new session are separate steps.
 
-## Reproduce or extend
+## Reproduction
 
-Use a fresh agent per sample. For the control provide only `brief.md`, prohibit loading design skills, and collect the response without the rubric. For the guided arm add the exact revised `SKILL.md` and only its relevant reference. Preserve actual outputs and document any changed inputs, guidance revision, runtime/model settings if available, and grader. Judge the observable task contract rather than template words. The original run did not record an independently controllable model identifier; do not reconstruct one from agent names.
-
-The minimal reference and existing user authorization determine work size. Do not turn this evaluation into a mandatory five-run benchmark for ordinary UI tasks.
+Use a fresh agent for each response, the identical `brief.md`, and only the selected condition's guidance. Supply the exact relevant reference to guided runs, not grading criteria or earlier outputs. Preserve the actual inputs, guidance revision, runtime settings where known, full outputs and grader. Read results for functional and structural meaning; do not use keyword counts or model-assigned novelty probabilities. If future samples change the budget, brief, comparison material or renderer, record a separate condition rather than merging it into these counts.

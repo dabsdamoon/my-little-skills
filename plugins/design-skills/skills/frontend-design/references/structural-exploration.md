@@ -24,7 +24,11 @@ Keep useful conventions recognizable. Strange geometry, hidden critical state, i
 
 ## Choose without freezing the search accidentally
 
-Compare candidates against the same tasks and important states. Explain a consequential difference and recommend the strongest fit. If the user asked for one deliverable and authorized progress, choose, label the choice as your recommendation, and continue. Ask when a material preference or missing constraint genuinely needs their decision, not because this reference was loaded.
+Compare candidates against the same tasks and important states. For a novelty request, also identify the comparison baseline from available previous designs and named references. Show how the final recommendation changes a relevant information relationship or user path and why that helps this task. Preserve any resemblance the user explicitly requested. Mirroring or exchanging regions without a useful change is weak novelty evidence.
+
+Select among viable candidates using task fit and the requested newness together. If none offers a meaningful difference, reconsider within the remaining agreed or stated budget, then report the unmet goal rather than presenting a repeated structure as a novelty success. Missing comparison material is a limitation, not permission to invent differences. Do not loop indefinitely or invent a universal distance threshold.
+
+For one authorized deliverable, choose, label the recommendation, and continue. Ask only when a material preference or missing constraint needs the user's decision. When novelty is not requested, task fit governs; familiar patterns may be the best choice.
 
 Keep the exploration proportional: one shared comparison artifact, not separate projects, worktrees, image sets, or dependency installations for every idea. Reuse supplied assets. Additional research is useful when it provides a missing structural principle; it is not required for every design.
 

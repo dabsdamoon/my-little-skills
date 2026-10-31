@@ -23,6 +23,8 @@ Respect the requested deliverable count and existing authorization. Exploration 
 
 Use the supplied brief, actual content, assets, references, and existing implementation. Identify the audience, primary task, and decisions the interface must support. Ask only for missing information that materially changes the work; otherwise state a reasonable assumption and proceed.
 
+When novelty is requested, compare the final recommendation with available prior designs and named references. Explain a useful task-specific difference; structural distance alone is not creative quality.
+
 Separate **requirements** from **design hypotheses**. Required information, actions, brand rules, and accessibility constraints can remain constant across candidates. A previous layout, poetic headline, or first-generated component is a hypothesis until the user adopts it. A recommendation may be implemented under existing authorization without being described as user-approved.
 
 Extract useful principles from references: attention hierarchy, density, spatial relationships, feedback, and input reach. A reference need not become a template for the same palette or component arrangement. For a task screen or game HUD, begin with the controls and information needed during use; a promotional introduction belongs only where it serves the task.
