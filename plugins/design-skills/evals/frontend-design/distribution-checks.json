@@ -1,0 +1,22 @@
+[
+  {
+    "case": "original-main",
+    "observed_exit": 1,
+    "first_output_line": "distribution differs: SKILL.md"
+  },
+  {
+    "case": "matching",
+    "observed_exit": 0,
+    "first_output_line": "frontend-design distribution and plugin metadata match"
+  },
+  {
+    "case": "mirror-drift",
+    "observed_exit": 1,
+    "first_output_line": "distribution differs: NOTICE.md"
+  },
+  {
+    "case": "version-drift",
+    "observed_exit": 1,
+    "first_output_line": "plugin metadata differs: version"
+  }
+]

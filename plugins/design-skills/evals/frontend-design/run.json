@@ -1,0 +1,32 @@
+{
+  "date": "2026-10-31",
+  "baseline_repository_commit": "6d2d539007d6c3ab57646d726054ba47e3f68ac1",
+  "control": "no design guidance",
+  "guided": "final revised SKILL.md plus relevant reference",
+  "model_identifier": null,
+  "runtime_notes": "No-history subagents sharing the parent runtime; not a separate harness or weights-only experiment.",
+  "entry_sha256": "ad1c8afa930a8d07ccf5d1f5783696fff847af66b93c4304732bf3f4971cd761",
+  "reference_sha256": "09f0f4e4bf7c33f1b7fe78962af5a1fadea2d5f3009aa1df241b447e845831cc",
+  "brief_sha256": "403871c4042960017120fd1a078a3f0ad267b0cdc39def8f8c9991cd313fc8fc",
+  "rubric_sha256": "91fee4dd52641e5b3ef123993925cbab948ce351abc4d388c70fd89288216b69",
+  "guided_revision": "v2 after independent review",
+  "fresh_runs_per_primary_arm": 5,
+  "primary_conditions": [
+    "no design guidance",
+    "old packaged skill at baseline repository commit",
+    "guided v2"
+  ],
+  "historical_guided_v1_runs": 5,
+  "extra_smoke_runs": 3,
+  "initial_guidance_record": "initial-run.json",
+  "old_plugin_sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0",
+  "supplemental_rubric_sha256": "250676e2cf93a2869b69fe8816d5d375ff69e84809df29d0bfee45757a8b0983",
+  "evaluated_revision": "v2 (entry_sha256 above)",
+  "shipped_revision": "v3 after code review; not re-evaluated",
+  "shipped_entry_sha256": "cd8da638e31378ffa412d7680f3abad8c1b09115d1c8703ed6841b07fc32a2d2",
+  "shipped_reference_sha256": "09f0f4e4bf7c33f1b7fe78962af5a1fadea2d5f3009aa1df241b447e845831cc",
+  "known_confounds": [
+    "parent-session context reached no-history subagents (character names absent from the brief appear in control, old-plugin, v1 and v2 responses)",
+    "guided runs received the structural-exploration reference directly, so scope routing was not exercised"
+  ]
+}
