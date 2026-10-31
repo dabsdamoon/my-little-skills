@@ -46,4 +46,3 @@ Desktop uses an index beside the sheet; mobile opens a full-width sheet with a l
 **Recommendation:** Proceed with A under the existing authorization. Its shared timeline makes the program feel like a running order and keeps booking decisions in one view. A and B are the closest pair: A interleaves venues chronologically; B partitions screenings by venue.
 
 **Handoff:** Retain B and C as alternatives, not requirements. Typography and color remain open. Prototype A with long titles, sold-out and stale-capacity states, loading, empty results and booking errors. Validate phone scanning and accessibility comprehension; these sketches establish neither usability nor accessibility compliance.
-
