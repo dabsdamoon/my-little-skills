@@ -1,0 +1,68 @@
+[
+  {
+    "file": "samples/control-1.md",
+    "condition": "control",
+    "words": 451,
+    "sha256": "89e2926e77819a64226b7181c3c10da67bcbf2d77fc6bcdb3f74a49fc960f26b"
+  },
+  {
+    "file": "samples/control-2.md",
+    "condition": "control",
+    "words": 455,
+    "sha256": "90151c2a088cee9426da9d07ad7846f98296f5bce93a41ac4dcb1ac7dee414d6"
+  },
+  {
+    "file": "samples/control-3.md",
+    "condition": "control",
+    "words": 438,
+    "sha256": "798acf1259f343970c7a4ca8d68a24a7302d39509d8b7532ef49f98f7dfaee78"
+  },
+  {
+    "file": "samples/control-4.md",
+    "condition": "control",
+    "words": 439,
+    "sha256": "876502083aea4e47f374a21a15e4c2ddb8a34be14604bf7b1748f8097fd76829"
+  },
+  {
+    "file": "samples/control-5.md",
+    "condition": "control",
+    "words": 432,
+    "sha256": "90a4cf75c4a4e50954f641ab3fd9c732b2c64ae143759eb40a1af520a7812983"
+  },
+  {
+    "file": "samples/revised-1.md",
+    "condition": "revised",
+    "words": 467,
+    "sha256": "98711b1ca6ff826538384adacb47b08052d302479e339bce4af3ec3a57c86441"
+  },
+  {
+    "file": "samples/revised-2.md",
+    "condition": "revised",
+    "words": 496,
+    "sha256": "add81b72ce7f6cf93c28e6c1c337665fd6f47244176a71767d00efc41950cf76"
+  },
+  {
+    "file": "samples/revised-3.md",
+    "condition": "revised",
+    "words": 475,
+    "sha256": "6b53151fe1119e2d677ae6d13ace08ebfd1ea2fa62148d44274e4cc6d6d267ac"
+  },
+  {
+    "file": "samples/revised-4.md",
+    "condition": "revised",
+    "words": 495,
+    "sha256": "e04f3976c4f4553108236e92a6110d9c29b9b52129d9b591aeea73679e6cf5b4"
+  },
+  {
+    "file": "samples/revised-5.md",
+    "condition": "revised",
+    "words": 479,
+    "sha256": "efa0b2e52ffd56fc8912154b9de440368bf2caa1a8b318aa7b8f2613cb3ea7b4"
+  },
+  {
+    "file": "samples/heldout-film.md",
+    "condition": "heldout",
+    "words": 436,
+    "sha256": "c42178288a44aa795d4a53cdf9669bb05bff328e07b1f4362dcc36e49f587b3b"
+  }
+]

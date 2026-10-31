@@ -1,42 +1,50 @@
 ---
 name: frontend-design
-description: Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics.
+description: Use when creating or visually redesigning web interfaces, interactive prototypes, or screen layouts, especially when design alternatives are requested or previous results feel templated.
 license: Complete terms in LICENSE.txt
 ---
 
-This skill guides creation of distinctive, production-grade frontend interfaces that avoid generic "AI slop" aesthetics. Implement real working code with exceptional attention to aesthetic details and creative choices.
+# Frontend Design
 
-The user provides frontend requirements: a component, page, application, or interface to build. They may include context about the purpose, audience, or technical constraints.
+Create a working interface whose organization and visual language come from the user's task and subject. Preserve function, accessibility, and explicit preferences while exploring choices the brief leaves open.
 
-## Design Thinking
+## Choose the scope
 
-Before coding, understand the context and commit to a BOLD aesthetic direction:
-- **Purpose**: What problem does this interface solve? Who uses it?
-- **Tone**: Pick an extreme: brutally minimal, maximalist chaos, retro-futuristic, organic/natural, luxury/refined, playful/toy-like, editorial/magazine, brutalist/raw, art deco/geometric, soft/pastel, industrial/utilitarian, etc. There are so many flavors to choose from. Use these for inspiration but design one that is true to the aesthetic direction.
-- **Constraints**: Technical requirements (framework, performance, accessibility).
-- **Differentiation**: What makes this UNFORGETTABLE? What's the one thing someone will remember?
+| Request | Approach |
+| --- | --- |
+| A local adjustment to an approved interface | Preserve its structure, content, tokens, and interactions. Change and verify the requested property. |
+| Implementation of a selected design | Follow that design; resolve only unspecified details. |
+| A new composition, open redesign, or request for more variety | Compare low-cost structural candidates before committing to a polished direction. Read [structural exploration](references/structural-exploration.md). |
+| Palette, typography, or another explicit variation within a fixed layout | Explore the requested axis while keeping the approved structure. |
 
-**CRITICAL**: Choose a clear conceptual direction and execute it with precision. Bold maximalism and refined minimalism both work - the key is intentionality, not intensity.
+Respect the requested deliverable count and existing authorization. Exploration is not a reason to force another approval meeting, produce several complete applications, or expand a small repair.
 
-Then implement working code (HTML/CSS/JS, React, Vue, etc.) that is:
-- Production-grade and functional
-- Visually striking and memorable
-- Cohesive with a clear aesthetic point-of-view
-- Meticulously refined in every detail
+## Ground the choices
 
-## Frontend Aesthetics Guidelines
+Use the supplied brief, actual content, assets, references, and existing implementation. Identify the audience, primary task, and decisions the interface must support. Ask only for missing information that materially changes the work; otherwise state a reasonable assumption and proceed.
 
-Focus on:
-- **Typography**: Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the frontend's aesthetics; unexpected, characterful font choices. Pair a distinctive display font with a refined body font.
-- **Color & Theme**: Commit to a cohesive aesthetic. Use CSS variables for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-- **Motion**: Use animations for effects and micro-interactions. Prioritize CSS-only solutions for HTML. Use Motion library for React when available. Focus on high-impact moments: one well-orchestrated page load with staggered reveals (animation-delay) creates more delight than scattered micro-interactions. Use scroll-triggering and hover states that surprise.
-- **Spatial Composition**: Unexpected layouts. Asymmetry. Overlap. Diagonal flow. Grid-breaking elements. Generous negative space OR controlled density.
-- **Backgrounds & Visual Details**: Create atmosphere and depth rather than defaulting to solid colors. Add contextual effects and textures that match the overall aesthetic. Apply creative forms like gradient meshes, noise textures, geometric patterns, layered transparencies, dramatic shadows, decorative borders, custom cursors, and grain overlays.
+Separate **requirements** from **design hypotheses**. Required information, actions, brand rules, and accessibility constraints can remain constant across candidates. A previous layout, poetic headline, or first-generated component is a hypothesis until the user adopts it. A recommendation may be implemented under existing authorization without being described as user-approved.
 
-NEVER use generic AI-generated aesthetics like overused font families (Inter, Roboto, Arial, system fonts), cliched color schemes (particularly purple gradients on white backgrounds), predictable layouts and component patterns, and cookie-cutter design that lacks context-specific character.
+Extract useful principles from references: attention hierarchy, density, spatial relationships, feedback, and input reach. A reference need not become a template for the same palette or component arrangement. For a task screen or game HUD, begin with the controls and information needed during use; a promotional introduction belongs only where it serves the task.
 
-Interpret creatively and make unexpected choices that feel genuinely designed for the context. No design should be the same. Vary between light and dark themes, different fonts, different aesthetics. NEVER converge on common choices (Space Grotesk, for example) across generations.
+## Make deliberate visual choices
 
-**IMPORTANT**: Match implementation complexity to the aesthetic vision. Maximalist designs need elaborate code with extensive animations and effects. Minimalist or refined designs need restraint, precision, and careful attention to spacing, typography, and subtle details. Elegance comes from executing the vision well.
+- **Structure:** encode priorities through grouping, adjacency, area, alignment, and disclosure. Explain how the chosen organization supports the task. A hero, card grid, or sidebar earns its place through that explanation.
+- **Type:** use a legible scale, intentional weights, and fonts that cover the content's languages. One family can suffice. Preserve an existing brand font; unusual type is optional.
+- **Color and material:** derive a coherent palette from the subject, with usable contrast and quiet space for important states. Existing brand choices outrank generic aesthetic preferences.
+- **Copy:** name actions and states plainly and consistently. Labels, numbers, borders, and decorative headings should communicate something true. Empty and error states guide the next action.
+- **Motion:** make changes and consequences understandable. Use automatic motion sparingly and respect reduced-motion preferences.
 
-Remember: Claude is capable of extraordinary creative work. Don't hold back, show what can truly be created when thinking outside the box and committing fully to a distinctive vision.
+Check habitual treatments against the brief: tracked uppercase eyebrows, emotional slogans, uniform cards, monospace data chrome, and fashionable light or dark palettes are choices, not defaults or universal bans. Familiar conventions are useful when they make an action easier to recognize.
+
+## Build and inspect
+
+Use the project's stack and reusable components. Match implementation effort to the chosen design. Exercise actual content and important states, including loading, empty, error, selected, disabled, and unavailable where relevant. Keep responsive behavior, keyboard focus, touch targets, and readable contrast intact.
+
+Inspect rendered results at relevant sizes when rendering tools are available. Distinguish code inspection, interaction checks, visual observation, and user preference; none substitutes for the others. State unavailable checks honestly. A static mockup does not establish gameplay readability or usability in motion.
+
+## Deliver and hand off
+
+Explain the useful tradeoff and identify the chosen direction as a recommendation or an adopted decision. In a downstream brief, separate required behavior, selected implementation choices, unresolved alternatives, and unverified assumptions. Carry forward the user's decisions without turning incidental prototype positions or styling into universal constraints.
+
+Preserve source attribution and local adaptations in [NOTICE.md](NOTICE.md).
