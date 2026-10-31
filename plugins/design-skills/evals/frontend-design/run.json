@@ -20,5 +20,13 @@
   "extra_smoke_runs": 3,
   "initial_guidance_record": "initial-run.json",
   "old_plugin_sha256": "b81e2ff87ed8fa4d6c377ccb127a7254c9e6a77e3ae94f21e6b514f7bb2945a0",
-  "supplemental_rubric_sha256": "250676e2cf93a2869b69fe8816d5d375ff69e84809df29d0bfee45757a8b0983"
+  "supplemental_rubric_sha256": "250676e2cf93a2869b69fe8816d5d375ff69e84809df29d0bfee45757a8b0983",
+  "evaluated_revision": "v2 (entry_sha256 above)",
+  "shipped_revision": "v3 after code review; not re-evaluated",
+  "shipped_entry_sha256": "cd8da638e31378ffa412d7680f3abad8c1b09115d1c8703ed6841b07fc32a2d2",
+  "shipped_reference_sha256": "09f0f4e4bf7c33f1b7fe78962af5a1fadea2d5f3009aa1df241b447e845831cc",
+  "known_confounds": [
+    "parent-session context reached no-history subagents (character names absent from the brief appear in control, old-plugin, v1 and v2 responses)",
+    "guided runs received the structural-exploration reference directly, so scope routing was not exercised"
+  ]
 }
