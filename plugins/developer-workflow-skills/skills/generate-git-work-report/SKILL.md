@@ -185,7 +185,8 @@ causality from commit counts alone.
 Run this gate only when the report language is Korean. English reports skip it.
 
 1. Load and follow the `humanize-korean` skill. Use `장르: 리포트` and
-   `강도: 보수`.
+   request the light route (`가볍게`), which runs one conservative rewrite
+   followed by the deterministic gates.
 2. Run it from a task-local staging directory so its `_workspace` files do not
    pollute the source repository.
 3. Give it only editorial narrative: the external purpose, scope, milestone,
