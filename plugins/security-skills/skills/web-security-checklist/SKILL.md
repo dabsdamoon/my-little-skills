@@ -1,6 +1,6 @@
 ---
 name: web-security-checklist
-description: "Security review checklist for Next.js, Supabase, Python, and Go apps: secrets, SQL injection, RLS and server-side auth, CSP nonces, CSRF, cookies, uploads, rate limits. Use when asked for a security review or audit of a branch, or when changing auth, sessions, payments, secrets, or file uploads."
+description: "Security review checklist for Next.js or Vite apps on Vercel, Supabase, Python, and Go: secrets, SQL injection, RLS and server-side auth, CSP nonces, CSRF, cookies, uploads, rate limits. Use when asked for a security review or audit of a branch, or when changing auth, sessions, payments, secrets, or file uploads."
 ---
 
 # Web Security Checklist
@@ -10,18 +10,20 @@ Two uses:
 - **Review a diff or branch.** Run the procedure below and report findings with file and line.
 - **Write security-sensitive code** (auth, sessions, payments, secrets, uploads). Follow the rules by topic.
 
-Target stack: Next.js App Router on Vercel, Supabase/Postgres, and Python or Go services on Cloud Run. This checklist does not replace a scanner or a penetration test. During a review, do not change code unless the user asks.
+Target stack: Next.js App Router on Vercel, Supabase/Postgres, and Python or Go services on Cloud Run. A Vite app with Vercel functions follows the same rules except the Next.js-only parts (`proxy.ts`, Server Actions). This checklist does not replace a scanner or a penetration test. During a review, do not change code unless the user asks.
 
 ## Diff review procedure
 
 ### 1. Scope the change
 
 ```bash
-git diff --name-only origin/main...HEAD
-git diff --name-only --diff-filter=A origin/main...HEAD
+# The branch this change merges into: the PR's base branch, else main.
+BASE=origin/$(gh pr view --json baseRefName -q .baseRefName 2>/dev/null || echo main)
+git diff --name-only "$BASE"...HEAD
+git diff --name-only --diff-filter=A "$BASE"...HEAD
 ```
 
-`A...B` diffs from the merge base, so only this branch's changes appear. Fetch first so `origin/main` is current.
+`A...B` diffs from the merge base, so only this branch's changes appear. Fetch first so `$BASE` is current. A repository that merges feature branches into `develop` must compare with `origin/develop`; comparing with `main` would also list changes that are not part of this branch.
 
 ### 2. Run the greppable checks
 
@@ -29,15 +31,15 @@ Each check prints only lines the branch adds. A hit is a lead, not a finding: op
 
 ```bash
 # Works in bash and zsh: d passes extra arguments (e.g. "-- path") through.
-d() { git diff origin/main...HEAD "$@"; }
+d() { git diff "$BASE"...HEAD "$@"; }
 
 # Hardcoded secrets and committed env files
 d | grep -nE '^\+.*(-----BEGIN [A-Z ]*PRIVATE KEY-----|AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9_-]{20,}|sk_live_[A-Za-z0-9]{10,})'
 d | grep -niE "^\+.*(api[_-]?key|secret|token|passw(or)?d)[[:space:]]*[:=][[:space:]]*['\"][^'\"]{8,}"
-git diff --name-only --diff-filter=A origin/main...HEAD | grep -E '(^|/)\.env($|\.)' | grep -v '\.example$'
+git diff --name-only --diff-filter=A "$BASE"...HEAD | grep -E '(^|/)\.env($|\.)' | grep -v '\.example$'
 
-# Secrets reaching the browser, logs, or the shell
-d | grep -nE '^\+.*NEXT_PUBLIC_[A-Z0-9_]*(SECRET|SERVICE_ROLE|PRIVATE)'
+# Secrets reaching the browser (Next.js NEXT_PUBLIC_, Vite VITE_, and similar prefixes), logs, or the shell
+d | grep -nE '^\+.*(NEXT_PUBLIC|VITE|PUBLIC|EXPO_PUBLIC|REACT_APP)_[A-Z0-9_]*(SECRET|SERVICE_ROLE|PRIVATE)'
 d | grep -niE '^\+.*(console\.(log|info|warn|error)|print\(|log\.Print|fmt\.Print).*(secret|token|password|api_?key|authorization)'
 d | grep -nE '^\+.*(echo|printf).*\$\{?[A-Z_]*(KEY|SECRET|TOKEN|PASSWORD)'
 d | grep -nE '^\+[[:space:]]*export [A-Z_]*(KEY|SECRET|TOKEN|PASSWORD)='
@@ -49,8 +51,8 @@ d | grep -nE "^\+.*\.execute\([[:space:]]*(f['\"]|['\"][^'\"]*['\"][[:space:]]*(
 d | grep -nE '^\+.*(Query|QueryRow|Exec)(Context)?\(.*fmt\.Sprintf'
 
 # Server entry points that need auth and ownership checks
-git diff --name-only --diff-filter=AM origin/main...HEAD | grep -E '(^|/)(route|proxy|middleware)\.(ts|js)$'
-git diff --name-only --diff-filter=AM origin/main...HEAD | xargs grep -lE "^['\"]use server['\"]" 2>/dev/null
+git diff --name-only --diff-filter=AM "$BASE"...HEAD | grep -E '(^|/)(route|proxy|middleware)\.(ts|js)$'
+git diff --name-only --diff-filter=AM "$BASE"...HEAD | xargs grep -lE "^['\"]use server['\"]" 2>/dev/null
 d | grep -nE '^\+.*auth\.getSession\('
 
 # Supabase privileged key outside server code, and new tables without RLS
@@ -67,7 +69,7 @@ d | grep -niE '^\+.*(Access-Control-Allow-Origin|allow_origins|AllowedOrigins).*
 d | grep -niE '^\+.*(formData\(\)|multipart|UploadFile|FormFile)'
 
 # Dependencies and CI
-git diff --name-only origin/main...HEAD | grep -E '(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|requirements[^/]*\.txt|pyproject\.toml|uv\.lock|go\.mod|go\.sum)$'
+git diff --name-only "$BASE"...HEAD | grep -E '(package\.json|package-lock\.json|pnpm-lock\.yaml|yarn\.lock|requirements[^/]*\.txt|pyproject\.toml|uv\.lock|go\.mod|go\.sum)$'
 d -- .github/workflows | grep -nE '^\+.*uses: [^@]+@[^[:space:]]+' | grep -vE '@[0-9a-f]{40}'
 d -- .github/workflows | grep -nE '^\+.*permissions:'
 ```
@@ -111,7 +113,7 @@ If nothing is found, say `CLEAR` and list the checks you ran.
     --set-secrets="DATABASE_URL=myapp--DATABASE_URL:3"
   ```
 
-- Next.js sends any variable prefixed `NEXT_PUBLIC_` to the browser. Keep secret keys unprefixed, and read `process.env` only in server-only modules (`import 'server-only'`).
+- Next.js sends any variable prefixed `NEXT_PUBLIC_` to the browser, and Vite does the same with `VITE_` (other tools use `PUBLIC_`, `EXPO_PUBLIC_`, or `REACT_APP_`). Keep secret keys unprefixed, and read them only in server code (`import 'server-only'` on Next.js, or the Vercel function).
 
 ### 2. SQL injection
 
@@ -131,7 +133,7 @@ If nothing is found, say `CLEAR` and list the checks you ran.
 - In server code (proxy, route handlers, Server Actions), protect pages and data with `supabase.auth.getClaims()`. Use `getUser()` when you need a fresh user record. Never trust `supabase.auth.getSession()` on the server: it reads the cookie without revalidating it, and cookies can be forged.
 - On Next.js 16 the session refresh lives in `proxy.ts`. On Next.js 15 and earlier it lives in `middleware.ts`, and a `proxy.ts` is never called.
 - Enable RLS on every table in an exposed schema. Write policies with `to authenticated` and `(select auth.uid())`. An `UPDATE` policy needs `using`, `with check`, and a matching `SELECT` policy. Put RLS and grants in the same migration; the `database-migrations` skill covers the mechanics.
-- The secret key (or legacy `service_role` key) bypasses RLS. It stays server-side and never goes into a `NEXT_PUBLIC_` variable or a Client Component.
+- The secret key (or legacy `service_role` key) bypasses RLS. It stays server-side and never goes into a browser-exposed variable (`NEXT_PUBLIC_`, `VITE_`, ...) or a Client Component.
 - Do not force `HttpOnly` on Supabase auth cookies. Supabase says it is not necessary, and the browser client needs the refresh token. The compensating controls are the CSP below and server-side `getClaims()`.
 
 ### 4. Authorization
@@ -259,7 +261,7 @@ Key limits on the user id for authenticated routes and the IP for anonymous ones
 
 ## Pre-merge checklist
 
-- [ ] The secret, env-file, `NEXT_PUBLIC_`, echo/export, and `gcloud secrets` greps are clean, or each hit is explained.
+- [ ] The secret, env-file, browser-prefix (`NEXT_PUBLIC_`, `VITE_`, ...), echo/export, and `gcloud secrets` greps are clean, or each hit is explained.
 - [ ] No raw SQL built by template literal, f-string, `%`, `+`, or `fmt.Sprintf`.
 - [ ] Every new route handler, Server Action, and proxy verifies the caller with `getClaims()`/`getUser()` (or the service's equivalent) and checks ownership.
 - [ ] No `getSession()` in server code.
@@ -283,6 +285,7 @@ Checked 2026-10-26.
 - Next.js CSP guide (nonce in `proxy.ts`, dynamic rendering, SRI, header without nonce): https://nextjs.org/docs/app/guides/content-security-policy
 - Next.js data security (Server Actions CSRF, `allowedOrigins`, auth inside actions, `NEXT_PUBLIC_`, `server-only`): https://nextjs.org/docs/app/guides/data-security
 - Next.js route handlers (`Response.json`, `request.json()`, `request.formData()`): https://nextjs.org/docs/app/api-reference/file-conventions/route
+- Vite env variables (`VITE_` values are bundled into client code and must not hold secrets; checked 2026-11-02): https://vite.dev/guide/env-and-mode
 - Supabase Next.js server-side auth (`getClaims()`, `getSession()` warning, `proxy.ts`): https://supabase.com/docs/guides/auth/server-side/nextjs?router=app
 - Supabase SSR advanced guide (HttpOnly FAQ, cookie storage): https://supabase.com/docs/guides/auth/server-side/advanced-guide
 - Supabase Row Level Security: https://supabase.com/docs/guides/database/postgres/row-level-security

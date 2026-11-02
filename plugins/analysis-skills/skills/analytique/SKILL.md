@@ -1,6 +1,6 @@
 ---
 name: analytique
-description: Analyze and critique ideas, opinions, plans, or claims. Use when asked to criticize, poke holes, fact-check, challenge assumptions, assess feasibility, or evaluate whether an idea is sound.
+description: Critique an idea, opinion, plan, or claim the user puts forward. Use when the user asks to criticize it, poke holes in it, challenge its assumptions, check whether it holds up, or judge its feasibility. Not for code review, debugging, editing a document's wording, or implementation planning.
 ---
 
 # Analytique
@@ -28,12 +28,10 @@ Apply 2-3 lenses per analysis: **Hidden Assumptions is always applied**, plus 1-
 
 ### Step 1 — Intent Extraction
 
-Parse what the user is actually saying or proposing. Restate it back in one sentence and ask the user to confirm.
+Parse what the user is actually saying or proposing. Restate it in one sentence at the top of the answer, then continue with the analysis in the same turn.
 
-**This step is blocking.** End your turn after asking. Do not run lens selection, analysis, or any other step in the same turn as the restatement — wait for the user's reply.
-
-- If the user confirms the restatement, proceed to Step 2 in the next turn.
-- If the user corrects the restatement, re-extract, restate, and ask again. Repeat until confirmed. Do not move forward until the user has explicitly confirmed.
+- If the input can be read in two ways that lead to different analyses, state both readings, ask which one is meant, and stop there.
+- If the user later corrects the restatement, redo the analysis on the corrected reading.
 
 ### Step 2 — Lens Selection
 
@@ -55,6 +53,7 @@ Apply each selected lens. For each lens:
 - State the lens name.
 - Deliver findings directly — strengths and weaknesses as warranted.
 - Back every claim with reasoning. No unsupported assertions, positive or negative.
+- Check factual claims and prior art against sources (material the user supplied, or a web search) and cite them. When a fact cannot be checked, say so instead of answering from memory.
 - No filler, no hedging phrases like "it could potentially be argued that..."
 - Adapt format to the findings: use lists when there are multiple discrete points, prose when reasoning flows better as a paragraph.
 
@@ -66,9 +65,9 @@ Deliver a direct, bottom-line assessment:
 - Name the single most important thing the user should pay attention to.
 - Do not soften the verdict. If the idea is weak, say so. If it is strong, say so. If it is mixed, state what tips it either way.
 
-### Step 5 — Follow-up Offer
+### Step 5 — Follow-up
 
-Ask if the user wants to dig deeper into any specific point. Deeper exploration can mean:
+Offer to go deeper only when a specific point clearly needs more work; do not end every answer with an offer. Deeper exploration can mean:
 
 - Applying the same lens with more depth.
 - Introducing a new lens from the pool that was not initially selected.
@@ -101,3 +100,4 @@ On follow-up explorations of the same input, skip Intent Extraction — the orig
 - Code review → use a code review skill
 - Debugging → use a debugging skill
 - Implementation planning → use a planning or brainstorming skill
+- Editing a document's wording or format → use a writing or editing skill

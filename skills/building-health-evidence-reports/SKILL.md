@@ -1,6 +1,6 @@
 ---
 name: building-health-evidence-reports
-description: Use when someone asks for 보건의료 통계 or 근거자료 — 제왕절개율·분만·수술·질병·진료 통계, 공식 지표, 최신 데이터, 해외 사례나 정책 자료, or an evidence pack on a health topic. Triggers include "X율 통계청 자료 좀", "국내외 근거자료 필요합니다", "해외는 어떻게 하나요", 심평원·건보공단·KOSIS·OECD 자료 요청, and refreshing a prior health evidence pack.
+description: Use when someone asks for 보건의료 통계 or 근거자료 as a deliverable — 제왕절개율·분만·수술·질병·진료 통계, 공식 지표, a health topic's latest data or overseas cases and policies, or an evidence pack on a health topic. Triggers include "X율 통계청 자료 좀", "국내외 근거자료 필요합니다", "해외는 어떻게 하나요" about a health topic, 심평원·건보공단·KOSIS·OECD 자료 요청, and refreshing a prior health evidence pack. Not for writing or checking lecture scripts, narration, or translations; a project's own evidence rules (its CLAUDE.md) take precedence over this skill.
 ---
 
 # Building Health Evidence Reports
@@ -20,7 +20,9 @@ description: Use when someone asks for 보건의료 통계 or 근거자료 — �
 - 같은 요청이 다시 올 가능성이 있을 때 (월간·분기)
 - 기존 근거자료 팩을 갱신할 때
 
-**Not for:** 채팅으로 사실 하나 답하면 되는 경우, 전달물이 남지 않는 조사, 보건의료가 아닌 도메인(탐색 순서는 비슷하나 `references/data-sources.md`의 출처 목록이 안 맞는다).
+**Not for:** 채팅으로 사실 하나 답하면 되는 경우, 전달물이 남지 않는 조사, 강의록·대본·내레이션·번역 작업(그 안의 수치는 해당 프로젝트 규칙을 따른다), 보건의료가 아닌 도메인(탐색 순서는 비슷하나 `references/data-sources.md`의 출처 목록이 안 맞는다).
+
+**프로젝트 규칙이 먼저다.** 작업 중인 저장소의 CLAUDE.md 등에 근거 규칙이 있으면 이 스킬보다 우선한다. 예를 들어 한 지표에 쓸 수치를 하나로 정해 두었으면 다른 기관의 수치를 나란히 쓰지 않고, 청중에게 분모 정의를 풀지 말라고 했으면 그 규칙을 따른다.
 
 ## The Six Non-Negotiables
 
@@ -76,6 +78,8 @@ A number found only in a news article is **재확인 필요**, even when three o
 | 결과 지표가 이미 낮으면, 추가 개입은 무엇을 사는가 | 추가 이익이 작고 위해 가능성이 커지는 수익체감 구간인지 검증한다 |
 | 국제기구가 이 관계에 대해 공식 입장을 낸 적 있나 | WHO·OECD 성명은 **원문을 열어** 정확한 문장으로 인용한다. 통용되는 요약이 원문과 다른 경우가 많다 |
 
+**신뢰구간이 비율·위험비에서 1, 차이에서 0을 가로지르면 「차이 없음」에서 멈춘다.** 점추정값의 방향으로 결론을 늘리지 않는다.
+
 단면 비교로 인과를 주장하지 않는다. 단면이 증명할 수 있는 것은 **"높은 값이 더 나은 결과로 정당화된다"는 주장의 반증**이지 그 역이 아니다. 이 구분을 리포트에 명시한다.
 
 **소득 수준이 양쪽을 동시에 끌어올리는 교란을 확인한다.** 결과 지표가 이미 낮은 나라들로 표본을 좁혀 상관을 다시 계산하고 관계가 유지되는지 확인한다. 관계가 약해지거나 사라지면 소득·의료 접근성 같은 교란 가능성을 기록한다. 전체 표본과 제한 표본의 결과를 나란히 제시한다.
@@ -87,7 +91,7 @@ A number found only in a news article is **재확인 필요**, even when three o
 - 지표를 쓰기 전에 **분자와 분모를 각각 적어본다.** 적을 수 없으면 아직 그 지표를 이해하지 못한 것이다
 - 분모가 급변하는 중이면(저출산·인구감소·수검자 확대) **분자 원수치를 반드시 병기**한다
 - **소수 사건 검사:** 분자가 두세 자리면 1건 증감이 지표를 얼마나 움직이는지 계산해서 적는다. 연도별 등락이 대부분 노이즈인 경우가 있다
-- 국제기구 추정치와 각국 공식 통계가 어긋날 수 있다. 국제기구 값은 보정 모델을 거친 **산출값**이다. **자국 수치는 자국 통계기관, 국가 간 순위는 국제기구**로 분리하고, 어긋난다는 사실 자체를 리포트에 쓴다
+- 국제기구 추정치와 각국 공식 통계가 어긋날 수 있다. 국제기구 값은 보정 모델을 거친 **산출값**이다. **자국 수치는 자국 통계기관, 국가 간 순위는 국제기구**로 분리하고, 어긋난다는 사실 자체를 리포트에 쓴다. 프로젝트가 그 지표의 수치를 하나로 정해 두었으면 그 규칙을 따른다
 
 ### 6. 전달물은 한 파일 + 자산 폴더
 

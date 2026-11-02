@@ -1,6 +1,6 @@
 ---
 name: building-decision-reports
-description: Create or revise durable Markdown decision reports that turn repository data, web research, and business assumptions into executive-ready analysis with explicit evidence states, scenario math, and labeled SVG charts. Use for 분석 보고서, 사업성·고객군·매출모델 reports, or requests to improve a report's conclusions and visualizations. Not for a chat-only critique or raw health-statistics collection.
+description: Create or revise durable Markdown business decision reports — 사업성, 고객군, 매출모델 — that turn repository data, web research, and business assumptions into executive-ready analysis with explicit evidence states, scenario math, and labeled SVG charts. Use when the user asks for such a decision report, or to improve the conclusions or charts of one. Not for other reports (status, work, release or research notes), a chat-only critique, or raw health-statistics collection.
 ---
 
 # Building Decision Reports
@@ -117,7 +117,7 @@ description: Create or revise durable Markdown decision reports that turn reposi
 
 ```bash
 REPORT_SKILL_DIR="/absolute/path/to/building-decision-reports"
-python3 "$REPORT_SKILL_DIR/scripts/validate_report.py" path/to/report.md
+python3 -I "$REPORT_SKILL_DIR/scripts/validate_report.py" path/to/report.md
 ```
 
 `REPORT_SKILL_DIR`에는 이 `SKILL.md`가 있는 디렉터리를 넣는다. 대상 저장소의 `scripts/`를
