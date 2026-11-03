@@ -35,7 +35,7 @@ Extract useful principles from references: attention hierarchy, density, spatial
 - **Type:** use a legible scale, intentional weights, and fonts that cover the content's languages. One family can suffice. Preserve an existing brand font; otherwise choose typefaces for this brief rather than the families you would reach for on any project. Keep body lines under about 80 characters; serif body text can run slightly longer with slightly more line-height.
 - **Color and material:** derive a coherent palette from the subject, with usable contrast and quiet space for important states. Existing brand choices outrank generic aesthetic preferences.
 - **Copy:** name actions and states plainly and consistently. Labels, numbers, borders, and decorative headings should communicate something true. Empty and error states guide the next action.
-- **Motion:** make changes and consequences understandable. Use automatic motion sparingly and respect reduced-motion preferences.
+- **Motion:** make changes and consequences understandable. Review [state and change](#make-state-and-change-understandable) across the user's flow. Use automatic motion sparingly and respect reduced-motion preferences.
 
 Avoid these default typographic treatments; they are the commonest tells of a generated page: accenting a single word or phrase in a headline, all-caps labels, and unnecessary labels above content.
 
@@ -54,6 +54,14 @@ Each is legitimate for some briefs, but they are defaults rather than choices. W
 For a new composition or redesign, write a compact plan before polished code: 4–6 named hex values, the typefaces and their roles, a layout concept as a sentence or ASCII wireframe with alignment guidance, and the principles that make this design specific. In an open exploration, the structural candidates are the layout part of this plan.
 
 Review the plan before building. If any part reads like the default you would produce for any similar brief (work through a similar prompt and see whether you arrive somewhere similar), revise it and say what changed and why. If you can keep notes across passes or sessions, record what you tried so later work does not repeat it.
+
+## Make state and change understandable
+
+Trace the user's flow through consequential state changes and the intervals between them, including changes without direct input. Identify what the user must understand to interpret their actions, recognize the current situation, and decide what to do next. Where the interface leaves them guessing, provide timely feedback grounded in the available system state.
+
+Choose motion when its temporal behavior makes causality, continuity, or ongoing activity clearer than a static update. Use static feedback where it communicates enough. For functional motion, ask what useful understanding would be lost if it were removed. Do not imply progress or completion unsupported by the available evidence.
+
+Verify the flow over time for both missing feedback and motion that communicates nothing useful. When reduced motion is requested, preserve the same information without relying on animation.
 
 ## Build and inspect
 
