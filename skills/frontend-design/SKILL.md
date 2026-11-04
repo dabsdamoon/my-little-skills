@@ -27,7 +27,9 @@ When novelty is requested, compare the final recommendation with available prior
 
 Separate **requirements** from **design hypotheses**. Required information, actions, brand rules, and accessibility constraints can remain constant across candidates. A previous layout, poetic headline, or first-generated component is a hypothesis until the user adopts it. A recommendation may be implemented under existing authorization without being described as user-approved.
 
-Extract useful principles from references: attention hierarchy, density, spatial relationships, feedback, and input reach. A reference need not become a template for the same palette or component arrangement. For a task screen, begin with the controls and information needed during use; a promotional introduction belongs only where it serves the task.
+Identify the problem a reference solves and the principle worth transferring: attention hierarchy, density, spatial relationships, feedback, or input reach. Where choices remain open, derive structure and motion from this task's content and actions. Reuse components and implementation techniques while choosing composition, palette, timing, and sequence for the brief. When the user requests close reproduction or adopts a design, preserve that fidelity.
+
+For a task screen, begin with the controls and information needed during use; a promotional introduction belongs only where it serves the task.
 
 ## Make deliberate visual choices
 
@@ -61,13 +63,15 @@ Trace the user's flow through consequential state changes and the intervals betw
 
 Choose motion when its temporal behavior makes causality, continuity, or ongoing activity clearer than a static update. Use static feedback where it communicates enough. For functional motion, ask what useful understanding would be lost if it were removed. Do not imply progress or completion unsupported by the available evidence.
 
+Acknowledge input promptly and distinguish receipt from confirmation of its outcome. Use timing to make dependencies between related changes legible within the project's motion language. Preserve unchanged context and the identity of objects as their state changes. For supported interruptions, continue coherently from the current visible state toward the latest valid state. Presentation timing must not delay task feedback; let settled results remain readable.
+
 Verify the flow over time for both missing feedback and motion that communicates nothing useful. When reduced motion is requested, preserve the same information without relying on animation.
 
 ## Build and inspect
 
 Use the project's stack and reusable components. Match implementation effort to the chosen design. Exercise actual content and important states, including loading, empty, error, selected, disabled, and unavailable where relevant. Keep responsive behavior, keyboard focus, touch targets, and readable contrast intact. Plan CSS selector specificity deliberately; rules such as `.section` and `.cta` can cancel each other's padding and margin.
 
-Inspect rendered results at relevant sizes when rendering tools are available. Distinguish code inspection, interaction checks, visual observation, and user preference; none substitutes for the others. State unavailable checks honestly. A static mockup does not establish usability in motion or under interaction.
+Inspect rendered results at relevant sizes when rendering tools are available. For motion, watch playback at normal speed from the triggering change through the settled result, including supported interruption and resumption. Use recordings or frame stepping to investigate faults; selected frames cannot establish continuous playback, and geometry checks cannot establish visual quality. Distinguish code inspection, interaction checks, visual observation, and user preference; none substitutes for the others. State what was observed and what remains unverified.
 
 ## Deliver and hand off
 
