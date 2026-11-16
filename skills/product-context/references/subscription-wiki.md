@@ -7,7 +7,7 @@ configure a model provider, or fall back to API-key billing.
 
 ## One-time setup
 
-Python 3.10+, Node.js 22.22+ and npm are required. Sign in to the intended host
+On macOS/Linux, Python 3.10+, Node.js 22.22+ and npm are required. Sign in to the intended host
 with its subscription first. Paths below are relative to this skill directory.
 
 ```sh
@@ -23,6 +23,10 @@ the user MCP server `product_context` with both CLIs. Use `--host claude` or
 refuses an unowned server with the same name. The stable runtime survives worktree
 removal. A repeated identical installation does not reinstall dependencies or
 duplicate registrations. Run setup again when moving to a new released version.
+Setup serializes installation and registration under a kernel-owned lock; an
+interrupted process releases ownership so the managed installation can be retried.
+Use a canonical install path: symlinked ancestors, registries and receipts are
+refused before they can redirect managed writes.
 
 Restart the host to load its user MCP configuration. No API key or scheduled
 workflow is needed. No background generation is installed. Existing subscription
@@ -60,6 +64,8 @@ the host bills its own model or other tools.
    overall update is incomplete. Inspect the changes and use update/resume for any
    further authorized work; report the incomplete state if the work budget is used.
    Do not declare success from the word `complete` in an earlier or nested response.
+   A premature finish with pending pages keeps the run lock; complete its remaining
+   queue or disconnect before another session can resume ownership.
 8. Call `product_context_status`. Its `wiki.status` and `context.review.status`
    are different signals. A guarded completion receipt checks primary source
    versions, generated Markdown/Claims/metadata bytes and complete wiki metadata.

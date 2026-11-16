@@ -26,7 +26,13 @@ const pageKey = value => '/' + value.replace(/^\/+/, '');
 const instructions = `Maintain product documents in the CURRENT subscription-authenticated host session. This MCP server calls no model/provider and has no API fallback or schedule. Read the product-context skill before generation. Write source specs/ADRs/decisions FIRST; preserve old evidence and distinguish accepted target, implemented behavior and proposals. Do not invent a rationale or human approval. Call openwiki_begin; existing wikis use update and interrupted runs resume. Plans are limited to ${maxPages} factual pages including quickstart. Consume the assigned page queue and sparse Claim decisions. A SOURCE_CHANGED error means pages may be saved but the workflow is incomplete: inspect sources and explicitly update again if needed, without init/reset. Finish must succeed without sourceChanged and with complete metadata. Then call product_context_status and product_context_record_review with the exact snapshot and an explicit questions array collected from documents AND existing open questions. Resolve questions only with answers. Do not use a raw CLI record to bypass a failed wiki completion. Existing API workflows are preserved and block generation until explicitly reviewed. Do not launch standalone OpenWiki, extra models or background jobs.`;
 const server = new McpServer({ name: 'product-context', version: '0.2.0' }, { instructions });
 
-async function unlock() { if (release) { const previous = release; release = null; await previous(); } activeRoot = null; plannedPages.clear(); claimIssuePages = []; }
+async function unlock() {
+  manager.active = null;
+  activeRoot = null;
+  plannedPages.clear();
+  claimIssuePages = [];
+  if (release) { const previous = release; release = null; await previous(); }
+}
 async function execute(name, input, native) {
   const generation = !['openwiki_list_workspaces', 'openwiki_list_wikis', 'openwiki_search', 'openwiki_read', 'product_context_status', 'product_context_subscription_status'].includes(name);
   if (generation && busy) fail('BUSY', 'Another wiki operation is in progress.');
@@ -43,6 +49,10 @@ async function execute(name, input, native) {
       const root = await rootPath(input.root);
       const releaseReview = await lock(root);
       try { return await recordReview(root, input, host); } finally { await releaseReview(); }
+    }
+    if (generation && name !== 'openwiki_begin' && (!activeRoot || !release || !await release.owns())) {
+      await unlock();
+      fail('NO_ACTIVE_RUN', 'Call openwiki_begin to acquire this product before continuing.');
     }
     if (name === 'openwiki_begin') {
       const root = await rootPath(input.root);
@@ -81,14 +91,16 @@ async function execute(name, input, native) {
     }
     if (name === 'openwiki_finish') {
       const root = activeRoot;
+      let finished = false;
       try {
         if (!root) fail('NO_ACTIVE_RUN', 'Call openwiki_begin first.');
         const result = await native.handle(input);
+        finished = true;
         if (result.sourceChanged) fail('SOURCE_CHANGED', 'Pages were saved but sources changed during generation; inspect and update again. No current receipt was written.');
         await noWorkflow(root);
         const receipt = await saveReceipt(root, await context(root));
         return { ...result, review_snapshot: receipt.snapshot, execution: 'subscription-host', model_calls: 0 };
-      } finally { await unlock(); }
+      } finally { if (finished) await unlock(); }
     }
     return native.handle(input);
   } finally { if (generation) busy = false; }

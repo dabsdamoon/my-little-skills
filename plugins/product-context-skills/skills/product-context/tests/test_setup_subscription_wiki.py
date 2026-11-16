@@ -5,13 +5,14 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+import time
 import unittest
 
 SKILL = Path(__file__).resolve().parents[1]
 SCRIPT = SKILL / 'scripts/setup_subscription_wiki.py'
 
 FAKE_CLI = '''#!/usr/bin/env python3
-import json,os,sys
+import json,os,sys,time
 from pathlib import Path
 tool=Path(sys.argv[0]).name
 args=sys.argv[1:]
@@ -21,6 +22,13 @@ if tool=='npm':
     state['events'].append(['npm',*args])
     target=Path.cwd()/'node_modules'
     if not target.exists(): target.symlink_to(os.environ['FIXTURE_REAL_NODE_MODULES'],target_is_directory=True)
+    if os.environ.get('FIXTURE_NPM_BARRIER'):
+        barrier=Path(os.environ['FIXTURE_NPM_BARRIER'])
+        (barrier/('entered-'+str(os.getpid()))).touch()
+        deadline=time.monotonic()+15
+        while not (barrier/'release').exists():
+            if time.monotonic()>deadline:sys.exit(9)
+            time.sleep(0.02)
 elif args[:2]==['login','status']:
     print('Logged in using ChatGPT',file=sys.stderr);sys.exit(0)
 elif args[:2]==['auth','status']:
@@ -45,7 +53,7 @@ class SubscriptionSetupTests(unittest.TestCase):
     def setUp(self) -> None:
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
-        self.root = Path(self.temporary.name)
+        self.root = Path(self.temporary.name).resolve()
         self.state = self.root / 'mcp-state.json'
         bin_dir = self.root / 'bin'
         bin_dir.mkdir()
@@ -95,6 +103,59 @@ class SubscriptionSetupTests(unittest.TestCase):
         self.assertIn('UNMANAGED_SERVER', result.stdout)
         self.assertEqual(self.state.read_bytes(), before)
         self.assertFalse(self.target.exists())
+
+    def test_a_symlinked_install_ancestor_is_rejected_without_writing_its_target(self) -> None:
+        outside = self.root / 'outside'
+        outside.mkdir()
+        alias = self.root / 'alias'
+        alias.symlink_to(outside, target_is_directory=True)
+        self.target = alias / '0.2.0'
+        result = self.run_setup('--install')
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn('UNSAFE_DESTINATION', result.stdout)
+        self.assertEqual(list(outside.iterdir()), [])
+        self.assertFalse(self.state.exists())
+
+    def test_a_symlinked_registry_does_not_overwrite_unrelated_json(self) -> None:
+        self.target.parent.mkdir()
+        unrelated = self.root / 'unrelated.json'
+        unrelated.write_text('{}\n')
+        (self.target.parent / 'registrations.json').symlink_to(unrelated)
+        result = self.run_setup('--install')
+        self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
+        self.assertIn('UNSAFE_DESTINATION', result.stdout)
+        self.assertEqual(unrelated.read_text(), '{}\n')
+        self.assertFalse(self.target.exists())
+
+    def test_concurrent_setup_cannot_enter_npm_or_registration_twice(self) -> None:
+        barrier = self.root / 'barrier'
+        barrier.mkdir()
+        env = dict(self.env, FIXTURE_NPM_BARRIER=str(barrier))
+        args = ['python3', '-B', str(SCRIPT), '--install-root', str(self.target), '--host', 'both', '--json', '--install']
+        first = subprocess.Popen(args, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        second = None
+        second_entered = False
+        try:
+            deadline = time.monotonic() + 10
+            while not list(barrier.glob('entered-*')):
+                self.assertIsNone(first.poll(), 'First installer exited before the npm boundary')
+                self.assertLess(time.monotonic(), deadline, 'First installer did not reach npm')
+                time.sleep(0.02)
+            second = subprocess.Popen(args, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            deadline = time.monotonic() + 10
+            while second.poll() is None and len(list(barrier.glob('entered-*'))) < 2:
+                self.assertLess(time.monotonic(), deadline, 'Second installer neither stopped nor reached npm')
+                time.sleep(0.02)
+            second_entered = len(list(barrier.glob('entered-*'))) > 1
+        finally:
+            (barrier / 'release').touch()
+            out1, err1 = first.communicate(timeout=15)
+            if second is not None:
+                out2, err2 = second.communicate(timeout=15)
+        self.assertFalse(second_entered, 'Concurrent installers both entered the same npm transaction')
+        self.assertEqual(first.returncode, 0, out1 + err1)
+        self.assertEqual(second.returncode, 2, out2 + err2)
+        self.assertIn('SETUP_BUSY', out2)
 
 
 if __name__ == '__main__':

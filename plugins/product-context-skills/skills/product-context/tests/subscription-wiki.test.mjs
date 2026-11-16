@@ -241,3 +241,13 @@ test('automatically included stale Claim pages cannot expand a small plan beyond
   assert.equal(update.claimIssuePages.length, 4);
   await call(bounded, 'openwiki_submit_plan', { runId: update.runId, pages: [pages[0]] }, 'PAGE_LIMIT');
 });
+
+test('a premature finish keeps exclusive ownership while its pending run remains usable', async t => {
+  const { root, client, connect } = await fixture(t);
+  const begin = await call(client, 'openwiki_begin', { root, mode: 'init' });
+  await call(client, 'openwiki_submit_plan', { runId: begin.runId, pages: [{ path: page, title: 'Policy', purpose: 'Retention' }] });
+  await call(client, 'openwiki_finish', { runId: begin.runId }, 'pending');
+  const other = await connect();
+  await call(other, 'openwiki_begin', { root, mode: 'init' }, 'LOCKED');
+  assert.equal((await call(client, 'openwiki_next_page', { runId: begin.runId })).status, 'pending');
+});

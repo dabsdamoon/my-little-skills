@@ -78,10 +78,15 @@ export async function lock(root) {
       const handle = await open(file, 'wx', 0o600);
       await handle.writeFile(JSON.stringify({ pid: process.pid, token }));
       await handle.close();
-      return async () => {
+      const release = async () => {
         try { if (JSON.parse(await readFile(file, 'utf8')).token === token) await unlink(file); }
         catch (error) { if (error.code !== 'ENOENT') throw error; }
       };
+      release.owns = async () => {
+        try { return JSON.parse(await readFile(file, 'utf8')).token === token; }
+        catch (error) { if (error.code === 'ENOENT') return false; throw error; }
+      };
+      return release;
     } catch (error) {
       if (error.code !== 'EEXIST') throw error;
       let previous;

@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import os
 from pathlib import Path
 import shutil
+import stat
 import subprocess
 import tempfile
 
@@ -18,6 +20,48 @@ NAME = 'product_context'
 
 class SetupError(Exception):
     pass
+
+
+def safe_destination(path: Path) -> None:
+    for item in [*reversed(path.parents), path]:
+        if item.is_symlink():
+            raise SetupError(f'UNSAFE_DESTINATION: Use a canonical path without symlinked ancestors: {item}')
+        if item != path and item.exists() and not item.is_dir():
+            raise SetupError('UNSAFE_DESTINATION: An install ancestor is not a directory.')
+
+
+def write_json(path: Path, value: dict) -> None:
+    safe_destination(path)
+    descriptor, name = tempfile.mkstemp(prefix=f'.{path.name}-', dir=path.parent)
+    try:
+        with os.fdopen(descriptor, 'w') as stream:
+            stream.write(json.dumps(value, indent=2) + '\n')
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(name, path)
+    finally:
+        Path(name).unlink(missing_ok=True)
+
+
+@contextmanager
+def setup_lock(parent: Path):
+    # Kernel ownership is released on process exit, so an interrupted install can
+    # be retried without confusing an active npm transaction with an abandoned one.
+    import fcntl
+    file = parent / '.setup.lock'
+    safe_destination(file)
+    parent.mkdir(parents=True, exist_ok=True)
+    descriptor = os.open(file, os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise SetupError('UNSAFE_DESTINATION: The setup lock must be a regular file.')
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            raise SetupError('SETUP_BUSY: Another installer owns this runtime and registration transaction.') from None
+        yield
+    finally:
+        os.close(descriptor)
 
 
 def command(args: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
@@ -72,8 +116,9 @@ def inspect_registration(host: str, owned: dict, expected: Path) -> bool:
 
 
 def install_runtime(target: Path, manifest: dict[str, str]) -> None:
-    if target.is_symlink():
-        raise SetupError('UNSAFE_DESTINATION: The install directory must not be a symlink.')
+    safe_destination(target)
+    for name in ['.installed.json', '.installing.json']:
+        safe_destination(target / name)
     expected = {'owner': NAME, 'version': VERSION, 'files': manifest}
     if target.exists():
         receipt = next((target / name for name in ['.installed.json', '.installing.json'] if (target / name).exists()), None)
@@ -81,6 +126,7 @@ def install_runtime(target: Path, manifest: dict[str, str]) -> None:
             raise SetupError('VERSION_CONFLICT: The target is not this exact managed version; use a new version/path.')
         for relative, digest in manifest.items():
             installed = target / relative
+            safe_destination(installed)
             if installed.is_symlink() or hashlib.sha256(installed.read_bytes()).hexdigest() != digest:
                 raise SetupError('VERSION_CONFLICT: Installed managed files changed; no files were overwritten.')
     else:
@@ -91,7 +137,7 @@ def install_runtime(target: Path, manifest: dict[str, str]) -> None:
                 destination = temporary / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(SKILL / relative, destination)
-            (temporary / '.installing.json').write_text(json.dumps(expected, indent=2) + '\n')
+            write_json(temporary / '.installing.json', expected)
             temporary.rename(target)
         finally:
             if temporary.exists():
@@ -99,7 +145,7 @@ def install_runtime(target: Path, manifest: dict[str, str]) -> None:
     if not (target / '.installed.json').exists():
         required(['npm', 'ci', '--ignore-scripts', '--no-audit', '--no-fund'], target / 'runtime')
         required(['node', str(target / 'runtime/server.mjs'), '--host', 'codex', '--self-check'])
-        (target / '.installed.json').write_text(json.dumps(expected, indent=2) + '\n')
+        write_json(target / '.installed.json', expected)
         (target / '.installing.json').unlink(missing_ok=True)
 
 
@@ -124,25 +170,28 @@ def main() -> int:
         if tuple(map(int, version[:2])) < (22, 22):
             raise SetupError('NODE_VERSION: Node.js 22.22 or newer is required.')
         registry = target.parent / 'registrations.json'
-        owned = json.loads(registry.read_text()) if registry.exists() else {}
-        ready = {host: inspect_registration(host, owned, server) for host in hosts}
-        install_runtime(target, files())
-        for host in hosts:
-            required(['node', str(server), '--host', host, '--check-auth'])
-        for host in hosts:
-            if ready[host]:
-                continue
-            previous = owned.get(host)
-            if previous:
-                required([host, 'mcp', 'remove', NAME, *(['--scope', 'user'] if host == 'claude' else [])])
-            try:
-                required(registration(host, server))
-            except SetupError:
+        safe_destination(target)
+        safe_destination(registry)
+        with setup_lock(target.parent):
+            owned = json.loads(registry.read_text()) if registry.exists() else {}
+            ready = {host: inspect_registration(host, owned, server) for host in hosts}
+            install_runtime(target, files())
+            for host in hosts:
+                required(['node', str(server), '--host', host, '--check-auth'])
+            for host in hosts:
+                if ready[host]:
+                    continue
+                previous = owned.get(host)
                 if previous:
-                    required(registration(host, Path(previous)))
-                raise
-            owned[host] = str(server)
-            registry.write_text(json.dumps(owned, indent=2) + '\n')
+                    required([host, 'mcp', 'remove', NAME, *(['--scope', 'user'] if host == 'claude' else [])])
+                try:
+                    required(registration(host, server))
+                except SetupError:
+                    if previous:
+                        required(registration(host, Path(previous)))
+                    raise
+                owned[host] = str(server)
+                write_json(registry, owned)
         report['registered'] = hosts
     print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else json.dumps(report, ensure_ascii=False))
     return 0
