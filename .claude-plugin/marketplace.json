@@ -103,7 +103,7 @@
     },
     {
       "name": "product-context-skills",
-      "description": "Offline product evidence, evolving decisions, and incremental documentation review without automatic model calls",
+      "description": "Offline product evidence and bounded subscription-host wiki maintenance without scheduled API generation",
       "source": "./plugins/product-context-skills"
     }
   ]

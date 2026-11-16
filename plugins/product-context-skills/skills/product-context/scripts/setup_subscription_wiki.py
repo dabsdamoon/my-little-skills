@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+"""Explicitly install the subscription-only MCP runtime for local coding hosts."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+
+SKILL = Path(__file__).resolve().parents[1]
+VERSION = json.loads((SKILL / 'runtime/package.json').read_text())['version']
+NAME = 'product_context'
+
+
+class SetupError(Exception):
+    pass
+
+
+def command(args: list[str], cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(args, cwd=cwd, capture_output=True, text=True)
+
+
+def required(args: list[str], cwd: Path | None = None) -> str:
+    result = command(args, cwd)
+    if result.returncode:
+        raise SetupError(f'COMMAND_FAILED: {args[0]} {args[1]} failed; no API fallback was attempted.')
+    return result.stdout
+
+
+def files() -> dict[str, str]:
+    result = {}
+    for directory, names, filenames in os.walk(SKILL):
+        names[:] = [name for name in names if name not in {'node_modules', '__pycache__', '.git'}]
+        for name in filenames:
+            if name.endswith('.pyc') or name in {'.installed.json', '.installing.json'}:
+                continue
+            source = Path(directory) / name
+            if source.is_symlink():
+                raise SetupError('UNSAFE_SOURCE: Refusing symlinked skill files.')
+            result[str(source.relative_to(SKILL))] = hashlib.sha256(source.read_bytes()).hexdigest()
+    return result
+
+
+def registration(host: str, server: Path) -> list[str]:
+    env = ['--env', 'OPENWIKI_TELEMETRY_DISABLED=1', '--env', 'DO_NOT_TRACK=1'] if host == 'codex' else ['-e', 'OPENWIKI_TELEMETRY_DISABLED=1', '-e', 'DO_NOT_TRACK=1']
+    scope = [] if host == 'codex' else ['--scope', 'user', '--transport', 'stdio']
+    return [host, 'mcp', 'add', NAME, *scope, *env, '--', 'node', str(server), '--host', host]
+
+
+def inspect_registration(host: str, owned: dict, expected: Path) -> bool:
+    result = command([host, 'mcp', 'get', NAME, *(['--json'] if host == 'codex' else [])])
+    if result.returncode:
+        return False
+    previous = owned.get(host)
+    text = result.stdout
+    try:
+        value = json.loads(text)
+        transport = value.get('transport', value)
+        args = transport.get('args', [])
+        reported = args[0] if transport.get('command') == 'node' and args else None
+    except json.JSONDecodeError:
+        reported = previous if previous and previous in text and 'Command: node' in text else None
+    if not reported or reported not in {previous, str(expected)}:
+        raise SetupError(f'UNMANAGED_SERVER: Existing {host} MCP server {NAME} was left unchanged.')
+    if previous is None and reported != str(expected):
+        raise SetupError(f'UNMANAGED_SERVER: Existing {host} server has no installation record.')
+    return reported == str(expected)
+
+
+def install_runtime(target: Path, manifest: dict[str, str]) -> None:
+    if target.is_symlink():
+        raise SetupError('UNSAFE_DESTINATION: The install directory must not be a symlink.')
+    expected = {'owner': NAME, 'version': VERSION, 'files': manifest}
+    if target.exists():
+        receipt = next((target / name for name in ['.installed.json', '.installing.json'] if (target / name).exists()), None)
+        if receipt is None or json.loads(receipt.read_text()) != expected:
+            raise SetupError('VERSION_CONFLICT: The target is not this exact managed version; use a new version/path.')
+        for relative, digest in manifest.items():
+            installed = target / relative
+            if installed.is_symlink() or hashlib.sha256(installed.read_bytes()).hexdigest() != digest:
+                raise SetupError('VERSION_CONFLICT: Installed managed files changed; no files were overwritten.')
+    else:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = Path(tempfile.mkdtemp(prefix='.product-context-install-', dir=target.parent))
+        try:
+            for relative in manifest:
+                destination = temporary / relative
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(SKILL / relative, destination)
+            (temporary / '.installing.json').write_text(json.dumps(expected, indent=2) + '\n')
+            temporary.rename(target)
+        finally:
+            if temporary.exists():
+                shutil.rmtree(temporary)
+    if not (target / '.installed.json').exists():
+        required(['npm', 'ci', '--ignore-scripts', '--no-audit', '--no-fund'], target / 'runtime')
+        required(['node', str(target / 'runtime/server.mjs'), '--host', 'codex', '--self-check'])
+        (target / '.installed.json').write_text(json.dumps(expected, indent=2) + '\n')
+        (target / '.installing.json').unlink(missing_ok=True)
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--host', choices=['claude', 'codex', 'both'], default='both')
+    parser.add_argument('--install-root', type=Path, default=Path.home() / '.local/share/product-context' / VERSION)
+    parser.add_argument('--install', action='store_true', help='Explicitly install dependencies and register user MCP servers.')
+    parser.add_argument('--json', action='store_true')
+    args = parser.parse_args()
+    hosts = ['claude', 'codex'] if args.host == 'both' else [args.host]
+    target = args.install_root.expanduser().absolute()
+    server = target / 'runtime/server.mjs'
+    report = {'mode': 'install' if args.install else 'plan', 'version': VERSION, 'hosts': hosts,
+              'runtime': str(target), 'commands': [registration(host, server) for host in hosts],
+              'model_calls': 0, 'api_fallback': False, 'schedules_installed': False}
+    if args.install:
+        for executable in ['node', 'npm', 'python3', *hosts]:
+            if not shutil.which(executable):
+                raise SetupError(f'MISSING_TOOL: Install {executable} before running setup.')
+        version = required(['node', '--version']).strip().removeprefix('v').split('.')
+        if tuple(map(int, version[:2])) < (22, 22):
+            raise SetupError('NODE_VERSION: Node.js 22.22 or newer is required.')
+        registry = target.parent / 'registrations.json'
+        owned = json.loads(registry.read_text()) if registry.exists() else {}
+        ready = {host: inspect_registration(host, owned, server) for host in hosts}
+        install_runtime(target, files())
+        for host in hosts:
+            required(['node', str(server), '--host', host, '--check-auth'])
+        for host in hosts:
+            if ready[host]:
+                continue
+            previous = owned.get(host)
+            if previous:
+                required([host, 'mcp', 'remove', NAME, *(['--scope', 'user'] if host == 'claude' else [])])
+            try:
+                required(registration(host, server))
+            except SetupError:
+                if previous:
+                    required(registration(host, Path(previous)))
+                raise
+            owned[host] = str(server)
+            registry.write_text(json.dumps(owned, indent=2) + '\n')
+        report['registered'] = hosts
+    print(json.dumps(report, ensure_ascii=False, indent=2) if args.json else json.dumps(report, ensure_ascii=False))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (SetupError, OSError, ValueError) as error:
+        print(json.dumps({'error': str(error)}))
+        raise SystemExit(2)

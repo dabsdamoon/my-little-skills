@@ -1,11 +1,11 @@
 ---
 name: product-context
-description: Use when product specifications, ADRs, implementation evidence, or handoff documents may be stale, when decisions change or need reconsideration, or when an offline product-context check is needed across repositories.
+description: Use when product specifications, ADRs, implementation evidence, or handoff documents may be stale, when decisions change or need reconsideration, when an offline context check is needed, or when a repository wiki needs a bounded subscription-host update.
 ---
 
 # Product Context
 
-Reference for the bundled **offline** CLI. A changed decision is legitimate;
+Reference for the **offline CLI** and optional **subscription-host wiki MCP**. A changed decision is legitimate;
 retain its reason, scope, predecessors, and unresolved questions. Evidence
 freshness is separate from semantic correctness and product acceptance.
 
@@ -52,16 +52,28 @@ Exit codes: `0` inspection completed (including expected drift), `1` missing
 local references or explicitly required freshness, `2` invalid/unsafe input or
 state. `--require-reviewed` is an opt-in freshness policy.
 
+## Subscription wiki maintenance
+
+For explicitly requested wiki generation, read [subscription workflow](references/subscription-wiki.md).
+The current Claude Code/Codex session researches and writes; the `product_context`
+MCP manages OpenWiki's queue and evidence without starting another model.
+
+Complete source/spec/decision edits **before** `openwiki_begin`. Existing wikis
+update; interrupted runs resume. Use the assigned page queue and its budget.
+Finish must pass without `SOURCE_CHANGED`; then inspect `product_context_status`
+and call `product_context_record_review` with the exact snapshot and explicit
+questions from documents plus existing open questions. Never bypass a failed wiki
+finish with the raw CLI `record`. Missing rationale remains unknown or explicitly
+inferred; do not invent an approval or close an unanswered question.
+
 ## Cost boundary
 
-The CLI starts no LLM, OpenWiki, network request, background job, or configured
-validation command. `prepare` prints instructions and references only. Skill
-selection and reading still consume the current agent session's allowance.
-Automatic checks do not authorize model-based generation. When the user
-explicitly requests generation, the current agent can use the packet for a
-scoped document update; optional OpenWiki usage follows that separately chosen
-execution/billing mode. Never treat a prepared packet as evidence that generation
-ran. No provider execution adapter is shipped in this version.
+Offline commands start no LLM, OpenWiki, network request, background job or
+validation command. `prepare` prints references only. The optional MCP checks the
+host's subscription login, starts no model/provider, suppresses OpenWiki's default
+API workflow, and installs no schedule. Reading and writing still consume the
+current host session's allowance; login checks are not billing receipts. Generation
+requires a user request. Never treat a packet as proof that generation ran.
 
 See [record formats and decisions](references/format.md). Existing product
 guidance and user decisions take precedence over this reference.
