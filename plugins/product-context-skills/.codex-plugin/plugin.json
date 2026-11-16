@@ -1,0 +1,15 @@
+{
+  "name": "product-context-skills",
+  "description": "Offline product evidence checks, evolving decision records, and incremental documentation review without automatic model calls",
+  "version": "0.1.0",
+  "author": {"name": "dabsdamoon"},
+  "interface": {
+    "displayName": "Product Context",
+    "shortDescription": "Offline evidence and evolving product decisions",
+    "longDescription": "Inspect product documentation and evidence, preserve decision changes and open questions, and prepare selective update packets. Automatic operations do not execute a model or provider.",
+    "developerName": "dabsdamoon",
+    "category": "Developer Tools",
+    "capabilities": ["Read", "Write", "Execute"],
+    "defaultPrompt": ["Check this product's documentation and changed evidence without calling a model."]
+  }
+}

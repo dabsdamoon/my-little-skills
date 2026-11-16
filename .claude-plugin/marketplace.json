@@ -100,6 +100,11 @@
       "skills": [
         "./skills/discernment-nudge"
       ]
+    },
+    {
+      "name": "product-context-skills",
+      "description": "Offline product evidence, evolving decisions, and incremental documentation review without automatic model calls",
+      "source": "./plugins/product-context-skills"
     }
   ]
 }
