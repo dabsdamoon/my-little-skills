@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "product": "my-little-skills-product-context",
+  "sources": [
+    "README.md",
+    "skills/product-context/**/*.md",
+    "skills/product-context/scripts/*.py",
+    "skills/product-context/runtime/*.mjs",
+    "plugins/product-context-skills/README.md"
+  ],
+  "exclude": [],
+  "topics": [],
+  "max_file_bytes": 1048576
+}

@@ -44,6 +44,18 @@ including GitHub expression contexts; no shellcheck/pyflakes integration was use
 Canonical/distribution bundles are compared byte-for-byte. Runtime dependencies
 are unchanged from 0.2.0, with exact pins and dependency lifecycle scripts disabled.
 
+An additional model-free smoke probe used the installed 0.3.0 MCP, real local
+Codex login, an actual detached Git worktree and the actual OpenWiki backend.
+Preflight → init → page/Claim submission → finish → guarded review → verified
+documentation commit succeeded, publishing nine expected wiki/state paths.
+The probe authored synthetic Markdown directly and did not call a model. It
+establishes backend/worktree compatibility, not hosted Claude OAuth delivery.
+
+Both real local CLI registrations now point to the stable 0.3.0 runtime. Actual
+MCP clients discovered 13 tools and passed subscription-login checks for Claude
+and Codex. Existing loose skill bundles were verified, backed up and updated to
+the exact 19-file bundle. No plugin-wide update or baseline policy change ran.
+
 ## One independent review and one fix pass
 
 Four material integration issues were reproduced as failing public contracts:
@@ -73,6 +85,9 @@ No token was read from local credential storage, copied to GitHub, or printed.
 No hosted Claude generation/push was claimed or performed without that secret.
 The checked-in workflow reports the missing prerequisite explicitly when a
 changed source snapshot needs generation; it has no API fallback.
+The skills repository profile selects 13 bounded primary files and has no
+missing source or broken-link findings. Its workflow pins the reviewed harness
+commit `cc31cefcc4a0c4d3efde47828eb3acd904961327` and passes actionlint.
 
 The completed code and emitted workflow can be reviewed before credentials are
 configured. Set the secret through GitHub's secret UI or the interactive GitHub
