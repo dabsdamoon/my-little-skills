@@ -49,7 +49,7 @@
         },
         {
           "name": "Fetch reviewed harness outside the Action checkout",
-          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin ceeef64c72e8028d60a4891cad4c48629f2a2076\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
+          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin 781bef05aff8cc9984a50bc0218c313839d5eca4\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
         },
         {
           "name": "Preserve PR evidence separately from Action config restoration",
@@ -82,6 +82,9 @@
           "id": "writer",
           "if": "steps.preflight.outputs.should_run == 'true'",
           "uses": "anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc",
+          "env": {
+            "PRODUCT_CONTEXT_SESSION": "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}"
+          },
           "with": {
             "github_token": "${{ github.token }}",
             "claude_code_oauth_token": "${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}",
