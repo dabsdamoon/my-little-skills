@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "product": "houmdesk",
+  "sources": [
+    "README.md",
+    "AGENTS.md",
+    "docs/PRD.md",
+    "docs/TDD.md",
+    "docs/adr/**/*.md",
+    "db/migrate.mjs",
+    "db/baseline.json",
+    ".github/workflows/*.yml"
+  ],
+  "exclude": [],
+  "topics": [
+    {
+      "id": "database-ownership",
+      "question": "Do PRD, TDD, agent guidance and the migration runner describe the currently agreed division between product schema ownership and central role/IAM/instance ownership? Record changed decisions and unresolved scope instead of choosing a document by recency alone.",
+      "sources": ["docs/PRD.md", "docs/TDD.md", "AGENTS.md", "db/migrate.mjs", "db/baseline.json"]
+    },
+    {
+      "id": "release-evidence",
+      "question": "Which capabilities are implemented, verified in staging, or verified in production? Preserve missing production evidence as an open question rather than inferring deployment from a merge.",
+      "sources": ["README.md", ".github/workflows/deploy-staging.yml", ".github/workflows/deploy-production.yml"]
+    }
+  ]
+}

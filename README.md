@@ -388,3 +388,12 @@ To bundle skills into a dual-compatible plugin, create `plugins/<name>/.codex-pl
 - [Plugins documentation](https://code.claude.com/docs/en/plugins)
 - [Codex plugin documentation](https://learn.chatgpt.com/docs/build-plugins)
 - [Upstream: anthropics/skills](https://github.com/anthropics/skills)
+
+## Product context harness
+
+`product-context-skills` provides a reusable offline CLI and reference skill for
+product specifications, changed evidence, decision supersession and open questions.
+It preserves each product's existing document layout. Automatic checks perform no
+model calls; AI generation and OpenWiki execution are not included.
+
+See [installation, CLI usage and HoumDesk pilot](plugins/product-context-skills/README.md).
