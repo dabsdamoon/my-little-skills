@@ -80,9 +80,14 @@ fails closed instead of being silently reset.
 
 ## OpenWiki
 
-OpenWiki is optional. `prepare` creates a packet for selective source reading;
-it does not call OpenWiki or configure credentials. If generation is separately
-requested, retain decision history and unanswered questions, distinguish intended
-behavior from current code, and keep staging/production verification separate.
-No paid provider execution, scheduled refresh, global skill installation, or
-deployment is included in this CLI.
+OpenWiki is optional. `prepare` creates a packet for selective source reading and
+does not call OpenWiki or configure credentials. Explicitly requested generation
+can use the separate [subscription-host MCP](subscription-wiki.md). It retains a
+guarded completion receipt in `.product-context/wiki-review.json`, containing the
+primary context snapshot and a digest of wiki Markdown, Claims and metadata.
+Changed source or generated wiki bytes invalidate that receipt. The MCP's guarded
+record tool requires a current receipt and explicit open-question input.
+
+Decision history, unanswered questions, intended versus implemented behavior, and
+environment-specific verification remain review concerns. This offline CLI
+contains no provider execution, scheduling, global installation or deployment.

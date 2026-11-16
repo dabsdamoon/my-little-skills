@@ -1,15 +1,23 @@
 {
   "name": "product-context-skills",
-  "description": "Offline product evidence checks, evolving decision records, and incremental documentation review without automatic model calls",
-  "version": "0.1.0",
-  "author": {"name": "dabsdamoon"},
+  "description": "Product evidence checks, evolving decisions, and bounded OpenWiki maintenance through subscription-authenticated coding agents",
+  "version": "0.2.0",
+  "author": {
+    "name": "dabsdamoon"
+  },
   "interface": {
     "displayName": "Product Context",
-    "shortDescription": "Offline evidence and evolving product decisions",
-    "longDescription": "Inspect product documentation and evidence, preserve decision changes and open questions, and prepare selective update packets. Automatic operations do not execute a model or provider.",
+    "shortDescription": "Product decisions and subscription wiki maintenance",
+    "longDescription": "Inspect evolving product evidence and preserve decisions and questions. An opt-in local MCP bridge lets the subscribed coding-agent session maintain OpenWiki without a separate model provider or scheduled API workflow.",
     "developerName": "dabsdamoon",
     "category": "Developer Tools",
-    "capabilities": ["Read", "Write", "Execute"],
-    "defaultPrompt": ["Check this product's documentation and changed evidence without calling a model."]
+    "capabilities": [
+      "Read",
+      "Write",
+      "Execute"
+    ],
+    "defaultPrompt": [
+      "Check this product's documentation and changed evidence without calling a model."
+    ]
   }
 }

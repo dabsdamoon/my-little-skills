@@ -391,9 +391,10 @@ To bundle skills into a dual-compatible plugin, create `plugins/<name>/.codex-pl
 
 ## Product context harness
 
-`product-context-skills` provides a reusable offline CLI and reference skill for
-product specifications, changed evidence, decision supersession and open questions.
-It preserves each product's existing document layout. Automatic checks perform no
-model calls; AI generation and OpenWiki execution are not included.
+`product-context-skills` provides an offline CLI for product evidence, evolving
+decisions and open questions, plus an optional local MCP bridge for subscription-host
+OpenWiki maintenance. It preserves existing document layouts. The current Claude
+Code/Codex session writes wiki pages; the bridge manages the queue and evidence
+without another model provider, scheduled API generation or API-key fallback.
 
 See [installation, CLI usage and HoumDesk pilot](plugins/product-context-skills/README.md).
