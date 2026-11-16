@@ -51,7 +51,13 @@ API workflow, and bounds each generation plan to three pages by default. Existin
 custom workflows are preserved and block generation. A clean completion receipt
 checks source versions, wiki Markdown, Claims and metadata before the guarded
 review tool can record the result. Existing wikis update and durable runs resume.
-No recurring generation or API-key fallback is installed.
+Local MCP setup installs no recurring generation or API-key fallback.
+
+For PR-triggered updates using Claude subscription OAuth, see
+[PR automation](skills/product-context/references/pr-automation.md). Codex-authored
+PRs use the same workflow; the automatic writer uses Claude once per eligible
+event. A tracked product-context profile, pinned workflow and repository secret
+are required. Generating the workflow alone does not activate cloud generation.
 
 See the skill's [subscription workflow](skills/product-context/references/subscription-wiki.md)
 for setup, source-doc-first ordering, questions and failure handling. The existing

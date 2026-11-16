@@ -17,7 +17,7 @@ python3 scripts/setup_subscription_wiki.py --host both --install --json
 
 The first command is a read-only plan. The second explicitly installs the pinned
 npm lockfile with dependency scripts disabled into
-`~/.local/share/product-context/0.2.0`, checks both subscription logins, and registers
+`~/.local/share/product-context/0.3.0`, checks both subscription logins, and registers
 the user MCP server `product_context` with both CLIs. Use `--host claude` or
 `--host codex` to configure only one. It preserves unrelated MCP servers and
 refuses an unowned server with the same name. The stable runtime survives worktree
@@ -29,7 +29,9 @@ Use a canonical install path: symlinked ancestors, registries and receipts are
 refused before they can redirect managed writes.
 
 Restart the host to load its user MCP configuration. No API key or scheduled
-workflow is needed. No background generation is installed. Existing subscription
+workflow is needed. This local setup installs no background generation. For
+user-enabled PR updates, use the separate [PR automation setup](pr-automation.md).
+Existing subscription
 limits and account billing settings still apply; this server cannot change how
 the host bills its own model or other tools.
 

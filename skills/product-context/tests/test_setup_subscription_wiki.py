@@ -64,7 +64,7 @@ class SubscriptionSetupTests(unittest.TestCase):
         self.env = dict(os.environ, PATH=str(bin_dir) + os.pathsep + os.environ['PATH'], FIXTURE_MCP_STATE=str(self.state), FIXTURE_REAL_NODE_MODULES=str(SKILL / 'runtime/node_modules'))
         for key in ['OPENAI_API_KEY', 'CODEX_API_KEY', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN']:
             self.env.pop(key, None)
-        self.target = self.root / 'installed/0.2.0'
+        self.target = self.root / 'installed/0.3.0'
 
     def run_setup(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(['python3', '-B', str(SCRIPT), '--install-root', str(self.target), '--host', 'both', '--json', *args], env=self.env, capture_output=True, text=True)
@@ -109,7 +109,7 @@ class SubscriptionSetupTests(unittest.TestCase):
         outside.mkdir()
         alias = self.root / 'alias'
         alias.symlink_to(outside, target_is_directory=True)
-        self.target = alias / '0.2.0'
+        self.target = alias / '0.3.0'
         result = self.run_setup('--install')
         self.assertEqual(result.returncode, 2, result.stdout + result.stderr)
         self.assertIn('UNSAFE_DESTINATION', result.stdout)

@@ -54,7 +54,10 @@ state. `--require-reviewed` is an opt-in freshness policy.
 
 ## Subscription wiki maintenance
 
-For explicitly requested wiki generation, read [subscription workflow](references/subscription-wiki.md).
+For manual wiki updates, read [subscription workflow](references/subscription-wiki.md).
+For PR-driven updates, read [PR automation](references/pr-automation.md). A repository
+workflow enabled by the user authorizes its bounded update on each eligible PR event;
+the user does not need to request another update in each development session.
 The current Claude Code/Codex session researches and writes; the `product_context`
 MCP manages OpenWiki's queue and evidence without starting another model.
 
@@ -73,7 +76,9 @@ validation command. `prepare` prints references only. The optional MCP checks th
 host's subscription login, starts no model/provider, suppresses OpenWiki's default
 API workflow, and installs no schedule. Reading and writing still consume the
 current host session's allowance; login checks are not billing receipts. Generation
-requires a user request. Never treat a packet as proof that generation ran.
+requires an explicit request or a user-enabled repository PR workflow. The PR writer
+uses Claude subscription OAuth regardless of which coding agent authored the PR.
+Never treat a packet as proof that generation ran.
 
 See [record formats and decisions](references/format.md). Existing product
 guidance and user decisions take precedence over this reference.

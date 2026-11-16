@@ -29,6 +29,7 @@ export async function safe(root, relative) {
 export async function rootPath(value) {
   if (!path.isAbsolute(value)) fail('INVALID_ROOT', 'Use the absolute Git top-level.');
   const root = await realpath(value);
+  if (process.env.PRODUCT_CONTEXT_ALLOWED_ROOT && root !== await realpath(process.env.PRODUCT_CONTEXT_ALLOWED_ROOT)) fail('INVALID_ROOT', 'This MCP process is confined to its configured product root.');
   let top;
   try { top = execFileSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { encoding: 'utf8', timeout: 10000, stdio: ['ignore', 'pipe', 'pipe'] }).trim(); }
   catch { fail('INVALID_ROOT', 'The product must be a Git repository.'); }
@@ -47,7 +48,8 @@ export function subscription(host) {
       fail('SUBSCRIPTION_REQUIRED', 'Codex must be signed in with ChatGPT.');
     }
     const output = JSON.parse(execFileSync('claude', ['auth', 'status', '--json'], { encoding: 'utf8', timeout: 15000, stdio: ['ignore', 'pipe', 'pipe'] }));
-    if (output.loggedIn && output.authMethod === 'claude.ai' && output.apiProvider === 'firstParty') return { host, authentication: 'subscription' };
+    const subscriptionMethod = output.authMethod === 'claude.ai' || (output.authMethod === 'oauth_token' && Boolean(process.env.CLAUDE_CODE_OAUTH_TOKEN));
+    if (output.loggedIn && subscriptionMethod && output.apiProvider === 'firstParty') return { host, authentication: 'subscription' };
   } catch (error) {
     if (error.message?.startsWith('SUBSCRIPTION_REQUIRED:')) throw error;
   }
