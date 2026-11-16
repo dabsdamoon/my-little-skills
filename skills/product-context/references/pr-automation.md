@@ -39,14 +39,31 @@ documentation commit; a rejected push is reported as failure, never force-pushed
 ## Automatic execution
 
 `opened`, `synchronize`, `reopened` and `ready_for_review` PR events are supported.
-Same-repository, non-draft PRs by an owner/member/collaborator are eligible. Forks
-and unknown authors do not receive a credential-bearing run. Generated wiki and
-review-only commits are excluded from the event filter; decisions remain inputs.
+Same-repository, non-draft PRs by an owner/member/collaborator or the explicitly
+listed GitHub Actions, Claude and Codex connector bots are eligible. Unknown bot
+actors and external forks do not receive a credential-bearing run. The official
+Action receives the same explicit bot allowlist. Review these identities when
+adapting the workflow to other automation accounts.
+
+Generated-only PR diffs are excluded by the path filter; decision changes remain
+inputs. Path filters inspect a PR's accumulated diff, so a documentation-only push
+to a PR that also changes sources can still run preflight. The current-snapshot
+check then skips model execution. Publishing with the built-in GitHub token also
+avoids recursively triggering ordinary push/PR workflows.
 
 The trusted harness validates the exact triggering head and runs the real offline
 context collector plus wiki receipt check before invoking a model. A current
 source snapshot and current wiki skip the writer. Missing sources, broken links,
 or a self-referential source profile fail before model execution.
+Required wiki/review outputs must be trackable by Git. Ignore rules that exclude
+new receipts or wiki artifacts fail explicitly; the workflow never force-adds
+arbitrary ignored files.
+
+The Action's workspace contains the checked-out PR Git repository. The trusted
+harness and a separate detached evidence worktree live under the runner's temp
+directory. The official Action can restore its own protected configuration from
+the base branch without changing the source evidence used for generation or
+publication. No PR hook or build script is executed to create this evidence copy.
 
 When needed, the official Claude Code Action starts a new job using the
 subscription OAuth token, the three-page MCP budget and at most sixteen Claude

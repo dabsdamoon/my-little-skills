@@ -1,6 +1,6 @@
 {
   "name": "product-context-skills",
-  "description": "Product evidence checks, evolving decisions, and bounded OpenWiki maintenance through subscription-authenticated coding agents",
+  "description": "Product evidence, evolving decisions, and bounded subscription wiki maintenance with optional PR automation",
   "version": "0.3.0",
   "author": {
     "name": "dabsdamoon"

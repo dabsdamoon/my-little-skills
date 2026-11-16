@@ -20,6 +20,8 @@ NODE = 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020'
 CLAUDE = 'anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc'
 OUTPUTS = {'.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore', 'AGENTS.md', 'CLAUDE.md'}
 RULES = {'.product-context/', '.product-context.json', '.github/workflows/openwiki-update.yml'}
+BOTS = ['github-actions[bot]', 'claude[bot]', 'chatgpt-codex-connector[bot]']
+REQUIRED_OUTPUTS = ['.product-context/review.json', '.product-context/wiki-review.json', 'openwiki/.last-update.json', 'openwiki/quickstart.md']
 
 
 def fail(code, message):
@@ -52,6 +54,27 @@ def fingerprint(path):
     return None if value is None else hashlib.sha256(value.encode()).hexdigest()
 
 
+def require_publishable(root):
+    result = subprocess.run(['git', 'check-ignore', '-z', '--stdin'], cwd=root, input='\0'.join(REQUIRED_OUTPUTS) + '\0', capture_output=True, text=True)
+    if result.returncode not in {0, 1}:
+        fail('COMMAND_FAILED', 'Cannot inspect generated-output tracking rules.')
+    ignored = result.stdout.split('\0')
+    ignored += run(['git', 'ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', 'openwiki', '.product-context/review.json', '.product-context/wiki-review.json'], root).split('\0')
+    if any(ignored):
+        fail('IGNORED_OUTPUT', 'Generated wiki and required review receipts must be trackable; review .gitignore or exclude rules first.')
+
+
+def checkout(root, args):
+    destination = Path(args.destination).absolute()
+    safe_destination(destination)
+    if destination.exists() or root in destination.parents or not re.fullmatch(r'[a-f0-9]{40}', args.head):
+        fail('UNSAFE_CHECKOUT', 'Use a new evidence worktree outside the Action workspace and a full head SHA.')
+    if run(['git', 'rev-parse', 'HEAD'], root).strip() != args.head:
+        fail('HEAD_CHANGED', 'The Action workspace must contain the exact PR head.')
+    run(['git', 'worktree', 'add', '--detach', str(destination), args.head], root)
+    return {'root': str(destination), 'head': args.head, 'model_calls': 0}
+
+
 def write_outputs(path, report):
     if path:
         with Path(path).open('a') as stream:
@@ -64,7 +87,8 @@ def prepare(root, args):
     repository = event.get('repository', {}).get('full_name')
     if (not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository or '')
             or pr.get('head', {}).get('repo', {}).get('full_name') != repository
-            or pr.get('author_association') not in {'OWNER', 'MEMBER', 'COLLABORATOR'}):
+            or (pr.get('author_association') not in {'OWNER', 'MEMBER', 'COLLABORATOR'} and pr.get('user', {}).get('login') not in BOTS)
+            or (event.get('sender', {}).get('type') == 'Bot' and event.get('sender', {}).get('login') not in BOTS)):
         fail('UNTRUSTED_PR', 'Only same-repository PRs from trusted collaborators may use subscription credentials.')
     if pr.get('draft') or event.get('action') not in {'opened', 'synchronize', 'reopened', 'ready_for_review'}:
         return {'should_run': False, 'reason': 'Draft or unsupported PR event', 'model_calls': 0}
@@ -73,6 +97,7 @@ def prepare(root, args):
         fail('HEAD_CHANGED', 'Checkout must match the triggering PR head exactly.')
     branch = pr['head'].get('ref', '')
     run(['git', 'check-ref-format', 'refs/heads/' + branch], root)
+    require_publishable(root)
     view = status(root)
     report = view['context']
     if report['missing_sources'] or report['broken_links']:
@@ -115,6 +140,7 @@ def verify(root, args):
     report = view['context']
     if view['wiki']['status'] != 'current' or report['review']['status'] != 'current':
         fail('WIKI_NOT_CURRENT', 'A complete guarded wiki receipt and inspected review are required before publishing.')
+    require_publishable(root)
     if fingerprint(root / '.product-context.json') != state['profile'] or fingerprint(root / '.product-context/decisions.json') != state['decisions']:
         fail('SOURCE_CHANGED', 'Primary configuration or decision history changed during generation.')
     before = {p: sha for p, sha in state['files'].items() if p not in {'AGENTS.md', 'CLAUDE.md'}}
@@ -139,53 +165,59 @@ def verify(root, args):
         fail('WIKI_NOT_CURRENT', 'An active or interrupted run cannot be published.')
     if args.commit and changed:
         run(['git', 'add', '--', *sorted(changed)], root)
+        run(['git', 'ls-files', '--error-unmatch', '--', *REQUIRED_OUTPUTS], root)
         run(['git', '-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', 'docs: update product wiki for PR'], root)
     return {'verified': True, 'publish_paths': sorted(changed), 'branch': state['branch'], 'model_calls': 0}
 
 
 def workflow(ref):
-    tool = 'harness/skills/product-context/scripts/pr_wiki.py'
+    harness = '$RUNNER_TEMP/product-context-harness'
+    tool = '"' + harness + '/skills/product-context/scripts/pr_wiki.py"'
     state = '"$RUNNER_TEMP/product-context-state.json"'
-    prompt = ('Read harness/skills/product-context/SKILL.md and harness/skills/product-context/references/subscription-wiki.md. '
-              'This configured PR event authorizes one bounded wiki update. Product root is ${{ github.workspace }}/product. '
+    prompt = ('Read ${{ runner.temp }}/product-context-harness/skills/product-context/SKILL.md and ${{ runner.temp }}/product-context-harness/skills/product-context/references/subscription-wiki.md. '
+              'This configured PR event authorizes one bounded wiki update. Product evidence root is ${{ runner.temp }}/product-context-product. '
               'Inspect primary specs, decisions and implementation evidence, preserving all source documents and unanswered questions. '
               'Maintain at most three factual wiki pages including quickstart. Use the product_context MCP lifecycle; '
-              'write page Markdown only under product/openwiki, submit sparse Claims, finish cleanly, then inspect status and record the exact review snapshot with explicit questions. '
+              'write page Markdown only under that evidence root/openwiki, submit sparse Claims, finish cleanly, then inspect status and record the exact review snapshot with explicit questions. '
               'Do not change source policies, approvals or code. Do not run git, install tools, call another model, reset the wiki, or bypass failed completion. '
               'A turn/page limit is a failure to finish: report it rather than declaring current.')
     steps = [
-        {'uses': CHECKOUT, 'with': {'path': 'product', 'ref': '${{ github.event.pull_request.head.sha }}', 'fetch-depth': 0, 'persist-credentials': False}},
-        {'uses': CHECKOUT, 'with': {'repository': HARNESS, 'ref': ref, 'path': 'harness', 'persist-credentials': False}},
+        {'uses': CHECKOUT, 'with': {'ref': '${{ github.event.pull_request.head.sha }}', 'fetch-depth': 0, 'persist-credentials': False}},
         {'uses': NODE, 'with': {'node-version': '22.22.0'}},
-        {'name': 'Check primary evidence before model execution', 'id': 'preflight', 'run': f'python3 {tool} prepare --repo product --event "$GITHUB_EVENT_PATH" --state {state} --github-output "$GITHUB_OUTPUT"'},
+        {'name': 'Fetch reviewed harness outside the Action checkout', 'run': f'git init "{harness}"\ngit -C "{harness}" remote add origin https://github.com/{HARNESS}.git\ngit -C "{harness}" fetch --depth 1 origin {ref}\ngit -C "{harness}" checkout --detach FETCH_HEAD'},
+        {'name': 'Preserve PR evidence separately from Action config restoration', 'env': {'PR_HEAD': '${{ github.event.pull_request.head.sha }}'}, 'run': f'python3 {tool} checkout --repo "$GITHUB_WORKSPACE" --destination "$RUNNER_TEMP/product-context-product" --head "$PR_HEAD"'},
+        {'name': 'Check primary evidence before model execution', 'id': 'preflight', 'run': f'python3 {tool} prepare --repo "$RUNNER_TEMP/product-context-product" --event "$GITHUB_EVENT_PATH" --state {state} --github-output "$GITHUB_OUTPUT"'},
         {'name': 'Require subscription OAuth', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'CLAUDE_OAUTH_TOKEN': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'},
          'run': 'if [ -z "$CLAUDE_OAUTH_TOKEN" ]; then echo "::error::Set repository secret CLAUDE_CODE_OAUTH_TOKEN using claude setup-token. No API fallback is configured."; exit 1; fi'},
-        {'name': 'Install pinned model-free MCP', 'if': "steps.preflight.outputs.should_run == 'true'", 'working-directory': 'harness/skills/product-context/runtime', 'run': 'npm ci --ignore-scripts --no-audit --no-fund'},
+        {'name': 'Install pinned model-free MCP', 'if': "steps.preflight.outputs.should_run == 'true'", 'working-directory': '${{ runner.temp }}/product-context-harness/skills/product-context/runtime', 'run': 'npm ci --ignore-scripts --no-audit --no-fund'},
         {'name': 'Update wiki with Claude subscription', 'id': 'writer', 'if': "steps.preflight.outputs.should_run == 'true'", 'uses': CLAUDE,
          'with': {'github_token': '${{ github.token }}', 'claude_code_oauth_token': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}',
-                  'prompt': prompt, 'claude_args': '--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --mcp-config "${{ runner.temp }}/product-context-mcp.json" --settings "${{ runner.temp }}/product-context-settings.json"'}},
+                  'allowed_bots': ','.join(BOTS), 'prompt': prompt, 'claude_args': '--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --add-dir "${{ runner.temp }}/product-context-product" --mcp-config "${{ runner.temp }}/product-context-mcp.json" --settings "${{ runner.temp }}/product-context-settings.json"'}},
         {'name': 'Verify completion and publish document changes', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'GH_TOKEN': '${{ github.token }}', 'PR_BRANCH': '${{ github.event.pull_request.head.ref }}'},
-         'run': f'python3 {tool} verify --repo product --state {state} --commit\ngh auth setup-git\ngit -C product push origin "HEAD:refs/heads/$PR_BRANCH"'},
+         'run': f'python3 {tool} verify --repo "$RUNNER_TEMP/product-context-product" --state {state} --commit\ngh auth setup-git\ngit -C "$RUNNER_TEMP/product-context-product" push origin "HEAD:refs/heads/$PR_BRANCH"'},
     ]
     return {'name': 'Product context wiki (Claude subscription)',
             'on': {'pull_request': {'types': ['opened', 'synchronize', 'reopened', 'ready_for_review'], 'paths-ignore': ['openwiki/**', '.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore']}},
             'permissions': {'contents': 'read', 'pull-requests': 'read'},
             'concurrency': {'group': 'product-context-${{ github.event.pull_request.number }}', 'cancel-in-progress': False},
-            'jobs': {'wiki': {'if': "github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft && contains(fromJSON('[\"OWNER\",\"MEMBER\",\"COLLABORATOR\"]'), github.event.pull_request.author_association)",
+            'jobs': {'wiki': {'if': "github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft && (contains(fromJSON('[\"OWNER\",\"MEMBER\",\"COLLABORATOR\"]'), github.event.pull_request.author_association) || contains(fromJSON('" + json.dumps(BOTS) + "'), github.event.pull_request.user.login))",
                               'runs-on': 'ubuntu-latest', 'permissions': {'contents': 'write', 'pull-requests': 'read'}, 'steps': steps}}}
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subs = parser.add_subparsers(dest='command', required=True)
-    for name in ['install', 'prepare', 'verify']:
+    for name in ['install', 'prepare', 'verify', 'checkout']:
         sub = subs.add_parser(name)
         sub.add_argument('--repo', type=Path, required=True)
         if name == 'install':
             sub.add_argument('--runtime-ref', required=True, help='Full reviewed commit SHA of the trusted harness.')
             sub.add_argument('--write', action='store_true')
-        else:
+        elif name != 'checkout':
             sub.add_argument('--state', required=True)
+        if name == 'checkout':
+            sub.add_argument('--destination', required=True)
+            sub.add_argument('--head', required=True)
         if name == 'prepare':
             sub.add_argument('--event', required=True)
             sub.add_argument('--github-output')
@@ -219,6 +251,8 @@ def main():
     elif args.command == 'prepare':
         report = prepare(root, args)
         write_outputs(args.github_output, report)
+    elif args.command == 'checkout':
+        report = checkout(root, args)
     else:
         report = verify(root, args)
     print(json.dumps(report, ensure_ascii=False))

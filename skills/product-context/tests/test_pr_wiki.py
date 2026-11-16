@@ -71,6 +71,69 @@ class PrWikiTests(unittest.TestCase):
             if 'uses' in step:
                 self.assertRegex(step['uses'], r'@[a-f0-9]{40}$')
 
+    def test_official_action_has_a_git_workspace_and_explicit_bot_support(self):
+        report = self.run_cli('install', '--runtime-ref', '1' * 40, '--write')
+        workflow = json.loads((self.repo / report['workflow']).read_text())
+        job = workflow['jobs']['wiki']
+        checkout = next(step for step in job['steps'] if step.get('uses', '').startswith('actions/checkout@'))
+        self.assertEqual(checkout['with'].get('path', '.'), '.')
+        writer = next(step for step in job['steps'] if step.get('id') == 'writer')
+        self.assertIn('chatgpt-codex-connector[bot]', writer['with'].get('allowed_bots', '').split(','))
+
+    def test_action_config_restoration_does_not_change_the_generation_evidence(self):
+        (self.repo / 'CLAUDE.md').write_text('Approved PR policy\n')
+        config = json.loads((self.repo / '.product-context.json').read_text())
+        config['sources'].append('CLAUDE.md')
+        (self.repo / '.product-context.json').write_text(json.dumps(config))
+        self.git('add', '.')
+        self.git('-c', 'user.name=Fixture', '-c', 'user.email=f@example.invalid', 'commit', '-qm', 'PR policy change')
+        head = self.git('rev-parse', 'HEAD').strip()
+        original = self.repo
+        evidence = self.home / 'evidence-worktree'
+        self.run_cli('checkout', '--destination', str(evidence), '--head', head)
+        self.assertEqual(self.git('rev-parse', '--show-toplevel').strip(), str(original))
+        # External Action restores its own workspace's protected configuration.
+        (original / 'CLAUDE.md').write_text('Base-branch policy restored by Action\n')
+        self.repo = evidence
+        self.payload['pull_request']['head']['sha'] = head
+        self.prepare()
+        self.seal()
+        self.assertTrue(self.run_cli('verify', '--state', str(self.state))['verified'])
+        self.assertEqual((evidence / 'CLAUDE.md').read_text(), 'Approved PR policy\n')
+
+    def test_known_codex_bot_prs_are_eligible_but_unknown_bots_are_not(self):
+        self.payload['pull_request']['author_association'] = 'NONE'
+        self.payload['pull_request']['user'] = {'login': 'chatgpt-codex-connector[bot]'}
+        self.payload['sender'] = {'type': 'Bot', 'login': 'chatgpt-codex-connector[bot]'}
+        self.assertTrue(self.prepare()['should_run'])
+        self.payload['sender']['login'] = 'unknown-app[bot]'
+        self.assertIn('UNTRUSTED_PR', self.prepare(code=2)['error'])
+
+    def test_ignored_required_receipts_fail_before_any_model_execution(self):
+        (self.repo / '.gitignore').write_text('.product-context/\n')
+        self.assertIn('IGNORED_OUTPUT', self.prepare(code=2)['error'])
+        self.assertFalse(self.state.exists())
+
+    def test_ignored_generated_outputs_cannot_receive_a_publication_success(self):
+        self.prepare()
+        exclude = self.repo / '.git/info/exclude'
+        exclude.write_text(exclude.read_text() + '\n.product-context/\n')
+        self.seal()
+        self.assertIn('IGNORED_OUTPUT', self.run_cli('verify', '--state', str(self.state), '--commit', code=2)['error'])
+
+    def test_verified_publication_keeps_receipts_and_current_status_in_a_fresh_clone(self):
+        self.prepare()
+        self.seal()
+        result = self.run_cli('verify', '--state', str(self.state), '--commit')
+        self.assertTrue(result['verified'])
+        clone = self.home / 'published-clone'
+        subprocess.check_call(['git', 'clone', '-q', str(self.repo), str(clone)])
+        self.repo = clone
+        self.payload['pull_request']['head']['sha'] = self.git('rev-parse', 'HEAD').strip()
+        for name in ['.product-context/review.json', '.product-context/wiki-review.json', 'openwiki/.last-update.json', 'openwiki/quickstart.md']:
+            self.assertTrue((clone / name).is_file(), name)
+        self.assertFalse(self.prepare()['should_run'])
+
     def test_install_preserves_an_unowned_workflow(self):
         file = self.repo / '.github/workflows/product-context-wiki.yml'
         file.parent.mkdir(parents=True)
