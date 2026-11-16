@@ -49,7 +49,7 @@
         },
         {
           "name": "Fetch reviewed harness outside the Action checkout",
-          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin cc31cefcc4a0c4d3efde47828eb3acd904961327\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
+          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin ceeef64c72e8028d60a4891cad4c48629f2a2076\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
         },
         {
           "name": "Preserve PR evidence separately from Action config restoration",
@@ -89,6 +89,14 @@
             "prompt": "Read ${{ runner.temp }}/product-context-harness/skills/product-context/SKILL.md and ${{ runner.temp }}/product-context-harness/skills/product-context/references/subscription-wiki.md. This configured PR event authorizes one bounded wiki update. Product evidence root is ${{ runner.temp }}/product-context-product. Inspect primary specs, decisions and implementation evidence, preserving all source documents and unanswered questions. Maintain at most three factual wiki pages including quickstart. Use the product_context MCP lifecycle; write page Markdown only under that evidence root/openwiki, submit sparse Claims, finish cleanly, then inspect status and record the exact review snapshot with explicit questions. Do not change source policies, approvals or code. Do not run git, install tools, call another model, reset the wiki, or bypass failed completion. A turn/page limit is a failure to finish: report it rather than declaring current.",
             "claude_args": "--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --add-dir \"${{ runner.temp }}/product-context-product\" --mcp-config \"${{ runner.temp }}/product-context-mcp.json\" --settings \"${{ runner.temp }}/product-context-settings.json\""
           }
+        },
+        {
+          "name": "Report safe MCP and completion diagnostics",
+          "if": "always() && steps.preflight.outputs.should_run == 'true' && steps.writer.outcome != 'skipped'",
+          "env": {
+            "CLAUDE_EXECUTION_FILE": "${{ steps.writer.outputs.execution_file }}"
+          },
+          "run": "python3 \"$RUNNER_TEMP/product-context-harness/skills/product-context/scripts/pr_wiki.py\" diagnose --repo \"$RUNNER_TEMP/product-context-product\" --execution-file \"$CLAUDE_EXECUTION_FILE\""
         },
         {
           "name": "Verify completion and publish document changes",
