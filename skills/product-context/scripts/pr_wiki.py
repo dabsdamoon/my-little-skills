@@ -115,7 +115,8 @@ def prepare(root, args):
         fail('UNSAFE_STATE', 'Keep the trusted run state outside the product checkout.')
     write_json(state_path, state)
     mcp = {'mcpServers': {'product_context': {'command': 'node', 'args': [str(SKILL / 'runtime/server.mjs'), '--host', 'claude'],
-             'env': {'OPENWIKI_TELEMETRY_DISABLED': '1', 'DO_NOT_TRACK': '1', 'PRODUCT_CONTEXT_ALLOWED_ROOT': str(root)}}}}
+             'env': {'OPENWIKI_TELEMETRY_DISABLED': '1', 'DO_NOT_TRACK': '1', 'PRODUCT_CONTEXT_ALLOWED_ROOT': str(root),
+                     'CLAUDE_CODE_OAUTH_TOKEN': '${CLAUDE_CODE_OAUTH_TOKEN}'}}}}
     write_json(state_path.parent / 'product-context-mcp.json', mcp)
     absolute = '/' + str(root)
     settings = {'permissions': {'allow': [f'Read({absolute}/**)', f'Read(/{SKILL}/**)', 'Glob', 'Grep',
@@ -170,6 +171,45 @@ def verify(root, args):
     return {'verified': True, 'publish_paths': sorted(changed), 'branch': state['branch'], 'model_calls': 0}
 
 
+def diagnose(root, args):
+    """Emit selected execution metadata only; never prompts, arguments or results."""
+    view = status(root)
+    summary = {'context': view['context']['review']['status'], 'wiki': view['wiki']['status'],
+               'mcp': {}, 'tools': [], 'tool_calls': {}, 'error_codes': [], 'result': None, 'model_calls': 0}
+    file = Path(args.execution_file) if args.execution_file else None
+    if not file or not file.is_file() or file.stat().st_size > 33554432:
+        return summary
+    messages = json.loads(file.read_text())
+    if not isinstance(messages, list):
+        return summary
+    errors = set()
+    allowed_codes = r'\b(SUBSCRIPTION_REQUIRED|CONTEXT_REQUIRED|NO_ACTIVE_RUN|SOURCE_CHANGED|PAGE_LIMIT|EXISTING_WORKFLOW|WIKI_NOT_CURRENT|UNSAFE_PATH|INVALID_ROOT|BUSY|LOCKED)\b'
+    valid_tool = lambda name: isinstance(name, str) and (name in {'Read', 'Write', 'Edit', 'Glob', 'Grep', 'ToolSearch'} or re.fullmatch(r'mcp__product_context__[A-Za-z_]+', name))
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        if message.get('type') == 'system' and message.get('subtype') == 'init':
+            summary['mcp'] = {server['name']: server['status'] for server in message.get('mcp_servers', [])
+                              if server.get('name') == 'product_context' and server.get('status') in {'connected', 'failed', 'disabled', 'needs-auth', 'pending'}}
+            summary['tools'] = [name for name in message.get('tools', []) if valid_tool(name)]
+        content = message.get('message', {}).get('content', [])
+        for block in content if isinstance(content, list) else []:
+            if not isinstance(block, dict):
+                continue
+            name = block.get('name')
+            if block.get('type') == 'tool_use' and valid_tool(name):
+                summary['tool_calls'][name] = summary['tool_calls'].get(name, 0) + 1
+            if block.get('type') == 'tool_result':
+                errors.update(re.findall(allowed_codes, json.dumps(block.get('content', ''))))
+        if message.get('type') == 'result':
+            subtype = message.get('subtype')
+            summary['result'] = {'subtype': subtype if subtype in {'success', 'error_during_execution', 'error_max_turns', 'error_max_budget_usd'} else 'unknown',
+                                 'is_error': bool(message.get('is_error')), 'num_turns': message.get('num_turns') if type(message.get('num_turns')) is int else None,
+                                 'permission_denials_count': len(message.get('permission_denials', []))}
+    summary['error_codes'] = sorted(errors)
+    return summary
+
+
 def workflow(ref):
     harness = '$RUNNER_TEMP/product-context-harness'
     tool = '"' + harness + '/skills/product-context/scripts/pr_wiki.py"'
@@ -193,6 +233,8 @@ def workflow(ref):
         {'name': 'Update wiki with Claude subscription', 'id': 'writer', 'if': "steps.preflight.outputs.should_run == 'true'", 'uses': CLAUDE,
          'with': {'github_token': '${{ github.token }}', 'claude_code_oauth_token': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}',
                   'allowed_bots': ','.join(BOTS), 'prompt': prompt, 'claude_args': '--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --add-dir "${{ runner.temp }}/product-context-product" --mcp-config "${{ runner.temp }}/product-context-mcp.json" --settings "${{ runner.temp }}/product-context-settings.json"'}},
+        {'name': 'Report safe MCP and completion diagnostics', 'if': "always() && steps.preflight.outputs.should_run == 'true' && steps.writer.outcome != 'skipped'", 'env': {'CLAUDE_EXECUTION_FILE': '${{ steps.writer.outputs.execution_file }}'},
+         'run': f'python3 {tool} diagnose --repo "$RUNNER_TEMP/product-context-product" --execution-file "$CLAUDE_EXECUTION_FILE"'},
         {'name': 'Verify completion and publish document changes', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'GH_TOKEN': '${{ github.token }}', 'PR_BRANCH': '${{ github.event.pull_request.head.ref }}'},
          'run': f'python3 {tool} verify --repo "$RUNNER_TEMP/product-context-product" --state {state} --commit\ngh auth setup-git\ngit -C "$RUNNER_TEMP/product-context-product" push origin "HEAD:refs/heads/$PR_BRANCH"'},
     ]
@@ -207,14 +249,16 @@ def workflow(ref):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     subs = parser.add_subparsers(dest='command', required=True)
-    for name in ['install', 'prepare', 'verify', 'checkout']:
+    for name in ['install', 'prepare', 'verify', 'checkout', 'diagnose']:
         sub = subs.add_parser(name)
         sub.add_argument('--repo', type=Path, required=True)
         if name == 'install':
             sub.add_argument('--runtime-ref', required=True, help='Full reviewed commit SHA of the trusted harness.')
             sub.add_argument('--write', action='store_true')
-        elif name != 'checkout':
+        elif name in {'prepare', 'verify'}:
             sub.add_argument('--state', required=True)
+        if name == 'diagnose':
+            sub.add_argument('--execution-file')
         if name == 'checkout':
             sub.add_argument('--destination', required=True)
             sub.add_argument('--head', required=True)
@@ -253,6 +297,8 @@ def main():
         write_outputs(args.github_output, report)
     elif args.command == 'checkout':
         report = checkout(root, args)
+    elif args.command == 'diagnose':
+        report = diagnose(root, args)
     else:
         report = verify(root, args)
     print(json.dumps(report, ensure_ascii=False))

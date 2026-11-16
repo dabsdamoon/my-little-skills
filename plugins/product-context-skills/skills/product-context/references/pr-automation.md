@@ -72,6 +72,16 @@ records the inspected snapshot and unresolved questions. Missing OAuth fails
 explicitly; no API-key or second-model fallback is present. Local MCP maintenance
 still supports either Claude Code or Codex.
 
+The generated MCP config explicitly forwards the OAuth variable through
+`${CLAUDE_CODE_OAUTH_TOKEN}` expansion. It stores the reference, never the token
+value. A subscription-authenticated parent session does not by itself establish
+authentication in an MCP child process with restricted environment inheritance.
+
+The workflow emits selected MCP connection/tool-call metadata, known error codes
+and completion status after the writer. It does not print prompts, tool arguments,
+tool results, credentials or the model's final text. Full transcript logging stays
+disabled; an Action step reporting success still has to pass the receipt verifier.
+
 Before publication, the verifier requires current wiki/review receipts, preserved
 primary evidence and decision history, and confined document outputs. Existing
 agent instructions may change only inside the OpenWiki-managed block; existing

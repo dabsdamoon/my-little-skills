@@ -202,6 +202,51 @@ class PrWikiTests(unittest.TestCase):
         self.git('-c', 'user.name=Fixture', '-c', 'user.email=f@example.invalid', 'commit', '--allow-empty', '-qm', 'New head')
         self.assertIn('HEAD_CHANGED', self.run_cli('verify', '--state', str(self.state), code=2)['error'])
 
+    def test_diagnostics_expose_mcp_state_without_logging_prompts_or_credentials(self):
+        log = self.home / 'execution.json'
+        secret = 'PRIVATE_TOKEN_SHOULD_NOT_APPEAR'
+        log.write_text(json.dumps([
+            {'type': 'system', 'subtype': 'init', 'mcp_servers': [{'name': 'product_context', 'status': 'failed'}], 'tools': ['Read', 'mcp__product_context__openwiki_begin'], 'env': {'TOKEN': secret}},
+            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'name': 'mcp__product_context__openwiki_begin', 'input': {'secret': secret}}]}},
+            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'content': 'SUBSCRIPTION_REQUIRED: ' + secret}]}},
+            {'type': 'result', 'subtype': 'success', 'num_turns': 9, 'is_error': False, 'result': secret, 'permission_denials': []}
+        ]))
+        result = self.run_cli('diagnose', '--execution-file', str(log))
+        self.assertEqual(result['mcp'], {'product_context': 'failed'})
+        self.assertEqual(result['tool_calls']['mcp__product_context__openwiki_begin'], 1)
+        self.assertEqual(result['error_codes'], ['SUBSCRIPTION_REQUIRED'])
+        self.assertEqual(result['result']['num_turns'], 9)
+        self.assertNotIn(secret, json.dumps(result))
+
+    def test_ci_subscription_auth_reaches_mcp_when_only_safe_parent_env_is_inherited(self):
+        self.prepare()
+        config = self.state.parent / 'product-context-mcp.json'
+        token = 'synthetic-ci-subscription-token'
+        bin_dir = self.home / 'ci-bin'
+        bin_dir.mkdir()
+        fake = bin_dir / 'claude'
+        fake.write_text('#!/usr/bin/env python3\nimport os,json\nok=os.environ.get("CLAUDE_CODE_OAUTH_TOKEN")=="synthetic-ci-subscription-token"\nprint(json.dumps({"loggedIn":ok,"authMethod":"oauth_token" if ok else "none","apiProvider":"firstParty"}))\n')
+        fake.chmod(0o755)
+        # Claude's documented config-variable expansion is the external boundary.
+        # The actual SDK transport otherwise inherits only safe environment keys.
+        code = '''
+import {readFile} from 'node:fs/promises';
+const {Client}=await import(process.argv[1]);
+const {StdioClientTransport}=await import(process.argv[2]);
+const cfg=JSON.parse(await readFile(process.argv[3],'utf8')).mcpServers.product_context;
+const env=Object.fromEntries(Object.entries(cfg.env).map(([k,v])=>[k,v.replace(/\\$\\{(\\w+)\\}/g,(_,name)=>process.env[name]??'')]));
+env.PATH=process.argv[4]+':'+process.env.PATH;
+const client=new Client({name:'ci-auth-contract',version:'1'});
+try {await client.connect(new StdioClientTransport({...cfg,env,stderr:'pipe'}));
+const result=await client.callTool({name:'product_context_subscription_status',arguments:{}});
+console.log(JSON.stringify({authorized:!result.isError}));} finally {await client.close();}
+'''
+        sdk = SKILL / 'runtime/node_modules/@modelcontextprotocol/sdk/dist/esm/client'
+        env = dict(os.environ, CLAUDE_CODE_OAUTH_TOKEN=token)
+        result = subprocess.check_output(['node', '--input-type=module', '-e', code, (sdk / 'index.js').as_uri(), (sdk / 'stdio.js').as_uri(), str(config), str(bin_dir)], env=env, text=True)
+        self.assertTrue(json.loads(result)['authorized'])
+        self.assertNotIn(token, config.read_text())
+
 
 if __name__ == '__main__':
     unittest.main()
