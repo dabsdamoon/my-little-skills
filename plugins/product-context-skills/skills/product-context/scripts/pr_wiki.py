@@ -116,7 +116,7 @@ def prepare(root, args):
     write_json(state_path, state)
     mcp = {'mcpServers': {'product_context': {'command': 'node', 'args': [str(SKILL / 'runtime/server.mjs'), '--host', 'claude'],
              'env': {'OPENWIKI_TELEMETRY_DISABLED': '1', 'DO_NOT_TRACK': '1', 'PRODUCT_CONTEXT_ALLOWED_ROOT': str(root),
-                     'CLAUDE_CODE_OAUTH_TOKEN': '${CLAUDE_CODE_OAUTH_TOKEN}'}}}}
+                     'CLAUDE_CODE_OAUTH_TOKEN': '${PRODUCT_CONTEXT_SESSION}'}}}}
     write_json(state_path.parent / 'product-context-mcp.json', mcp)
     absolute = '/' + str(root)
     settings = {'permissions': {'allow': [f'Read({absolute}/**)', f'Read(/{SKILL}/**)', 'Glob', 'Grep',
@@ -175,7 +175,7 @@ def diagnose(root, args):
     """Emit selected execution metadata only; never prompts, arguments or results."""
     view = status(root)
     summary = {'context': view['context']['review']['status'], 'wiki': view['wiki']['status'],
-               'mcp': {}, 'tools': [], 'tool_calls': {}, 'error_codes': [], 'result': None, 'model_calls': 0}
+               'mcp': {}, 'tools': [], 'tool_calls': {}, 'mcp_errors': {}, 'error_codes': [], 'result': None, 'model_calls': 0}
     file = Path(args.execution_file) if args.execution_file else None
     if not file or not file.is_file() or file.stat().st_size > 33554432:
         return summary
@@ -183,6 +183,7 @@ def diagnose(root, args):
     if not isinstance(messages, list):
         return summary
     errors = set()
+    calls = {}
     allowed_codes = r'\b(SUBSCRIPTION_REQUIRED|CONTEXT_REQUIRED|NO_ACTIVE_RUN|SOURCE_CHANGED|PAGE_LIMIT|EXISTING_WORKFLOW|WIKI_NOT_CURRENT|UNSAFE_PATH|INVALID_ROOT|BUSY|LOCKED)\b'
     valid_tool = lambda name: isinstance(name, str) and (name in {'Read', 'Write', 'Edit', 'Glob', 'Grep', 'ToolSearch'} or re.fullmatch(r'mcp__product_context__[A-Za-z_]+', name))
     for message in messages:
@@ -199,8 +200,13 @@ def diagnose(root, args):
             name = block.get('name')
             if block.get('type') == 'tool_use' and valid_tool(name):
                 summary['tool_calls'][name] = summary['tool_calls'].get(name, 0) + 1
-            if block.get('type') == 'tool_result':
-                errors.update(re.findall(allowed_codes, json.dumps(block.get('content', ''))))
+                if isinstance(block.get('id'), str):
+                    calls[block['id']] = name
+            tool = calls.get(block.get('tool_use_id'))
+            if block.get('type') == 'tool_result' and block.get('is_error') and tool and tool.startswith('mcp__product_context__'):
+                codes = re.findall(allowed_codes, json.dumps(block.get('content', '')))
+                errors.update(codes)
+                summary['mcp_errors'][tool] = sorted(set(summary['mcp_errors'].get(tool, []) + (codes or ['MCP_OPERATION_FAILED'])))
         if message.get('type') == 'result':
             subtype = message.get('subtype')
             summary['result'] = {'subtype': subtype if subtype in {'success', 'error_during_execution', 'error_max_turns', 'error_max_budget_usd'} else 'unknown',
@@ -231,6 +237,7 @@ def workflow(ref):
          'run': 'if [ -z "$CLAUDE_OAUTH_TOKEN" ]; then echo "::error::Set repository secret CLAUDE_CODE_OAUTH_TOKEN using claude setup-token. No API fallback is configured."; exit 1; fi'},
         {'name': 'Install pinned model-free MCP', 'if': "steps.preflight.outputs.should_run == 'true'", 'working-directory': '${{ runner.temp }}/product-context-harness/skills/product-context/runtime', 'run': 'npm ci --ignore-scripts --no-audit --no-fund'},
         {'name': 'Update wiki with Claude subscription', 'id': 'writer', 'if': "steps.preflight.outputs.should_run == 'true'", 'uses': CLAUDE,
+         'env': {'PRODUCT_CONTEXT_SESSION': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'},
          'with': {'github_token': '${{ github.token }}', 'claude_code_oauth_token': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}',
                   'allowed_bots': ','.join(BOTS), 'prompt': prompt, 'claude_args': '--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --add-dir "${{ runner.temp }}/product-context-product" --mcp-config "${{ runner.temp }}/product-context-mcp.json" --settings "${{ runner.temp }}/product-context-settings.json"'}},
         {'name': 'Report safe MCP and completion diagnostics', 'if': "always() && steps.preflight.outputs.should_run == 'true' && steps.writer.outcome != 'skipped'", 'env': {'CLAUDE_EXECUTION_FILE': '${{ steps.writer.outputs.execution_file }}'},

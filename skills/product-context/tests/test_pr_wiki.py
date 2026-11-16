@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -207,14 +208,15 @@ class PrWikiTests(unittest.TestCase):
         secret = 'PRIVATE_TOKEN_SHOULD_NOT_APPEAR'
         log.write_text(json.dumps([
             {'type': 'system', 'subtype': 'init', 'mcp_servers': [{'name': 'product_context', 'status': 'failed'}], 'tools': ['Read', 'mcp__product_context__openwiki_begin'], 'env': {'TOKEN': secret}},
-            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'name': 'mcp__product_context__openwiki_begin', 'input': {'secret': secret}}]}},
-            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'content': 'SUBSCRIPTION_REQUIRED: ' + secret}]}},
+            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'begin', 'name': 'mcp__product_context__openwiki_begin', 'input': {'secret': secret}}, {'type': 'tool_use', 'id': 'read', 'name': 'Read', 'input': {}}]}},
+            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'begin', 'is_error': True, 'content': 'SUBSCRIPTION_REQUIRED: ' + secret}, {'type': 'tool_result', 'tool_use_id': 'read', 'content': 'Docs mention SOURCE_CHANGED and LOCKED.'}]}},
             {'type': 'result', 'subtype': 'success', 'num_turns': 9, 'is_error': False, 'result': secret, 'permission_denials': []}
         ]))
         result = self.run_cli('diagnose', '--execution-file', str(log))
         self.assertEqual(result['mcp'], {'product_context': 'failed'})
         self.assertEqual(result['tool_calls']['mcp__product_context__openwiki_begin'], 1)
         self.assertEqual(result['error_codes'], ['SUBSCRIPTION_REQUIRED'])
+        self.assertEqual(result['mcp_errors'], {'mcp__product_context__openwiki_begin': ['SUBSCRIPTION_REQUIRED']})
         self.assertEqual(result['result']['num_turns'], 9)
         self.assertNotIn(secret, json.dumps(result))
 
@@ -242,10 +244,38 @@ const result=await client.callTool({name:'product_context_subscription_status',a
 console.log(JSON.stringify({authorized:!result.isError}));} finally {await client.close();}
 '''
         sdk = SKILL / 'runtime/node_modules/@modelcontextprotocol/sdk/dist/esm/client'
-        env = dict(os.environ, CLAUDE_CODE_OAUTH_TOKEN=token)
+        env = dict(os.environ, PRODUCT_CONTEXT_SESSION=token)
+        env.pop('CLAUDE_CODE_OAUTH_TOKEN', None)
         result = subprocess.check_output(['node', '--input-type=module', '-e', code, (sdk / 'index.js').as_uri(), (sdk / 'stdio.js').as_uri(), str(config), str(bin_dir)], env=env, text=True)
         self.assertTrue(json.loads(result)['authorized'])
         self.assertNotIn(token, config.read_text())
+
+    @unittest.skipUnless(shutil.which('claude'), 'Native Claude CLI is required for this model-free boundary probe.')
+    def test_native_claude_passes_subscription_to_the_prepared_mcp_without_a_model(self):
+        self.prepare()
+        native = shutil.which('claude')
+        home = self.home / 'isolated-claude-home'
+        home.mkdir()
+        observed = home / 'observed.json'
+        probe = home / 'probe.mjs'
+        runtime = SKILL / 'runtime'
+        probe.write_text('import {writeFileSync} from "node:fs";\n'
+                         + 'const {subscription}=await import(' + json.dumps((runtime / 'guard.mjs').as_uri()) + ');\n'
+                         + 'let authorized=false;try{authorized=subscription("claude").authentication==="subscription"}catch{}\n'
+                         + 'writeFileSync(' + json.dumps(str(observed)) + ',JSON.stringify({authorized,tokenForwarded:process.env.CLAUDE_CODE_OAUTH_TOKEN==="sk-ant-oat01-synthetic-native-contract"}));\n'
+                         + 'await import(' + json.dumps((runtime / 'server.mjs').as_uri()) + ');\n')
+        config = json.loads((self.state.parent / 'product-context-mcp.json').read_text())['mcpServers']['product_context']
+        config['args'][0] = str(probe)
+        env = {'HOME': str(home), 'CLAUDE_CONFIG_DIR': str(home), 'PATH': os.environ['PATH'],
+               'DO_NOT_TRACK': '1', 'PRODUCT_CONTEXT_SESSION': 'sk-ant-oat01-synthetic-native-contract'}
+        result = subprocess.run([native, 'mcp', 'add-json', 'product_context', '--scope', 'local', json.dumps(config)],
+                                cwd=home, env=env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        result = subprocess.run([native, 'mcp', 'list'], cwd=home, env=env, text=True, capture_output=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(observed.exists(), 'Native CLI did not start the prepared MCP.')
+        self.assertTrue(json.loads(observed.read_text())['tokenForwarded'])
+        self.assertTrue(json.loads(observed.read_text())['authorized'])
 
 
 if __name__ == '__main__':

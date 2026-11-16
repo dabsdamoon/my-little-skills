@@ -72,12 +72,14 @@ records the inspected snapshot and unresolved questions. Missing OAuth fails
 explicitly; no API-key or second-model fallback is present. Local MCP maintenance
 still supports either Claude Code or Codex.
 
-The generated MCP config explicitly forwards the OAuth variable through
-`${CLAUDE_CODE_OAUTH_TOKEN}` expansion. It stores the reference, never the token
-value. A subscription-authenticated parent session does not by itself establish
-authentication in an MCP child process with restricted environment inheritance.
+The writer receives the OAuth secret as `PRODUCT_CONTEXT_SESSION`; the generated
+MCP config assigns its `${PRODUCT_CONTEXT_SESSION}` reference to the child's
+`CLAUDE_CODE_OAUTH_TOKEN`. Only the reference is stored. Referencing the reserved
+credential name itself did not deliver it in the pinned native CLI, as reproduced
+with a synthetic token and no model call. A subscription-authenticated parent
+does not by itself establish authentication in a restricted MCP child process.
 
-The workflow emits selected MCP connection/tool-call metadata, known error codes
+The workflow emits selected MCP connection/tool-call metadata, known MCP error codes
 and completion status after the writer. It does not print prompts, tool arguments,
 tool results, credentials or the model's final text. Full transcript logging stays
 disabled; an Action step reporting success still has to pass the receipt verifier.
