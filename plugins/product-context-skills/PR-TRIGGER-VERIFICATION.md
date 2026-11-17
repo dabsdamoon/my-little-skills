@@ -1,116 +1,93 @@
-# PR automation 0.3.0 verification
+# PR automation 0.3.1 verification
 
-This corrects the omitted PR trigger in 0.2.0. A user-enabled repository workflow
-is standing authorization for its bounded documentation update. Codex-authored
-PRs and Claude-authored PRs use the same Claude subscription OAuth writer.
+PR events automatically maintain the product wiki through Claude subscription
+OAuth, including PRs authored with Codex. Local Claude/Codex MCP support remains.
+The workflow has no model API-key fallback or schedule.
 
-## Authentication and execution choice
+## Hosted results
 
-The official Claude Code Action accepts `claude_code_oauth_token`; its setup guide
-directs Pro/Max users to `claude setup-token`:
-https://github.com/anthropics/claude-code-action/blob/main/docs/setup.md
+Actual same-repository PR #54 events completed generation, guarded verification
+and normal publication to the PR branch:
 
-Codex's official non-interactive guide supports saved CLI login locally, but
-explicitly excludes the described ChatGPT-managed CI authentication workflow from
-public/open-source repositories:
-https://learn.chatgpt.com/docs/non-interactive-mode
+| Case | GitHub run | Result |
+| --- | --- | --- |
+| Initial wiki | [43996653721](https://github.com/dabsdamoon/my-little-skills/actions/runs/43996653721) | Success; one quickstart, 13 turns, nine published paths; commit `4bd0339` |
+| Primary README changed | [43997004332](https://github.com/dabsdamoon/my-little-skills/actions/runs/43997004332) | Success; existing page updated, 15 turns, six published paths; commit `635bb35` |
 
-This implementation keeps local Claude/Codex MCP support and uses only the
-official Claude Action for hosted PR automation. No model API key/fallback is
-configured. GitHub runner allowances, Claude account limits and any account
-extra-usage settings still apply. Login checks are not billing/entitlement proof.
+Both runs reported connected MCP, zero MCP errors and permission denials, and
+current context/wiki receipts. Separate model-free checks after fetching the published
+commits also reported both states current. The update retained the existing page
+and Claim IDs, added the changed README evidence, and reflected setup version
+0.3.1. These are live execution results, not just a rendered workflow or mocked
+model response. The host model consumes the Claude account's allowance; helper
+outputs of `model_calls: 0` describe the model-free helper itself.
 
-## Reproducible checks
+## CI repairs
 
-Public Python CLI tests use temporary Git repositories, real Git worktrees,
-the actual context collector, real guarded receipt computation and synthetic
-filesystem verifier inputs. No project-owned module is mocked. They exercise
-workflow emission, read-only planning, existing workflow preservation, trusted PR
-gates, current-snapshot skip, source/decision changes, head races, completion and
-scope gates, ignored outputs and published receipt persistence in a fresh clone.
+1. The OAuth secret was initially absent. The user completed official
+   `claude setup-token` browser authorization, and the newly issued token was
+   sent directly to repository secret `CLAUDE_CODE_OAUTH_TOKEN`. No credential
+   value was printed or added to source.
+2. A parent Claude login did not authenticate the MCP child. A model-free native
+   Claude 2.1.325 probe reproduced failed forwarding of the reserved credential
+   reference. The writer now explicitly receives `PRODUCT_CONTEXT_SESSION`, and
+   MCP assigns `${PRODUCT_CONTEXT_SESSION}` to its `CLAUDE_CODE_OAUTH_TOKEN`.
+   Generated configuration stores the reference only. The actual native CLI and
+   SDK transport regressions failed before this change and passed afterward.
+3. A credentialed run reached the sixteen-turn limit during page submission.
+   The cap remains sixteen. New wikis start with one concise quickstart; an
+   existing wiki may update up to three affected pages. A tested minimal protocol
+   example supplies valid front matter, repository evidence URIs and exact job IDs.
+4. Safe diagnostics report only selected MCP status, tool counts, error categories
+   and completion metadata. Failed MCP results are correlated to their calls;
+   error examples in a Read result cannot become false diagnostic errors.
+   Prompts, arguments, result bodies, credentials and final model text stay hidden.
 
-Real MCP tests use the pinned OpenWiki backend and actual stdio protocol. External
-CLI authentication is faked. A new test proves official subscription `oauth_token`
-authentication can complete generation, and another confines CI MCP calls to the
-configured product repository. Both new behaviors were observed failing before
-their fixes. No model/provider is called by these tests.
+## Reproducible local validation
 
-Validation commands and results are recorded in the implementation ledger and
-the follow-up PR. Public PR CLI suite: **16 passed**. Full repository command
-`uv run --no-project --with pytest python -m pytest --import-mode=importlib -q`:
-**140 passed, 10 subtests passed**. Real MCP suite: **18 passed**.
-`actionlint` v1.7.7 validates the actual emitted workflow data,
-including GitHub expression contexts; no shellcheck/pyflakes integration was used.
-Canonical/distribution bundles are compared byte-for-byte. Runtime dependencies
-are unchanged from 0.2.0, with exact pins and dependency lifecycle scripts disabled.
+- Public PR CLI: **19 passed**. Tests use real temporary Git repositories,
+  detached worktrees, the actual context collector and guarded verifier.
+- Whole repository: `uv run --no-project --with pytest python -m pytest --import-mode=importlib -q`
+  completed with **146 passed, 10 subtests passed**.
+- `node --test skills/product-context/tests/subscription-wiki.test.mjs`:
+  **18 passed**, using real stdio and pinned OpenWiki. External authentication
+  fixtures use synthetic credentials; no model is called.
+- The optional native Claude CLI boundary test starts an actual MCP under an
+  isolated configuration with a synthetic token, without sending a model prompt.
+- A model-free smoke probe completed actual OpenWiki planning, page/Claim
+  submission, finish, review and verified documentation commit in a Git worktree.
+- `actionlint` v1.7.7 passed the checked-in JSON/YAML workflow and expression
+  contexts, with shellcheck/pyflakes integration disabled. `git diff --check`
+  passed; canonical/distribution bundles have **19 identical files**.
 
-An additional model-free smoke probe used the installed 0.3.0 MCP, real local
-Codex login, an actual detached Git worktree and the actual OpenWiki backend.
-Preflight → init → page/Claim submission → finish → guarded review → verified
-documentation commit succeeded, publishing nine expected wiki/state paths.
-The probe authored synthetic Markdown directly and did not call a model. It
-establishes backend/worktree compatibility, not hosted Claude OAuth delivery.
+Both local CLI registrations and loose skill bundles were upgraded to **0.3.1**
+after verifying and backing up their previous managed contents. Each actual MCP
+client discovered **13 tools**, advertised 0.3.1 and passed its subscription check.
+The stable path is `~/.local/share/product-context/0.3.1`; no plugin-wide upgrade
+or baseline policy change was performed. Restart hosts to load the new registration.
 
-Both real local CLI registrations now point to the stable 0.3.0 runtime. Actual
-MCP clients discovered 13 tools and passed subscription-login checks for Claude
-and Codex. Existing loose skill bundles were verified, backed up and updated to
-the exact 19-file bundle. No plugin-wide update or baseline policy change ran.
+## Retained boundaries
 
-## One independent review and one fix pass
+The initial independent review identified and reproduced four integration issues:
+Action workspace layout, protected-config restoration changing evidence, bot
+allowlist mismatch, and ignored receipts not surviving publication. Each was
+fixed with a failing-then-passing contract before this CI repair. No second model
+review was used for the repair.
 
-Four material integration issues were reproduced as failing public contracts:
+The workflow still uses a pinned harness outside the Action checkout and a
+separate exact-head evidence worktree. It rejects external forks and unknown bots,
+source/decision changes during generation, incomplete receipts and out-of-scope
+outputs. Publication uses a normal push; branch policies are not bypassed.
+Its accumulated PR path filter can run preflight after a documentation-only push;
+unchanged selected evidence and current receipts skip the writer.
 
-1. The official Action expects a Git repository at the workspace root. The
-   product now occupies that location, while the pinned harness is fetched into
-   the runner's temp directory.
-2. The Action restores protected configuration from the base branch. Generation
-   and publication now use a separate detached evidence worktree preserving the
-   exact PR head, while keeping the Action's restoration behavior intact.
-3. Agent mode rejects bots unless explicitly allowed. Workflow and preflight now
-   share a narrow GitHub Actions/Claude/Codex connector bot allowlist; unknown bot
-   actors and external forks are rejected.
-4. Ignored new pages/receipts could pass working-tree verification without being
-   committed. Preflight and publication now reject ignored required outputs;
-   the index must include required receipts before committing. A fresh-clone
-   regression verifies current status survives a normal publication.
+Observed success does not prove future OAuth expiry, entitlement or quota, every
+organization policy, semantic correctness of all prose, or adequacy of sixteen
+turns for every project. Current receipts mean matching evidence versions, not
+product approval. This is not a full dependency audit or a sandbox against a
+trusted collaborator who can modify workflows. Failed or unfinished work remains
+unpublished.
 
-The review's path-filter wording concern is documented accurately: filters use
-the accumulated PR diff, so a documentation-only push can still invoke preflight;
-unchanged context then skips the model. No second model reviewer was run.
-
-## Activation boundary
-
-The `CLAUDE_CODE_OAUTH_TOKEN` repository secret was absent during implementation.
-No token was read from local credential storage, copied to GitHub, or printed.
-No hosted Claude generation/push was claimed or performed without that secret.
-The checked-in workflow reports the missing prerequisite explicitly when a
-changed source snapshot needs generation; it has no API fallback.
-The skills repository profile selects 13 bounded primary files and has no
-missing source or broken-link findings. Its workflow pins the reviewed harness
-commit `cc31cefcc4a0c4d3efde47828eb3acd904961327` and passes actionlint.
-
-The completed code and emitted workflow can be reviewed before credentials are
-configured. Set the secret through GitHub's secret UI or the interactive GitHub
-CLI, then observe an eligible PR run to verify OAuth delivery, provider acceptance
-and actual publication. Branch protection/organization policies may reject the
-normal push; this is reported as failure and never bypassed with a force push.
-
-## Review rulings and limitations
-
-- Hosted execution, OAuth delivery/expiry, entitlement, quota and billing require
-  the user's configured secret and a live run. Local tests cannot prove them;
-  the risk is a failed run or account allowance consumption.
-- Semantic wiki accuracy and whether sixteen turns suffice require inspecting a
-  generated result. The bounded run may stop incomplete and will not be published.
-- The user's actual Codex GitHub identity was not observed. Human-authored PRs and
-  the listed connector bot are supported; another identity needs explicit policy
-  configuration or it will be rejected.
-- Repository branch protection, Actions policy and push authorization were not
-  independently changed or verified; they can block publication.
-- This is not a full dependency/source security audit or a sandbox against a
-  malicious trusted collaborator who can change workflows; that threat remains.
-- The reviewer did not independently rerun the suites or authenticate to local
-  accounts. The author ran the complete suites and separately verifies local
-  registration; supplied results are not an independent execution claim.
-- Fix effectiveness is established by RED→GREEN reproductions and whole-suite
-  reruns, rather than a second reviewer or unperformed hosted generation test.
+Authentication uses the official [Claude Action setup](https://github.com/anthropics/claude-code-action/blob/main/docs/setup.md).
+The runtime variable reference follows the [MCP configuration mechanism](https://code.claude.com/docs/en/mcp#environment-variable-expansion-in-mcp-json),
+with native CLI behavior verified rather than assumed from the reference syntax.
