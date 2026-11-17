@@ -1,0 +1,3 @@
+.product-context/
+.product-context.json
+.github/workflows/openwiki-update.yml

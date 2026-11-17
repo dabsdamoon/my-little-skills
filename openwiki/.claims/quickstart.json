@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:01bca9ee0c8d0cc50355d01e54cc24b349a6f81f9a97b110fad355b8b8c8f52c",
+  "claims": [
+    {
+      "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
+      "statement": "my-little-skills is a curated Agent Skills and plugin marketplace for Codex/OpenAI, Claude Code, Claude and Cowork.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+        }
+      ]
+    },
+    {
+      "id": "claim_6525552a2edd43a0b029d2287fc1dbfc",
+      "statement": "pr-creator is distributed only as developer-workflow-skills:pr-creator, and humanize-korean requires explicitly installing writing-skills.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+        }
+      ]
+    },
+    {
+      "id": "claim_51af1e9713a74c7eb08173549c577e0c",
+      "statement": "Offline product-context commands start no LLM, OpenWiki, network request or background job; a current result is not release approval.",
+      "evidence": [
+        {
+          "resource": "repo://skills/product-context/SKILL.md",
+          "version": "repo-file-v1:sha256:701d51008dcb11629e49512889b0094bc81c72a9d1bcfca7868c5c837961d2d9"
+        }
+      ]
+    },
+    {
+      "id": "claim_38c26f50ecf549e2b4247b36b89db47a",
+      "statement": "Wiki updates use the subscription-authenticated host session with no API-key fallback, and the default work budget is three pages including quickstart.",
+      "evidence": [
+        {
+          "resource": "repo://skills/product-context/references/subscription-wiki.md",
+          "version": "repo-file-v1:sha256:fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-17T01:35:30.771Z"
+  }
+}

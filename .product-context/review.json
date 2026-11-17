@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "product": "my-little-skills-product-context",
+  "snapshot": "fe481ca915ecf3bbd533987e4de894a2f288d7f10818609d7b4b74ca7946d1fd",
+  "files": {
+    "README.md": "8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009",
+    "plugins/product-context-skills/README.md": "d9e5c6dd61069ec7f23ce379e3bc11ec624424de0023d0223c3635f5b5726242",
+    "skills/product-context/SKILL.md": "701d51008dcb11629e49512889b0094bc81c72a9d1bcfca7868c5c837961d2d9",
+    "skills/product-context/references/format.md": "f7be0fd4922c62b3a5af4edf6a2403fa2fea6049255826f612ec0beca3158ffa",
+    "skills/product-context/references/pr-automation.md": "ebf813aec599278e0725cd4fc32ff5d26c4dc432c1563e0d078dedd7ae0fe131",
+    "skills/product-context/references/subscription-wiki.md": "fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb",
+    "skills/product-context/runtime/guard.mjs": "0b2bf4f044703d896877cc0332973c283acfc225220af3988a318051626daab7",
+    "skills/product-context/runtime/server.mjs": "504be7fda79f2fa8854b433aa83ef03a23578cf0b817d084aac23c71b0c62ef3",
+    "skills/product-context/scripts/context_core.py": "1cfa49c804a50f6eb1e94c3bcd56e6349848e6db55c1da7f20329a95c2a5006c",
+    "skills/product-context/scripts/context_store.py": "d529354ac0706c0f7f6504357470472c10efcab8bdddcc36ac933502f5a5ff98",
+    "skills/product-context/scripts/pr_wiki.py": "4664b1ebe48850f31ba1b1ca2b490b06b8e983d2291989b569205b4c621d74fd",
+    "skills/product-context/scripts/product_context.py": "a9be6a1ab758cb70f6e3f454818f1d46fa135189a74c7c5a09c14ae64fdbf672",
+    "skills/product-context/scripts/setup_subscription_wiki.py": "f26e3c3a7cc2798a879be2afcd3ba220b1b6bf7047e9750c3710d23af2a99a09"
+  },
+  "questions": [],
+  "actor": "agent:claude",
+  "note": "Reviewed README and product-context skill docs; created bounded quickstart wiki page.",
+  "recorded_at": "2026-11-17T01:35:46.886593+00:00",
+  "git_head": "6cf1600a55c0bfc450dcd9b0fc9024789f374a85"
+}
