@@ -1,4 +1,4 @@
-# Product onboarding verification — 0.4.0
+# Product onboarding verification — 0.4.1
 
 Scope: issue #57, distinguishing machine-local installation from a product's PR
 automation configuration and an actual published wiki update. This report does
@@ -30,11 +30,11 @@ not infer production readiness from offline checks or another product's test.
   Error transport containing a synthetic token is suppressed from CLI output.
 - Full Python regression command (canonical tests; duplicate plugin mirrors
   excluded): `uv run --no-project --with pytest pytest -q skills/product-context/tests plugins/developer-workflow-skills/skills/dual-track-checklist-verifier/tests plugins/developer-workflow-skills/skills/webapp-testing/tests plugins/fde-estimation-skills/tests`
-  — **129 passed, 17 subtests passed**.
+  — **132 passed, 17 subtests passed**.
 - Existing real model-free MCP/OpenWiki lifecycle suite:
   `node --test skills/product-context/tests/subscription-wiki.test.mjs`
   — **18 passed**. These do not start a model or verify a cloud account's billing.
-- The canonical skill and plugin distribution are byte-identical (23 files).
+- The canonical skill and plugin distribution are byte-identical (24 files).
 - A fresh read-only reviewer identified three Important defects and one partial
   write edge; the fixes have explicit regressions. The final narrow review closed
   the remaining authentication-classification finding. No cloud or credential
@@ -57,6 +57,21 @@ logins available, but its profile, workflow and Actions OAuth missing. The propo
 0.4.0 managed runtime was not installed at that point. No credentials were read or
 changed by diagnosis.
 
-Live cloud publication evidence and product rollout are recorded separately after
-execution. At this report's initial commit, no 0.4.0 live PR run or HoumDesk rollout
-is claimed complete. A green local suite is not a substitute for that evidence.
+The first 0.4.0 harness run completed generation, guarded verification, publication
+and artifact upload: [run 44059591900](https://github.com/dabsdamoon/my-little-skills/actions/runs/44059591900).
+Doctor matched its exact published head and source snapshot; both local hosts
+were subsequently installed and its three stages all passed.
+
+The first real HoumDesk run authenticated, finished its one-page wiki and recorded
+review, but the Action correctly rejected its reported 18 turns against the
+16-turn limit. Nothing was published from that over-budget run. Ordinary CI also
+reported the generated JSON-as-YAML workflow through Prettier. Version 0.4.1
+supplies the trusted instructions and preflight evidence without duplicate model
+reads, preserves final status/review and the same 16-turn bound, and respects the
+existing formatter's generated-output exclusions. Both regressions have focused
+tests, as does explicit migration from the exact 0.4.0 workflow.
+
+Final bounded retry evidence and product rollout are recorded separately in
+[the harness PR](https://github.com/dabsdamoon/my-little-skills/pull/58) and
+[the HoumDesk setup PR](https://github.com/houm-ground/houm-desk/pull/125). A green
+local suite or an earlier version's run is not a substitute for that evidence.

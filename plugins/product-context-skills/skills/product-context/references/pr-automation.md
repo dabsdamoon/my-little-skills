@@ -78,6 +78,14 @@ records the inspected snapshot and unresolved questions. Missing OAuth fails
 explicitly; no API-key or second-model fallback is present. Local MCP maintenance
 still supports either Claude Code or Codex.
 
+The preflight supplies the trusted skill/protocol and source inventory through a
+system-prompt file, avoiding model turns spent rereading setup references or
+repeating initial status/authentication probes. In this configured CI mode,
+`openwiki_begin` performs those checks; final status and guarded review remain
+mandatory. Research uses at most four focused Read/Grep calls. The sixteen-turn
+limit is unchanged, and the Action rejects an over-budget result even if the
+model reports success.
+
 The writer receives the OAuth secret as `PRODUCT_CONTEXT_SESSION`; the generated
 MCP config assigns its `${PRODUCT_CONTEXT_SESSION}` reference to the child's
 `CLAUDE_CODE_OAUTH_TOKEN`. Only the reference is stored. Referencing the reserved

@@ -22,7 +22,7 @@ python3 scripts/setup_subscription_wiki.py --host both --install --json
 
 The first command is a read-only plan. The second explicitly installs the pinned
 npm lockfile with dependency scripts disabled into
-`~/.local/share/product-context/0.4.0`, checks both subscription logins, and registers
+`~/.local/share/product-context/0.4.1`, checks both subscription logins, and registers
 the user MCP server `product_context` with both CLIs. Use `--host claude` or
 `--host codex` to configure only one. It preserves unrelated MCP servers and
 refuses an unowned server with the same name. The stable runtime survives worktree

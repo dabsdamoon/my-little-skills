@@ -104,7 +104,7 @@ def workflow_state(root):
         revision = workflow_revision(value)
         if not revision:
             return check('unknown', 'WORKFLOW_UNREVIEWED', 'Review the existing workflow explicitly; setup preserves custom workflows.')
-        if revision['revision'] == 'legacy':
+        if revision['revision'] != 'current':
             return check('incomplete', 'WORKFLOW_LEGACY', 'Review setup --upgrade-workflow to add publication proof to the known previous workflow.', runtime_ref=revision['runtime_ref'])
         return check('ready', 'WORKFLOW_READY', runtime_ref=revision['runtime_ref'], base_branches='all', events=value['on']['pull_request']['types'])
     except (SetupError, ValueError, TypeError, OSError):
@@ -195,6 +195,7 @@ def setup(root, args):
     # Inspect both product destinations before changing local registration or files.
     for relative in ('.product-context.json', WORKFLOW, OPT_IN):
         safe_destination(root/relative)
+    formatter = read_optional(root/'.prettierignore')
     existing = workflow_state(root)
     if existing['status'] not in {'ready', 'missing'} and not (existing['code'] == 'WORKFLOW_LEGACY' and args.upgrade_workflow):
         return
@@ -229,6 +230,12 @@ def setup(root, args):
     if previous is None or args.upgrade_workflow:
         (root/OPT_IN).parent.mkdir(exist_ok=True)
         write_json(root/OPT_IN, receipt)
+    if formatter is not None:
+        generated = [WORKFLOW, 'openwiki/', '.product-context/']
+        missing = [path for path in generated if path not in formatter.splitlines()]
+        if missing:
+            value = formatter + ('' if formatter.endswith('\n') else '\n') + '\n# Generated product-context automation artifacts.\n' + '\n'.join(missing) + '\n'
+            (root/'.prettierignore').write_text(value)
 
 
 def main():

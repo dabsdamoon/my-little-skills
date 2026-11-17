@@ -77,6 +77,32 @@ class PrWikiTests(unittest.TestCase):
         self.assertFalse(report.get('automation_ready', True))
         self.assertEqual(report.get('completion'), 'workflow_only')
 
+    def test_ci_bootstrap_provides_instructions_and_snapshot_without_model_read_turns(self):
+        result = self.prepare()
+        path = self.home/'product-context-instructions.md'
+        self.assertTrue(path.is_file())
+        text = path.read_text()
+        marker = 'PRODUCT_CONTEXT_PREFLIGHT_JSON='
+        packet = json.loads(next(line.removeprefix(marker) for line in text.splitlines() if line.startswith(marker)))
+        self.assertEqual(packet['snapshot'], result['snapshot'])
+        self.assertEqual(set(packet['files']), {'README.md','spec.md'})
+        self.assertEqual(packet['questions'], [])
+        installed = self.run_cli('install', '--runtime-ref', '1'*40, '--write')
+        value = json.loads((self.repo/installed['workflow']).read_text())
+        writer = next(s for s in value['jobs']['wiki']['steps'] if s.get('id')=='writer')
+        self.assertIn('--append-system-prompt-file', writer['with']['claude_args'])
+        self.assertIn('--max-turns 16', writer['with']['claude_args'])
+
+    def test_explicit_upgrade_accepts_the_exact_previous_release_workflow(self):
+        value = json.loads((SKILL/'assets/workflow-0.4.0.json').read_text().replace('0'*40,'1'*40))
+        path = self.repo/'.github/workflows/product-context-wiki.yml'
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps(value))
+        self.run_cli('install', '--runtime-ref', '2'*40, '--write', '--upgrade')
+        upgraded = json.loads(path.read_text())
+        writer = next(s for s in upgraded['jobs']['wiki']['steps'] if s.get('id')=='writer')
+        self.assertIn('--append-system-prompt-file', writer['with']['claude_args'])
+
     def test_verified_publication_emits_snapshot_and_commit_evidence_outside_product(self):
         self.prepare()
         self.seal()

@@ -65,7 +65,7 @@ class ProductSetupTests(unittest.TestCase):
             'repos/acme/product': {'full_name': 'acme/product', 'default_branch': 'develop'},
             'repos/acme/product/actions/secrets': {'secrets': []},
             'repos/acme/product/actions/organization-secrets': {'secrets': []},
-            'repos/dabsdamoon/my-little-skills/contents/skills/product-context/runtime/package.json?ref='+PIN: contents({'version': '0.4.0'}),
+            'repos/dabsdamoon/my-little-skills/contents/skills/product-context/runtime/package.json?ref='+PIN: contents({'version': '0.4.1'}),
         }}
         self.save()
         bin_dir = self.root / 'bin'
@@ -365,6 +365,18 @@ class ProductSetupTests(unittest.TestCase):
         self.assertEqual(report['verification']['code'], 'PR_PUBLICATION_UNVERIFIED')
         self.assertEqual(report['automation']['checks']['oauth']['authentication'], 'unverified')
         self.assertNotIn('--replace', ' '.join(report['next_actions']))
+
+    def test_setup_preserves_formatter_rules_and_excludes_only_its_generated_outputs(self):
+        self.profile()
+        ignore = self.repo/'.prettierignore'
+        ignore.write_text('# Existing owner rules\ndocs/legacy.md\n')
+        self.call('setup', '--runtime-ref', PIN, '--write', '--skip-local')
+        content = ignore.read_text()
+        self.assertTrue(content.startswith('# Existing owner rules\ndocs/legacy.md\n'))
+        entries = [line for line in content.splitlines() if line and not line.startswith('#')]
+        self.assertEqual(entries, ['docs/legacy.md','.github/workflows/product-context-wiki.yml','openwiki/','.product-context/'])
+        self.call('setup', '--runtime-ref', PIN, '--write', '--skip-local')
+        self.assertEqual(ignore.read_text(), content)
 
 
 if __name__ == '__main__':

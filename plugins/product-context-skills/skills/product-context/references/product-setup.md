@@ -26,6 +26,11 @@ unreviewed and is not replaced. A recognized generated workflow can be explicitl
 migrated with `setup --upgrade-workflow` after reviewing the new runtime pin.
 `--skip-local` is available for cloud-only setup; it does not mark local setup done.
 
+When the product already has `.prettierignore`, setup preserves its rules and
+adds only the generated workflow, `openwiki/` and `.product-context/` paths.
+These generated artifacts retain their producer's formatting; product source
+formatting remains governed by the existing rules.
+
 ## Required OAuth stage
 
 If Actions OAuth is missing, setup stays incomplete and returns the next action.
