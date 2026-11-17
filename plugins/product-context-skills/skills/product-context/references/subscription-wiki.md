@@ -7,6 +7,11 @@ configure a model provider, or fall back to API-key billing.
 
 ## One-time setup
 
+For product PR automation use [product setup](product-setup.md). The low-level
+local installer below reports `local_only`; it does not configure a product
+workflow or supply cloud OAuth credentials.
+
+
 On macOS/Linux, Python 3.10+, Node.js 22.22+ and npm are required. Sign in to the intended host
 with its subscription first. Paths below are relative to this skill directory.
 
@@ -17,7 +22,7 @@ python3 scripts/setup_subscription_wiki.py --host both --install --json
 
 The first command is a read-only plan. The second explicitly installs the pinned
 npm lockfile with dependency scripts disabled into
-`~/.local/share/product-context/0.3.1`, checks both subscription logins, and registers
+`~/.local/share/product-context/0.4.0`, checks both subscription logins, and registers
 the user MCP server `product_context` with both CLIs. Use `--host claude` or
 `--host codex` to configure only one. It preserves unrelated MCP servers and
 refuses an unowned server with the same name. The stable runtime survives worktree

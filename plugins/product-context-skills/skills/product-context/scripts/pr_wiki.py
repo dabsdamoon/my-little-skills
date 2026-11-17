@@ -18,6 +18,7 @@ HARNESS = 'dabsdamoon/my-little-skills'
 CHECKOUT = 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262'
 NODE = 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020'
 CLAUDE = 'anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc'
+UPLOAD = 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02'
 OUTPUTS = {'.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore', 'AGENTS.md', 'CLAUDE.md'}
 RULES = {'.product-context/', '.product-context.json', '.github/workflows/openwiki-update.yml'}
 BOTS = ['github-actions[bot]', 'claude[bot]', 'chatgpt-codex-connector[bot]']
@@ -107,6 +108,7 @@ def prepare(root, args):
     if report['review']['status'] == 'current' and view['wiki']['status'] == 'current':
         return {'should_run': False, 'reason': 'Primary sources and guarded wiki are current', 'model_calls': 0}
     state = {'schema_version': 1, 'root': str(root), 'head': head, 'branch': branch,
+             'repository': repository, 'pr_number': pr.get('number'),
              'files': report['files'], 'profile': fingerprint(root / '.product-context.json'),
              'decisions': fingerprint(root / '.product-context/decisions.json'),
              'notes': {name: read_optional(root / name) for name in ['AGENTS.md', 'CLAUDE.md', '.openwikiignore']}}
@@ -131,6 +133,12 @@ def strip_note(text):
 
 
 def verify(root, args):
+    publication = getattr(args, 'publication_receipt', None)
+    if publication:
+        destination = Path(publication).absolute()
+        safe_destination(destination)
+        if root == destination or root in destination.parents:
+            fail('UNSAFE_STATE', 'Keep publication evidence outside the product checkout.')
     safe_destination(Path(args.state))
     state = json.loads(Path(args.state).read_text())
     if state.get('schema_version') != 1 or state.get('root') != str(root):
@@ -168,7 +176,17 @@ def verify(root, args):
         run(['git', 'add', '--', *sorted(changed)], root)
         run(['git', 'ls-files', '--error-unmatch', '--', *REQUIRED_OUTPUTS], root)
         run(['git', '-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', 'docs: update product wiki for PR'], root)
-    return {'verified': True, 'publish_paths': sorted(changed), 'branch': state['branch'], 'model_calls': 0}
+    published = run(['git', 'rev-parse', 'HEAD'], root).strip()
+    if publication:
+        proof = {'schema_version': 1, 'repository': state['repository'], 'pr_number': state['pr_number'],
+                 'run_id': int(os.environ.get('GITHUB_RUN_ID', '0')), 'source_head': state['head'],
+                 'published_commit': published, 'snapshot': report['snapshot'],
+                 'wiki_receipt_sha256': fingerprint(root / '.product-context/wiki-review.json'),
+                 'review_receipt_sha256': fingerprint(root / '.product-context/review.json')}
+        write_json(destination, proof)
+    return {'verified': True, 'publish_paths': sorted(changed), 'branch': state['branch'],
+            'snapshot': report['snapshot'], 'source_head': state['head'], 'published_commit': published,
+            'publication': 'pending_push', 'model_calls': 0}
 
 
 def diagnose(root, args):
@@ -258,7 +276,10 @@ def workflow(ref):
         {'name': 'Report safe MCP and completion diagnostics', 'if': "always() && steps.preflight.outputs.should_run == 'true' && steps.writer.outcome != 'skipped'", 'env': {'CLAUDE_EXECUTION_FILE': '${{ steps.writer.outputs.execution_file }}'},
          'run': f'python3 {tool} diagnose --repo "$RUNNER_TEMP/product-context-product" --execution-file "$CLAUDE_EXECUTION_FILE"'},
         {'name': 'Verify completion and publish document changes', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'GH_TOKEN': '${{ github.token }}', 'PR_BRANCH': '${{ github.event.pull_request.head.ref }}'},
-         'run': f'python3 {tool} verify --repo "$RUNNER_TEMP/product-context-product" --state {state} --commit\ngh auth setup-git\ngit -C "$RUNNER_TEMP/product-context-product" push origin "HEAD:refs/heads/$PR_BRANCH"'},
+         'run': f'python3 {tool} verify --repo "$RUNNER_TEMP/product-context-product" --state {state} --commit --publication-receipt "$RUNNER_TEMP/product-context-publication.json"\ngh auth setup-git\ngit -C "$RUNNER_TEMP/product-context-product" push origin "HEAD:refs/heads/$PR_BRANCH"'},
+        {'name': 'Upload verified publication receipt', 'if': "steps.preflight.outputs.should_run == 'true'", 'uses': UPLOAD,
+         'with': {'name': 'product-context-publication-${{ github.event.pull_request.number }}',
+                  'path': '${{ runner.temp }}/product-context-publication.json', 'if-no-files-found': 'error', 'retention-days': 30}},
     ]
     return {'name': 'Product context wiki (Claude subscription)',
             'on': {'pull_request': {'types': ['opened', 'synchronize', 'reopened', 'ready_for_review'], 'paths-ignore': ['openwiki/**', '.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore']}},
@@ -266,6 +287,22 @@ def workflow(ref):
             'concurrency': {'group': 'product-context-${{ github.event.pull_request.number }}', 'cancel-in-progress': False},
             'jobs': {'wiki': {'if': "github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft && (contains(fromJSON('[\"OWNER\",\"MEMBER\",\"COLLABORATOR\"]'), github.event.pull_request.author_association) || contains(fromJSON('" + json.dumps(BOTS) + "'), github.event.pull_request.user.login))",
                               'runs-on': 'ubuntu-latest', 'permissions': {'contents': 'write', 'pull-requests': 'read'}, 'steps': steps}}}
+
+
+def workflow_revision(value):
+    """Recognize exact current/0.3.1 generated workflows, including their pin."""
+    match = re.search(r'fetch --depth 1 origin ([a-f0-9]{40})', json.dumps(value))
+    if not match:
+        return None
+    pin = match[1]
+    current = workflow(pin)
+    if value == current:
+        return {'revision': 'current', 'runtime_ref': pin}
+    legacy = json.loads(json.dumps(current))
+    steps = legacy['jobs']['wiki']['steps']
+    steps.pop()
+    steps[-1]['run'] = steps[-1]['run'].replace(' --publication-receipt "$RUNNER_TEMP/product-context-publication.json"', '')
+    return {'revision': 'legacy', 'runtime_ref': pin} if value == legacy else None
 
 
 def main():
@@ -277,6 +314,7 @@ def main():
         if name == 'install':
             sub.add_argument('--runtime-ref', required=True, help='Full reviewed commit SHA of the trusted harness.')
             sub.add_argument('--write', action='store_true')
+            sub.add_argument('--upgrade', action='store_true', help='Explicitly migrate an exact known generated workflow; custom workflows remain preserved.')
         elif name in {'prepare', 'verify'}:
             sub.add_argument('--state', required=True)
         if name == 'diagnose':
@@ -289,6 +327,7 @@ def main():
             sub.add_argument('--github-output')
         if name == 'verify':
             sub.add_argument('--commit', action='store_true')
+            sub.add_argument('--publication-receipt')
     args = parser.parse_args()
     root = args.repo.resolve()
     if run(['git', 'rev-parse', '--show-toplevel'], root).strip() != str(root):
@@ -308,12 +347,15 @@ def main():
             except ValueError:
                 previous = None
             if previous != content:
-                fail('WORKFLOW_EXISTS', 'The existing workflow was preserved; review it explicitly before migration.')
-        if args.write and not destination.exists():
+                if not args.upgrade or not workflow_revision(previous):
+                    fail('WORKFLOW_EXISTS', 'The existing workflow was preserved; review it explicitly before migration.')
+        if args.write and (not destination.exists() or args.upgrade):
             destination.parent.mkdir(parents=True, exist_ok=True)
             write_json(destination, content)
         report = {'mode': 'install' if args.write else 'plan', 'workflow': WORKFLOW, 'runtime_ref': args.runtime_ref,
-                  'required_secret': 'CLAUDE_CODE_OAUTH_TOKEN', 'model_calls': 0, 'api_fallback': False}
+                  'required_secret': 'CLAUDE_CODE_OAUTH_TOKEN', 'model_calls': 0, 'api_fallback': False,
+                  'completion': 'workflow_only', 'automation_ready': False,
+                  'next_action': 'Run product_setup.py doctor --repo PRODUCT to check product configuration, Actions OAuth and PR publication.'}
     elif args.command == 'prepare':
         report = prepare(root, args)
         write_outputs(args.github_output, report)

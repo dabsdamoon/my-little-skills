@@ -3,7 +3,7 @@
 Reusable product evidence and decision tooling with optional subscription-host
 OpenWiki maintenance. The offline Python CLI needs no OpenWiki or model provider.
 
-Install from the my-little-skills marketplace after version 0.3.1 is published:
+Install from the my-little-skills marketplace after version 0.4.0 is published:
 
 ```text
 Claude Code: /plugin install product-context-skills@my-little-skills
@@ -28,6 +28,23 @@ write product state. `check` and `prepare` are read-only. Evidence changes promp
 review, not automatic rejection of legitimate changes. Existing questions and
 superseded decisions remain available to the next session.
 
+For installation with PR automation, use the product-aware entry point:
+
+```sh
+python3 skills/product-context/scripts/product_setup.py doctor --repo /product --github-repo OWNER/REPO --host both --json
+python3 skills/product-context/scripts/product_setup.py setup --repo /product --github-repo OWNER/REPO --host both --profile /reviewed/profile.json --runtime-ref REVIEWED_FULL_COMMIT_SHA --write --json
+python3 skills/product-context/scripts/product_setup.py oauth --repo /product --github-repo OWNER/REPO
+python3 skills/product-context/scripts/product_setup.py doctor --repo /product --github-repo OWNER/REPO --pr NUMBER --json
+```
+
+The setup command stays incomplete until product configuration and Actions
+subscription OAuth are provided. Issue a new token with `claude setup-token`
+interactively, then use the hidden-input `oauth` command; never paste credentials
+into chat. Existing secrets are preserved. Diagnosis distinguishes local
+installation, product PR readiness and actual current-head publication evidence.
+See [product setup](skills/product-context/references/product-setup.md) for read-only
+plans, safe upgrades and the required completion report.
+
 The CLI contains no model/provider execution path. Reading this skill or asking
 the current agent to update documents consumes that session's usage. CI can call
 `check` without a model, but CI infrastructure can have its own costs.
@@ -42,7 +59,7 @@ python3 skills/product-context/scripts/setup_subscription_wiki.py --host both --
 The first command is a read-only plan. Setup requires Python 3.10+, Node.js
 22.22+, npm and subscription logins for the selected hosts. It installs a pinned
 OpenWiki 0.9.0 runtime with npm scripts disabled under
-`~/.local/share/product-context/0.3.1`, then registers the user MCP server
+`~/.local/share/product-context/0.4.0`, then registers the user MCP server
 `product_context` with Claude Code and Codex. Restart the hosts afterward.
 
 The current subscribed agent writes the pages. The bridge calls no model,

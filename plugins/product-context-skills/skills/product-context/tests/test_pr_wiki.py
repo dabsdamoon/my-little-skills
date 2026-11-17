@@ -72,6 +72,24 @@ class PrWikiTests(unittest.TestCase):
             if 'uses' in step:
                 self.assertRegex(step['uses'], r'@[a-f0-9]{40}$')
 
+    def test_workflow_install_does_not_claim_product_automation_readiness(self):
+        report = self.run_cli('install', '--runtime-ref', '1' * 40, '--write')
+        self.assertFalse(report.get('automation_ready', True))
+        self.assertEqual(report.get('completion'), 'workflow_only')
+
+    def test_verified_publication_emits_snapshot_and_commit_evidence_outside_product(self):
+        self.prepare()
+        self.seal()
+        proof = self.home/'publication.json'
+        result = self.run_cli('verify', '--state', str(self.state), '--commit', '--publication-receipt', str(proof))
+        receipt = json.loads(proof.read_text())
+        self.assertEqual(receipt['source_head'], self.payload['pull_request']['head']['sha'])
+        self.assertEqual(receipt['published_commit'], self.git('rev-parse', 'HEAD').strip())
+        review = json.loads((self.repo/'.product-context/review.json').read_text())
+        self.assertEqual(receipt['snapshot'], review['snapshot'])
+        self.assertEqual(receipt['wiki_receipt_sha256'], __import__('hashlib').sha256((self.repo/'.product-context/wiki-review.json').read_bytes()).hexdigest())
+        self.assertTrue(result['verified'])
+
     def test_official_action_has_a_git_workspace_and_explicit_bot_support(self):
         report = self.run_cli('install', '--runtime-ref', '1' * 40, '--write')
         workflow = json.loads((self.repo / report['workflow']).read_text())
@@ -141,6 +159,20 @@ class PrWikiTests(unittest.TestCase):
         file.write_text('name: Custom\n')
         self.assertIn('WORKFLOW_EXISTS', self.run_cli('install', '--runtime-ref', '1' * 40, '--write', code=2)['error'])
         self.assertEqual(file.read_text(), 'name: Custom\n')
+
+    def test_explicit_upgrade_migrates_a_known_workflow_and_preserves_custom_steps(self):
+        installed = self.run_cli('install', '--runtime-ref', '1'*40, '--write')
+        path = self.repo/installed['workflow']
+        original = json.loads(path.read_text())
+        self.run_cli('install', '--runtime-ref', '2'*40, '--write', '--upgrade')
+        upgraded = json.loads(path.read_text())
+        fetch = next(step['run'] for step in upgraded['jobs']['wiki']['steps'] if step.get('name') == 'Fetch reviewed harness outside the Action checkout')
+        self.assertIn('2'*40, fetch)
+        original['jobs']['wiki']['steps'].append({'run': 'custom-command'})
+        path.write_text(json.dumps(original))
+        before = path.read_bytes()
+        self.assertIn('WORKFLOW_EXISTS', self.run_cli('install', '--runtime-ref', '2'*40, '--write', '--upgrade', code=2)['error'])
+        self.assertEqual(path.read_bytes(), before)
 
     def test_source_drift_runs_but_a_current_wiki_skips_generation(self):
         self.assertTrue(self.prepare()['should_run'])

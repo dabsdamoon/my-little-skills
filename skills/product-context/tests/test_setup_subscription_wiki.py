@@ -75,6 +75,8 @@ class SubscriptionSetupTests(unittest.TestCase):
         report = json.loads(result.stdout)
         self.assertEqual(report['mode'], 'plan')
         self.assertEqual(report['hosts'], ['claude', 'codex'])
+        self.assertEqual(report.get('completion'), 'local_only')
+        self.assertFalse(report.get('automation_ready', True))
         self.assertFalse(self.target.exists())
         self.assertFalse(self.state.exists())
 
@@ -93,6 +95,26 @@ class SubscriptionSetupTests(unittest.TestCase):
         second = self.run_setup('--install')
         self.assertEqual(second.returncode, 0, second.stderr + second.stdout)
         self.assertEqual(self.state.read_bytes(), before)
+
+    def test_product_doctor_refuses_a_managed_runtime_with_missing_dependencies(self) -> None:
+        result = self.run_setup('--install')
+        self.assertEqual(result.returncode, 0, result.stdout+result.stderr)
+        dependencies = self.target/'runtime/node_modules'
+        dependencies.unlink()  # Fixture npm linked real dependencies; damage only the installed copy.
+        (dependencies/'openwiki').mkdir(parents=True)
+        (dependencies/'openwiki/package.json').write_text('{"version":"0.9.0"}')
+        product = self.root/'product'
+        product.mkdir()
+        subprocess.run(['git', 'init', '-q', str(product)], check=True)
+        subprocess.run(['git', '-C', str(product), 'remote', 'add', 'origin', 'https://github.com/acme/product.git'], check=True)
+        gh = self.root/'bin/gh'
+        gh.write_text('#!/bin/sh\nprintf \'%s\\n\' \'{"secrets":[],"default_branch":"develop"}\'\n')
+        gh.chmod(0o755)
+        result = subprocess.run(['python3', '-B', str(SKILL/'scripts/product_setup.py'), 'doctor', '--repo', str(product), '--install-root', str(self.target), '--host', 'both'], env=self.env, capture_output=True, text=True)
+        report = json.loads(result.stdout)
+        self.assertEqual(report['local']['status'], 'incomplete')
+        for host in ('claude', 'codex'):
+            self.assertNotEqual(report['local']['hosts'][host]['status'], 'ready')
 
     def test_an_unowned_same_name_server_is_preserved_without_installing(self) -> None:
         state = {'registrations': {'claude': {'command': 'node', 'args': ['/unrelated/server.mjs']}}, 'events': []}
