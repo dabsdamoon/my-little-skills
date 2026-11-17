@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:01bca9ee0c8d0cc50355d01e54cc24b349a6f81f9a97b110fad355b8b8c8f52c",
+  "pageVersion": "sha256:7a3e2d2755b5aeb2470f095e661feb0212faa8aaf5228e058706dca48f4f604a",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -41,10 +41,30 @@
           "version": "repo-file-v1:sha256:fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb"
         }
       ]
+    },
+    {
+      "id": "claim_31dd4b305b974839a23d40c89881c57f",
+      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.3.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
+      "evidence": [
+        {
+          "resource": "repo://plugins/product-context-skills/README.md",
+          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+        }
+      ]
+    },
+    {
+      "id": "claim_e82512ebc6714ecfa44eb55add9f96fc",
+      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.3.1; existing custom workflows are preserved and block generation.",
+      "evidence": [
+        {
+          "resource": "repo://plugins/product-context-skills/README.md",
+          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+        }
+      ]
     }
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-17T01:35:30.771Z"
+    "at": "2026-11-17T01:38:17.013Z"
   }
 }
