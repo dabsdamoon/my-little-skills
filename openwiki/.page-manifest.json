@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:7a3e2d2755b5aeb2470f095e661feb0212faa8aaf5228e058706dca48f4f604a",
+      "completedBy": "claude-code",
+      "completedRunId": "8c14e339-c1d6-4c3a-afe8-2625983d46d6",
+      "gitHead": "cb9ddfe060db88c991e6b4701f77732680e93f0d",
+      "sourceFingerprint": "sha256:f2ecf0c999bec5aca24e6ca407f6a738722491b76cebd594a3b1eb5dd2b4fe74"
+    }
+  }
+}

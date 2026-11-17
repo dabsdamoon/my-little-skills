@@ -396,5 +396,8 @@ decisions and open questions, plus an optional local MCP bridge for subscription
 OpenWiki maintenance. It preserves existing document layouts. The current Claude
 Code/Codex session writes wiki pages; the bridge manages the queue and evidence
 without another model provider, scheduled API generation or API-key fallback.
+An opt-in PR workflow can automatically maintain the wiki using Claude subscription
+OAuth, including for PRs authored with Codex. It skips unchanged evidence and
+requires a per-repository source profile and OAuth secret.
 
 See [installation, CLI usage and HoumDesk pilot](plugins/product-context-skills/README.md).

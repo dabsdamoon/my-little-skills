@@ -1,14 +1,14 @@
 {
   "name": "product-context-skills",
-  "description": "Product evidence checks, evolving decisions, and bounded OpenWiki maintenance through subscription-authenticated coding agents",
-  "version": "0.2.0",
+  "description": "Product evidence, evolving decisions, and bounded subscription wiki maintenance with optional PR automation",
+  "version": "0.3.1",
   "author": {
     "name": "dabsdamoon"
   },
   "interface": {
     "displayName": "Product Context",
     "shortDescription": "Product decisions and subscription wiki maintenance",
-    "longDescription": "Inspect evolving product evidence and preserve decisions and questions. An opt-in local MCP bridge lets the subscribed coding-agent session maintain OpenWiki without a separate model provider or scheduled API workflow.",
+    "longDescription": "Inspect evolving product evidence and preserve decisions and questions. Local Claude/Codex sessions can maintain OpenWiki through MCP; an optional PR workflow uses Claude subscription OAuth for bounded automatic updates.",
     "developerName": "dabsdamoon",
     "category": "Developer Tools",
     "capabilities": [

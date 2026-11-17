@@ -3,7 +3,7 @@
 Reusable product evidence and decision tooling with optional subscription-host
 OpenWiki maintenance. The offline Python CLI needs no OpenWiki or model provider.
 
-Install from the my-little-skills marketplace after version 0.2.0 is published:
+Install from the my-little-skills marketplace after version 0.3.1 is published:
 
 ```text
 Claude Code: /plugin install product-context-skills@my-little-skills
@@ -42,7 +42,7 @@ python3 skills/product-context/scripts/setup_subscription_wiki.py --host both --
 The first command is a read-only plan. Setup requires Python 3.10+, Node.js
 22.22+, npm and subscription logins for the selected hosts. It installs a pinned
 OpenWiki 0.9.0 runtime with npm scripts disabled under
-`~/.local/share/product-context/0.2.0`, then registers the user MCP server
+`~/.local/share/product-context/0.3.1`, then registers the user MCP server
 `product_context` with Claude Code and Codex. Restart the hosts afterward.
 
 The current subscribed agent writes the pages. The bridge calls no model,
@@ -51,7 +51,13 @@ API workflow, and bounds each generation plan to three pages by default. Existin
 custom workflows are preserved and block generation. A clean completion receipt
 checks source versions, wiki Markdown, Claims and metadata before the guarded
 review tool can record the result. Existing wikis update and durable runs resume.
-No recurring generation or API-key fallback is installed.
+Local MCP setup installs no recurring generation or API-key fallback.
+
+For PR-triggered updates using Claude subscription OAuth, see
+[PR automation](skills/product-context/references/pr-automation.md). Codex-authored
+PRs use the same workflow; the automatic writer uses Claude once per eligible
+event. A tracked product-context profile, pinned workflow and repository secret
+are required. Generating the workflow alone does not activate cloud generation.
 
 See the skill's [subscription workflow](skills/product-context/references/subscription-wiki.md)
 for setup, source-doc-first ordering, questions and failure handling. The existing

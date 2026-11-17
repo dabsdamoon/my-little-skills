@@ -103,7 +103,7 @@
     },
     {
       "name": "product-context-skills",
-      "description": "Offline product evidence and bounded subscription-host wiki maintenance without scheduled API generation",
+      "description": "Product evidence checks and PR-triggered OpenWiki updates through subscribed coding agents",
       "source": "./plugins/product-context-skills"
     }
   ]

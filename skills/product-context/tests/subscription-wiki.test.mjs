@@ -11,7 +11,7 @@ import { StdioClientTransport } from '../runtime/node_modules/@modelcontextproto
 const skill = fileURLToPath(new URL('../', import.meta.url));
 const server = path.join(skill, 'runtime/server.mjs');
 
-async function fixture(t, { host = 'codex', auth = 'subscription', authToStderr = false, authProvider = 'firstParty' } = {}) {
+async function fixture(t, { host = 'codex', auth = 'subscription', authToStderr = false, authProvider = 'firstParty', confined = false } = {}) {
   const dir = await mkdtemp(path.join(tmpdir(), 'subscription-wiki-'));
   t.after(() => rm(dir, { recursive: true, force: true }));
   const root = path.join(dir, 'product');
@@ -27,9 +27,11 @@ async function fixture(t, { host = 'codex', auth = 'subscription', authToStderr 
   execFileSync('git', ['-C', root, 'add', '.']);
   execFileSync('git', ['-C', root, '-c', 'user.name=Fixture', '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'Seed synthetic policy']);
   await writeFile(path.join(bin, 'codex'), `#!/bin/sh\nprintf '%s\\n' '${auth === 'subscription' ? 'Logged in using ChatGPT' : 'Logged in using an API key'}'${authToStderr ? ' >&2' : ''}\n`, { mode: 0o755 });
-  await writeFile(path.join(bin, 'claude'), `#!/bin/sh\nprintf '%s\\n' '${JSON.stringify({ loggedIn: true, authMethod: auth === 'subscription' ? 'claude.ai' : 'api_key', apiProvider: authProvider })}'\n`, { mode: 0o755 });
+  await writeFile(path.join(bin, 'claude'), `#!/bin/sh\nprintf '%s\\n' '${JSON.stringify({ loggedIn: true, authMethod: auth === 'subscription' ? 'claude.ai' : auth === 'oauth' ? 'oauth_token' : 'api_key', apiProvider: authProvider })}'\n`, { mode: 0o755 });
   const env = { ...process.env, PATH: bin + path.delimiter + process.env.PATH, OPENWIKI_TELEMETRY_DISABLED: '1', DO_NOT_TRACK: '1' };
   for (const key of ['OPENAI_API_KEY', 'CODEX_API_KEY', 'ANTHROPIC_API_KEY', 'ANTHROPIC_AUTH_TOKEN', 'CLAUDE_CODE_OAUTH_TOKEN']) delete env[key];
+  if (auth === 'oauth') env.CLAUDE_CODE_OAUTH_TOKEN = 'synthetic-subscription-token';
+  if (confined) env.PRODUCT_CONTEXT_ALLOWED_ROOT = root;
   async function connect(extraArgs = []) {
     const client = new Client({ name: 'public-contract-test', version: '1' });
     const transport = new StdioClientTransport({ command: process.execPath, args: [server, '--host', host, ...extraArgs], env, stderr: 'pipe' });
@@ -39,6 +41,23 @@ async function fixture(t, { host = 'codex', auth = 'subscription', authToStderr 
   }
   return { root, client: await connect(), dir, connect };
 }
+
+test('official Claude subscription OAuth authentication can generate through the guarded MCP', async t => {
+  const { root, client } = await fixture(t, { host: 'claude', auth: 'oauth' });
+  const begin = await call(client, 'openwiki_begin', { root, mode: 'init' });
+  assert.equal(begin.execution, 'subscription-host');
+  assert.equal((await complete(client, root, begin, initialClaims)).status, 'complete');
+});
+
+test('a PR-bound MCP refuses a different repository before context or wiki mutation', async t => {
+  const { root, dir, client } = await fixture(t, { confined: true });
+  const other = path.join(dir, 'other');
+  await mkdir(other);
+  execFileSync('git', ['init', '-q', other]);
+  await call(client, 'openwiki_begin', { root: other, mode: 'init' }, 'INVALID_ROOT');
+  await assert.rejects(access(path.join(other, '.product-context')));
+  assert.equal((await call(client, 'openwiki_begin', { root, mode: 'init' })).status, 'active');
+});
 
 async function call(client, name, args, expectedError) {
   const raw = await client.callTool({ name, arguments: args });

@@ -1,0 +1,335 @@
+#!/usr/bin/env python3
+"""Install and verify PR-triggered wiki updates using Claude subscription OAuth."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import subprocess
+
+from setup_subscription_wiki import SetupError, safe_destination, write_json
+
+SKILL = Path(__file__).resolve().parents[1]
+WORKFLOW = '.github/workflows/product-context-wiki.yml'
+HARNESS = 'dabsdamoon/my-little-skills'
+CHECKOUT = 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262'
+NODE = 'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020'
+CLAUDE = 'anthropics/claude-code-action@f3b070c88125d33dbae5653df5f143101d4ea9dc'
+OUTPUTS = {'.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore', 'AGENTS.md', 'CLAUDE.md'}
+RULES = {'.product-context/', '.product-context.json', '.github/workflows/openwiki-update.yml'}
+BOTS = ['github-actions[bot]', 'claude[bot]', 'chatgpt-codex-connector[bot]']
+REQUIRED_OUTPUTS = ['.product-context/review.json', '.product-context/wiki-review.json', 'openwiki/.last-update.json', 'openwiki/quickstart.md']
+
+
+def fail(code, message):
+    raise SetupError(f'{code}: {message}')
+
+
+def run(args, root=None):
+    result = subprocess.run(args, cwd=root, capture_output=True, text=True)
+    if result.returncode:
+        fail('COMMAND_FAILED', f'{args[0]} failed; no model/API fallback is attempted.')
+    return result.stdout
+
+
+def status(root):
+    code = "const g=await import(process.argv[1]);const root=await g.rootPath(process.argv[2]);const report=await g.context(root);console.log(JSON.stringify({context:report,wiki:await g.wikiStatus(root,report)}));"
+    return json.loads(run(['node', '--input-type=module', '-e', code, (SKILL / 'runtime/guard.mjs').as_uri(), str(root)]))
+
+
+def read_optional(path):
+    safe_destination(path)
+    if not path.exists():
+        return None
+    if path.stat().st_size > 1048576:
+        fail('SOURCE_TOO_LARGE', 'Managed state or instruction file exceeds 1 MiB.')
+    return path.read_text()
+
+
+def fingerprint(path):
+    value = read_optional(path)
+    return None if value is None else hashlib.sha256(value.encode()).hexdigest()
+
+
+def require_publishable(root):
+    result = subprocess.run(['git', 'check-ignore', '-z', '--stdin'], cwd=root, input='\0'.join(REQUIRED_OUTPUTS) + '\0', capture_output=True, text=True)
+    if result.returncode not in {0, 1}:
+        fail('COMMAND_FAILED', 'Cannot inspect generated-output tracking rules.')
+    ignored = result.stdout.split('\0')
+    ignored += run(['git', 'ls-files', '--others', '--ignored', '--exclude-standard', '-z', '--', 'openwiki', '.product-context/review.json', '.product-context/wiki-review.json'], root).split('\0')
+    if any(ignored):
+        fail('IGNORED_OUTPUT', 'Generated wiki and required review receipts must be trackable; review .gitignore or exclude rules first.')
+
+
+def checkout(root, args):
+    destination = Path(args.destination).absolute()
+    safe_destination(destination)
+    if destination.exists() or root in destination.parents or not re.fullmatch(r'[a-f0-9]{40}', args.head):
+        fail('UNSAFE_CHECKOUT', 'Use a new evidence worktree outside the Action workspace and a full head SHA.')
+    if run(['git', 'rev-parse', 'HEAD'], root).strip() != args.head:
+        fail('HEAD_CHANGED', 'The Action workspace must contain the exact PR head.')
+    run(['git', 'worktree', 'add', '--detach', str(destination), args.head], root)
+    return {'root': str(destination), 'head': args.head, 'model_calls': 0}
+
+
+def write_outputs(path, report):
+    if path:
+        with Path(path).open('a') as stream:
+            stream.write('should_run=' + str(report['should_run']).lower() + '\n')
+
+
+def prepare(root, args):
+    event = json.loads(Path(args.event).read_text())
+    pr = event.get('pull_request', {})
+    repository = event.get('repository', {}).get('full_name')
+    if (not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository or '')
+            or pr.get('head', {}).get('repo', {}).get('full_name') != repository
+            or (pr.get('author_association') not in {'OWNER', 'MEMBER', 'COLLABORATOR'} and pr.get('user', {}).get('login') not in BOTS)
+            or (event.get('sender', {}).get('type') == 'Bot' and event.get('sender', {}).get('login') not in BOTS)):
+        fail('UNTRUSTED_PR', 'Only same-repository PRs from trusted collaborators may use subscription credentials.')
+    if pr.get('draft') or event.get('action') not in {'opened', 'synchronize', 'reopened', 'ready_for_review'}:
+        return {'should_run': False, 'reason': 'Draft or unsupported PR event', 'model_calls': 0}
+    head = pr.get('head', {}).get('sha', '')
+    if not re.fullmatch(r'[a-f0-9]{40}', head) or run(['git', 'rev-parse', 'HEAD'], root).strip() != head:
+        fail('HEAD_CHANGED', 'Checkout must match the triggering PR head exactly.')
+    branch = pr['head'].get('ref', '')
+    run(['git', 'check-ref-format', 'refs/heads/' + branch], root)
+    require_publishable(root)
+    view = status(root)
+    report = view['context']
+    if report['missing_sources'] or report['broken_links']:
+        fail('CONTEXT_FINDINGS', 'Repair missing primary sources and broken local links before generation.')
+    if any(p.startswith('openwiki/') for p in report['files']):
+        fail('SELF_REFERENCE', 'Exclude generated openwiki files from primary context sources.')
+    if report['review']['status'] == 'current' and view['wiki']['status'] == 'current':
+        return {'should_run': False, 'reason': 'Primary sources and guarded wiki are current', 'model_calls': 0}
+    state = {'schema_version': 1, 'root': str(root), 'head': head, 'branch': branch,
+             'files': report['files'], 'profile': fingerprint(root / '.product-context.json'),
+             'decisions': fingerprint(root / '.product-context/decisions.json'),
+             'notes': {name: read_optional(root / name) for name in ['AGENTS.md', 'CLAUDE.md', '.openwikiignore']}}
+    state_path = Path(args.state).absolute()
+    if root == state_path or root in state_path.parents:
+        fail('UNSAFE_STATE', 'Keep the trusted run state outside the product checkout.')
+    write_json(state_path, state)
+    mcp = {'mcpServers': {'product_context': {'command': 'node', 'args': [str(SKILL / 'runtime/server.mjs'), '--host', 'claude'],
+             'env': {'OPENWIKI_TELEMETRY_DISABLED': '1', 'DO_NOT_TRACK': '1', 'PRODUCT_CONTEXT_ALLOWED_ROOT': str(root),
+                     'CLAUDE_CODE_OAUTH_TOKEN': '${PRODUCT_CONTEXT_SESSION}'}}}}
+    write_json(state_path.parent / 'product-context-mcp.json', mcp)
+    absolute = '/' + str(root)
+    settings = {'permissions': {'allow': [f'Read({absolute}/**)', f'Read(/{SKILL}/**)', 'Glob', 'Grep',
+                    f'Write({absolute}/openwiki/**)', f'Edit({absolute}/openwiki/**)', 'mcp__product_context__*'],
+                    'deny': ['Bash', f'Read({absolute}/.git/**)', f'Read({absolute}/.env)', f'Read({absolute}/.env.*)']}}
+    write_json(state_path.parent / 'product-context-settings.json', settings)
+    return {'should_run': True, 'snapshot': report['snapshot'], 'state': str(state_path), 'model_calls': 0}
+
+
+def strip_note(text):
+    return re.sub(r'<!-- OPENWIKI:START -->.*?<!-- OPENWIKI:END -->', '', text or '', flags=re.S).strip()
+
+
+def verify(root, args):
+    safe_destination(Path(args.state))
+    state = json.loads(Path(args.state).read_text())
+    if state.get('schema_version') != 1 or state.get('root') != str(root):
+        fail('INVALID_STATE', 'The trusted preflight state belongs to another checkout.')
+    if run(['git', 'rev-parse', 'HEAD'], root).strip() != state['head']:
+        fail('HEAD_CHANGED', 'The local checkout changed during generation.')
+    view = status(root)
+    report = view['context']
+    if view['wiki']['status'] != 'current' or report['review']['status'] != 'current':
+        fail('WIKI_NOT_CURRENT', 'A complete guarded wiki receipt and inspected review are required before publishing.')
+    require_publishable(root)
+    if fingerprint(root / '.product-context.json') != state['profile'] or fingerprint(root / '.product-context/decisions.json') != state['decisions']:
+        fail('SOURCE_CHANGED', 'Primary configuration or decision history changed during generation.')
+    before = {p: sha for p, sha in state['files'].items() if p not in {'AGENTS.md', 'CLAUDE.md'}}
+    after = {p: sha for p, sha in report['files'].items() if p not in {'AGENTS.md', 'CLAUDE.md'}}
+    if before != after:
+        fail('SOURCE_CHANGED', 'Primary specification or implementation evidence changed during generation.')
+    for name in ['AGENTS.md', 'CLAUDE.md']:
+        if strip_note(read_optional(root / name)) != strip_note(state['notes'][name]):
+            fail('SOURCE_CHANGED', 'Only the managed OpenWiki instruction block may change in agent rules.')
+    old_ignore = (state['notes']['.openwikiignore'] or '').splitlines()
+    new_ignore = (read_optional(root / '.openwikiignore') or '').splitlines()
+    if new_ignore[:len(old_ignore)] != old_ignore or any(line not in RULES for line in new_ignore[len(old_ignore):]):
+        fail('OUT_OF_SCOPE', 'Existing ignore rules must be preserved; only bridge exclusions may be appended.')
+    changed = set(run(['git', 'diff', '--name-only', '-z', 'HEAD'], root).split('\0'))
+    changed.update(run(['git', 'ls-files', '--others', '--exclude-standard', '-z'], root).split('\0'))
+    changed.discard('')
+    for name in changed:
+        safe_destination(root / name)
+        if name not in OUTPUTS and not name.startswith('openwiki/'):
+            fail('OUT_OF_SCOPE', f'Generated work changed a non-document output: {name}')
+    if (root / '.product-context/wiki.lock').exists() or (root / 'openwiki/.run.json').exists():
+        fail('WIKI_NOT_CURRENT', 'An active or interrupted run cannot be published.')
+    if args.commit and changed:
+        run(['git', 'add', '--', *sorted(changed)], root)
+        run(['git', 'ls-files', '--error-unmatch', '--', *REQUIRED_OUTPUTS], root)
+        run(['git', '-c', 'user.name=github-actions[bot]', '-c', 'user.email=41898282+github-actions[bot]@users.noreply.github.com', 'commit', '-m', 'docs: update product wiki for PR'], root)
+    return {'verified': True, 'publish_paths': sorted(changed), 'branch': state['branch'], 'model_calls': 0}
+
+
+def diagnose(root, args):
+    """Emit selected execution metadata only; never prompts, arguments or results."""
+    view = status(root)
+    summary = {'context': view['context']['review']['status'], 'wiki': view['wiki']['status'],
+               'mcp': {}, 'tools': [], 'tool_calls': {}, 'mcp_errors': {}, 'error_codes': [], 'result': None, 'model_calls': 0}
+    file = Path(args.execution_file) if args.execution_file else None
+    if not file or not file.is_file() or file.stat().st_size > 33554432:
+        return summary
+    messages = json.loads(file.read_text())
+    if not isinstance(messages, list):
+        return summary
+    errors = set()
+    calls = {}
+    allowed_codes = r'\b(SUBSCRIPTION_REQUIRED|CONTEXT_REQUIRED|NO_ACTIVE_RUN|SOURCE_CHANGED|PAGE_LIMIT|EXISTING_WORKFLOW|WIKI_NOT_CURRENT|UNSAFE_PATH|INVALID_ROOT|BUSY|LOCKED)\b'
+    valid_tool = lambda name: isinstance(name, str) and (name in {'Read', 'Write', 'Edit', 'Glob', 'Grep', 'ToolSearch'} or re.fullmatch(r'mcp__product_context__[A-Za-z_]+', name))
+    for message in messages:
+        if not isinstance(message, dict):
+            continue
+        if message.get('type') == 'system' and message.get('subtype') == 'init':
+            summary['mcp'] = {server['name']: server['status'] for server in message.get('mcp_servers', [])
+                              if server.get('name') == 'product_context' and server.get('status') in {'connected', 'failed', 'disabled', 'needs-auth', 'pending'}}
+            summary['tools'] = [name for name in message.get('tools', []) if valid_tool(name)]
+        content = message.get('message', {}).get('content', [])
+        for block in content if isinstance(content, list) else []:
+            if not isinstance(block, dict):
+                continue
+            name = block.get('name')
+            if block.get('type') == 'tool_use' and valid_tool(name):
+                summary['tool_calls'][name] = summary['tool_calls'].get(name, 0) + 1
+                if isinstance(block.get('id'), str):
+                    calls[block['id']] = name
+            tool = calls.get(block.get('tool_use_id'))
+            if block.get('type') == 'tool_result' and block.get('is_error') and tool and tool.startswith('mcp__product_context__'):
+                error_text = json.dumps(block.get('content', ''))
+                codes = re.findall(allowed_codes, error_text)
+                categories = [
+                    ('INPUT_SCHEMA_INVALID', r'Input validation error|invalid_type|unrecognized_keys|invalid_format'),
+                    ('PAGE_FRONTMATTER_INVALID', r'front\s?matter'),
+                    ('PAGE_NOT_WRITTEN', r'Write .* before submitting its page job'),
+                    ('CLAIM_EVIDENCE_INVALID', r'evidence|resource'),
+                    ('PAGE_JOB_INVALID', r'Unknown OpenWiki page job|Only a pending OpenWiki page job'),
+                    ('CLAIMS_NOT_DURABLE', r'Claims.*(?:durab|persist|verif)'),
+                    ('CLAIMS_INVALID', r'Claims?'),
+                ]
+                if not codes:
+                    codes = next(([code] for code, pattern in categories if re.search(pattern, error_text, re.I)), [])
+                errors.update(codes)
+                summary['mcp_errors'][tool] = sorted(set(summary['mcp_errors'].get(tool, []) + (codes or ['MCP_OPERATION_FAILED'])))
+        if message.get('type') == 'result':
+            subtype = message.get('subtype')
+            summary['result'] = {'subtype': subtype if subtype in {'success', 'error_during_execution', 'error_max_turns', 'error_max_budget_usd'} else 'unknown',
+                                 'is_error': bool(message.get('is_error')), 'num_turns': message.get('num_turns') if type(message.get('num_turns')) is int else None,
+                                 'permission_denials_count': len(message.get('permission_denials', []))}
+    summary['error_codes'] = sorted(errors)
+    return summary
+
+
+def workflow(ref):
+    harness = '$RUNNER_TEMP/product-context-harness'
+    tool = '"' + harness + '/skills/product-context/scripts/pr_wiki.py"'
+    state = '"$RUNNER_TEMP/product-context-state.json"'
+    prompt = ('Read ${{ runner.temp }}/product-context-harness/skills/product-context/SKILL.md and ${{ runner.temp }}/product-context-harness/skills/product-context/references/subscription-wiki.md. '
+              'This configured PR event authorizes one bounded wiki update. Product evidence root is ${{ runner.temp }}/product-context-product. '
+              'Inspect primary specs, decisions and implementation evidence, preserving all source documents and unanswered questions. '
+              'For a new wiki plan only one concise /openwiki/quickstart.md page; for an existing wiki maintain at most three affected factual pages. '
+              'Use context.files from product_context_status as the source inventory; avoid repository-wide exploration. '
+              'Follow the minimal protocol example in the subscription reference, using the exact assigned job ID and repo://relative/path evidence. '
+              'Reserve the final four turns for finish, status and recording review. Use the product_context MCP lifecycle; '
+              'write page Markdown only under that evidence root/openwiki, submit sparse Claims, finish cleanly, then inspect status and record the exact review snapshot with explicit questions. '
+              'Do not change source policies, approvals or code. Do not run git, install tools, call another model, reset the wiki, or bypass failed completion. '
+              'A turn/page limit is a failure to finish: report it rather than declaring current.')
+    steps = [
+        {'uses': CHECKOUT, 'with': {'ref': '${{ github.event.pull_request.head.sha }}', 'fetch-depth': 0, 'persist-credentials': False}},
+        {'uses': NODE, 'with': {'node-version': '22.22.0'}},
+        {'name': 'Fetch reviewed harness outside the Action checkout', 'run': f'git init "{harness}"\ngit -C "{harness}" remote add origin https://github.com/{HARNESS}.git\ngit -C "{harness}" fetch --depth 1 origin {ref}\ngit -C "{harness}" checkout --detach FETCH_HEAD'},
+        {'name': 'Preserve PR evidence separately from Action config restoration', 'env': {'PR_HEAD': '${{ github.event.pull_request.head.sha }}'}, 'run': f'python3 {tool} checkout --repo "$GITHUB_WORKSPACE" --destination "$RUNNER_TEMP/product-context-product" --head "$PR_HEAD"'},
+        {'name': 'Check primary evidence before model execution', 'id': 'preflight', 'run': f'python3 {tool} prepare --repo "$RUNNER_TEMP/product-context-product" --event "$GITHUB_EVENT_PATH" --state {state} --github-output "$GITHUB_OUTPUT"'},
+        {'name': 'Require subscription OAuth', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'CLAUDE_OAUTH_TOKEN': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'},
+         'run': 'if [ -z "$CLAUDE_OAUTH_TOKEN" ]; then echo "::error::Set repository secret CLAUDE_CODE_OAUTH_TOKEN using claude setup-token. No API fallback is configured."; exit 1; fi'},
+        {'name': 'Install pinned model-free MCP', 'if': "steps.preflight.outputs.should_run == 'true'", 'working-directory': '${{ runner.temp }}/product-context-harness/skills/product-context/runtime', 'run': 'npm ci --ignore-scripts --no-audit --no-fund'},
+        {'name': 'Update wiki with Claude subscription', 'id': 'writer', 'if': "steps.preflight.outputs.should_run == 'true'", 'uses': CLAUDE,
+         'env': {'PRODUCT_CONTEXT_SESSION': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}'},
+         'with': {'github_token': '${{ github.token }}', 'claude_code_oauth_token': '${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}',
+                  'allowed_bots': ','.join(BOTS), 'prompt': prompt, 'claude_args': '--max-turns 16 --permission-mode default --strict-mcp-config --tools Read,Glob,Grep,Write,Edit --add-dir "${{ runner.temp }}/product-context-product" --mcp-config "${{ runner.temp }}/product-context-mcp.json" --settings "${{ runner.temp }}/product-context-settings.json"'}},
+        {'name': 'Report safe MCP and completion diagnostics', 'if': "always() && steps.preflight.outputs.should_run == 'true' && steps.writer.outcome != 'skipped'", 'env': {'CLAUDE_EXECUTION_FILE': '${{ steps.writer.outputs.execution_file }}'},
+         'run': f'python3 {tool} diagnose --repo "$RUNNER_TEMP/product-context-product" --execution-file "$CLAUDE_EXECUTION_FILE"'},
+        {'name': 'Verify completion and publish document changes', 'if': "steps.preflight.outputs.should_run == 'true'", 'env': {'GH_TOKEN': '${{ github.token }}', 'PR_BRANCH': '${{ github.event.pull_request.head.ref }}'},
+         'run': f'python3 {tool} verify --repo "$RUNNER_TEMP/product-context-product" --state {state} --commit\ngh auth setup-git\ngit -C "$RUNNER_TEMP/product-context-product" push origin "HEAD:refs/heads/$PR_BRANCH"'},
+    ]
+    return {'name': 'Product context wiki (Claude subscription)',
+            'on': {'pull_request': {'types': ['opened', 'synchronize', 'reopened', 'ready_for_review'], 'paths-ignore': ['openwiki/**', '.product-context/review.json', '.product-context/wiki-review.json', '.openwikiignore']}},
+            'permissions': {'contents': 'read', 'pull-requests': 'read'},
+            'concurrency': {'group': 'product-context-${{ github.event.pull_request.number }}', 'cancel-in-progress': False},
+            'jobs': {'wiki': {'if': "github.event.pull_request.head.repo.full_name == github.repository && !github.event.pull_request.draft && (contains(fromJSON('[\"OWNER\",\"MEMBER\",\"COLLABORATOR\"]'), github.event.pull_request.author_association) || contains(fromJSON('" + json.dumps(BOTS) + "'), github.event.pull_request.user.login))",
+                              'runs-on': 'ubuntu-latest', 'permissions': {'contents': 'write', 'pull-requests': 'read'}, 'steps': steps}}}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    subs = parser.add_subparsers(dest='command', required=True)
+    for name in ['install', 'prepare', 'verify', 'checkout', 'diagnose']:
+        sub = subs.add_parser(name)
+        sub.add_argument('--repo', type=Path, required=True)
+        if name == 'install':
+            sub.add_argument('--runtime-ref', required=True, help='Full reviewed commit SHA of the trusted harness.')
+            sub.add_argument('--write', action='store_true')
+        elif name in {'prepare', 'verify'}:
+            sub.add_argument('--state', required=True)
+        if name == 'diagnose':
+            sub.add_argument('--execution-file')
+        if name == 'checkout':
+            sub.add_argument('--destination', required=True)
+            sub.add_argument('--head', required=True)
+        if name == 'prepare':
+            sub.add_argument('--event', required=True)
+            sub.add_argument('--github-output')
+        if name == 'verify':
+            sub.add_argument('--commit', action='store_true')
+    args = parser.parse_args()
+    root = args.repo.resolve()
+    if run(['git', 'rev-parse', '--show-toplevel'], root).strip() != str(root):
+        fail('INVALID_ROOT', 'Use the product Git top-level.')
+    if args.command == 'install':
+        if not re.fullmatch(r'[a-f0-9]{40}', args.runtime_ref):
+            fail('UNPINNED_RUNTIME', 'Use a reviewed full 40-character commit SHA, not a branch or tag.')
+        safe_destination(root / '.product-context.json')
+        if not (root / '.product-context.json').is_file():
+            fail('CONTEXT_REQUIRED', 'Initialize and review the product-context source profile first.')
+        destination = root / WORKFLOW
+        safe_destination(destination)
+        content = workflow(args.runtime_ref)
+        if destination.exists():
+            try:
+                previous = json.loads(destination.read_text())
+            except ValueError:
+                previous = None
+            if previous != content:
+                fail('WORKFLOW_EXISTS', 'The existing workflow was preserved; review it explicitly before migration.')
+        if args.write and not destination.exists():
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            write_json(destination, content)
+        report = {'mode': 'install' if args.write else 'plan', 'workflow': WORKFLOW, 'runtime_ref': args.runtime_ref,
+                  'required_secret': 'CLAUDE_CODE_OAUTH_TOKEN', 'model_calls': 0, 'api_fallback': False}
+    elif args.command == 'prepare':
+        report = prepare(root, args)
+        write_outputs(args.github_output, report)
+    elif args.command == 'checkout':
+        report = checkout(root, args)
+    elif args.command == 'diagnose':
+        report = diagnose(root, args)
+    else:
+        report = verify(root, args)
+    print(json.dumps(report, ensure_ascii=False))
+    return 0
+
+
+if __name__ == '__main__':
+    try:
+        raise SystemExit(main())
+    except (SetupError, OSError, ValueError, KeyError, TypeError) as error:
+        print(json.dumps({'error': str(error)}))
+        raise SystemExit(2)

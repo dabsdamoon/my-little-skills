@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:7a3e2d2755b5aeb2470f095e661feb0212faa8aaf5228e058706dca48f4f604a",
+  "claims": [
+    {
+      "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
+      "statement": "my-little-skills is a curated Agent Skills and plugin marketplace for Codex/OpenAI, Claude Code, Claude and Cowork.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+        }
+      ]
+    },
+    {
+      "id": "claim_6525552a2edd43a0b029d2287fc1dbfc",
+      "statement": "pr-creator is distributed only as developer-workflow-skills:pr-creator, and humanize-korean requires explicitly installing writing-skills.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+        }
+      ]
+    },
+    {
+      "id": "claim_51af1e9713a74c7eb08173549c577e0c",
+      "statement": "Offline product-context commands start no LLM, OpenWiki, network request or background job; a current result is not release approval.",
+      "evidence": [
+        {
+          "resource": "repo://skills/product-context/SKILL.md",
+          "version": "repo-file-v1:sha256:701d51008dcb11629e49512889b0094bc81c72a9d1bcfca7868c5c837961d2d9"
+        }
+      ]
+    },
+    {
+      "id": "claim_38c26f50ecf549e2b4247b36b89db47a",
+      "statement": "Wiki updates use the subscription-authenticated host session with no API-key fallback, and the default work budget is three pages including quickstart.",
+      "evidence": [
+        {
+          "resource": "repo://skills/product-context/references/subscription-wiki.md",
+          "version": "repo-file-v1:sha256:fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb"
+        }
+      ]
+    },
+    {
+      "id": "claim_31dd4b305b974839a23d40c89881c57f",
+      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.3.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
+      "evidence": [
+        {
+          "resource": "repo://plugins/product-context-skills/README.md",
+          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+        }
+      ]
+    },
+    {
+      "id": "claim_e82512ebc6714ecfa44eb55add9f96fc",
+      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.3.1; existing custom workflows are preserved and block generation.",
+      "evidence": [
+        {
+          "resource": "repo://plugins/product-context-skills/README.md",
+          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.9.0",
+    "at": "2026-11-17T01:38:17.013Z"
+  }
+}
