@@ -1,6 +1,6 @@
 ---
 name: product-context
-description: Use when product specifications, ADRs, implementation evidence, or handoff documents may be stale, when decisions change or need reconsideration, when an offline context check is needed, or when a repository wiki needs a bounded subscription-host update.
+description: Use when installing or diagnosing product-context, preparing a PR for a product with wiki automation, checking whether subscription wiki setup is complete, or when specifications, decisions, implementation evidence, or handoff documents may be stale.
 ---
 
 # Product Context
@@ -8,6 +8,34 @@ description: Use when product specifications, ADRs, implementation evidence, or 
 Reference for the **offline CLI** and optional **subscription-host wiki MCP**. A changed decision is legitimate;
 retain its reason, scope, predecessors, and unresolved questions. Evidence
 freshness is separate from semantic correctness and product acceptance.
+
+## Connect a product and verify completion
+
+For installation, PR automation, or missing OAuth/API messages, read
+[product setup](references/product-setup.md). Resolve its scripts relative to this
+skill. The product-aware entry point is:
+
+```sh
+python3 scripts/product_setup.py doctor --repo /product --github-repo OWNER/REPO --host both --json
+```
+
+Its required completion report has three separate rows: **local installation**
+(`local`), **this product's PR configuration** (`automation`), and **actual PR
+publication** (`verification`). Include their status, missing/unknown check codes,
+and next actions. `complete` requires all three; secret presence alone leaves
+authentication unverified until a real writer succeeds. `unknown` means inspection
+was unavailable. It does not mean the credential is absent.
+
+When the user chooses PR automation, use the integrated `setup` path with their
+reviewed source profile and runtime pin. Complete the OAuth registration stage or
+report the exact incomplete step. Preserve existing secrets. A local login does
+not supply a GitHub runner credential. Use subscription OAuth, not an API key.
+
+For a product with `.product-context/automation.json` or the configured wiki
+workflow, run doctor before creating its PR and again with `--pr NUMBER` after its
+run. Use the existing product opt-in across sessions. The final report names the
+matching run URL, source snapshot and published commit; skipped generation or a
+successful harness test is not proof for another product.
 
 ## Run the tool
 
@@ -50,7 +78,8 @@ should travel between checkouts. Preserve existing document conventions.
 
 Exit codes: `0` inspection completed (including expected drift), `1` missing
 local references or explicitly required freshness, `2` invalid/unsafe input or
-state. `--require-reviewed` is an opt-in freshness policy.
+state. `--require-reviewed` is an opt-in freshness policy. These are the offline
+CLI's exit codes; product setup has its own documented readiness exit codes.
 
 ## Subscription wiki maintenance
 

@@ -1,7 +1,7 @@
 {
   "name": "product-context-skills",
   "description": "Product evidence, evolving decisions, and bounded subscription wiki maintenance with optional PR automation",
-  "version": "0.3.1",
+  "version": "0.4.1",
   "author": {
     "name": "dabsdamoon"
   },

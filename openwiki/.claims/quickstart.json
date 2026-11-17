@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:7a3e2d2755b5aeb2470f095e661feb0212faa8aaf5228e058706dca48f4f604a",
+  "pageVersion": "sha256:e86b6d104cd8b4dc446567e86e8e604506e961090ca1a69c3e148319ba837c1d",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -28,7 +28,7 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/SKILL.md",
-          "version": "repo-file-v1:sha256:701d51008dcb11629e49512889b0094bc81c72a9d1bcfca7868c5c837961d2d9"
+          "version": "repo-file-v1:sha256:e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e"
         }
       ]
     },
@@ -38,33 +38,43 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/references/subscription-wiki.md",
-          "version": "repo-file-v1:sha256:fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb"
+          "version": "repo-file-v1:sha256:d484cf93a25aea56cad06c96c35474057ae6f7beaa92624ea820d633d7422958"
         }
       ]
     },
     {
       "id": "claim_31dd4b305b974839a23d40c89881c57f",
-      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.3.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
+      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.4.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
         }
       ]
     },
     {
       "id": "claim_e82512ebc6714ecfa44eb55add9f96fc",
-      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.3.1; existing custom workflows are preserved and block generation.",
+      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.4.1; existing custom workflows are preserved and block generation.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f"
+          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4917f4cec85546f4bc25817acb2f1e16",
+      "statement": "The product-aware product_setup.py completion report has three separate rows (local installation, product PR configuration, actual PR publication); complete requires all three and unknown means inspection was unavailable, not that a credential is absent.",
+      "evidence": [
+        {
+          "resource": "repo://skills/product-context/SKILL.md",
+          "version": "repo-file-v1:sha256:e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-17T01:38:17.013Z"
+    "at": "2026-11-17T10:23:54.771Z"
   }
 }

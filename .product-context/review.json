@@ -1,25 +1,28 @@
 {
   "schema_version": 1,
   "product": "my-little-skills-product-context",
-  "snapshot": "9cadd61fbed5358a982de6900d75fa516f6a5dccde9f7f8383902379a8187ac4",
+  "snapshot": "0054a7ed1cda7c78b0f3150d5eddff289734da988f2578e04fc932e1b4e6ec87",
   "files": {
     "README.md": "8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009",
-    "plugins/product-context-skills/README.md": "68ae178f6a284ceacf66e15739bf65b64b290f3207173cc22e3ca375be611a0f",
-    "skills/product-context/SKILL.md": "701d51008dcb11629e49512889b0094bc81c72a9d1bcfca7868c5c837961d2d9",
+    "plugins/product-context-skills/README.md": "68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9",
+    "skills/product-context/SKILL.md": "e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e",
     "skills/product-context/references/format.md": "f7be0fd4922c62b3a5af4edf6a2403fa2fea6049255826f612ec0beca3158ffa",
-    "skills/product-context/references/pr-automation.md": "ebf813aec599278e0725cd4fc32ff5d26c4dc432c1563e0d078dedd7ae0fe131",
-    "skills/product-context/references/subscription-wiki.md": "fa287dae59b388d71c88bf7689aae7715871a285fb2f442b2130040022f16dbb",
+    "skills/product-context/references/pr-automation.md": "220e4ec1053463444e6e6ee46b190ad7a83cc38f8d9b520cf8ef4605eff0516c",
+    "skills/product-context/references/product-setup.md": "bc259542e6228083bc4fe66ea54a759bfeae2a515cfee1ea327e71cfce8f91c9",
+    "skills/product-context/references/subscription-wiki.md": "d484cf93a25aea56cad06c96c35474057ae6f7beaa92624ea820d633d7422958",
     "skills/product-context/runtime/guard.mjs": "0b2bf4f044703d896877cc0332973c283acfc225220af3988a318051626daab7",
-    "skills/product-context/runtime/server.mjs": "504be7fda79f2fa8854b433aa83ef03a23578cf0b817d084aac23c71b0c62ef3",
+    "skills/product-context/runtime/server.mjs": "88f9daae6cc01cc0629b0a70b4f6bc12b5466e40b6826d50ed821f1e0e4de0a4",
     "skills/product-context/scripts/context_core.py": "1cfa49c804a50f6eb1e94c3bcd56e6349848e6db55c1da7f20329a95c2a5006c",
     "skills/product-context/scripts/context_store.py": "d529354ac0706c0f7f6504357470472c10efcab8bdddcc36ac933502f5a5ff98",
-    "skills/product-context/scripts/pr_wiki.py": "4664b1ebe48850f31ba1b1ca2b490b06b8e983d2291989b569205b4c621d74fd",
+    "skills/product-context/scripts/github_setup.py": "e40d128d370441aac1cb6e03eae62b4396f0d3f34fc7615a48e55fb3358f60c5",
+    "skills/product-context/scripts/pr_wiki.py": "4f8deb2274879d236053f83443dd0bc02335432472f3b04a725a081ae8228923",
     "skills/product-context/scripts/product_context.py": "a9be6a1ab758cb70f6e3f454818f1d46fa135189a74c7c5a09c14ae64fdbf672",
-    "skills/product-context/scripts/setup_subscription_wiki.py": "f26e3c3a7cc2798a879be2afcd3ba220b1b6bf7047e9750c3710d23af2a99a09"
+    "skills/product-context/scripts/product_setup.py": "f49f4e48a03b8ebaf474bcb6794ab299e9094637d8aa0d8443cce168d1437924",
+    "skills/product-context/scripts/setup_subscription_wiki.py": "3d75a4f47b927931ad67bac09877025fd781705e5a5ad2efc889dd3c1f686a5f"
   },
   "questions": [],
   "actor": "agent:claude",
-  "note": "Reviewed the modified plugin README; updated the quickstart wiki page with plugin install and setup details.",
-  "recorded_at": "2026-11-17T01:38:31.380324+00:00",
-  "git_head": "cb9ddfe060db88c991e6b4701f77732680e93f0d"
+  "note": "Updated quickstart wiki page to reflect version 0.4.1 (plugin README and runtime install path). No source changes.",
+  "recorded_at": "2026-11-17T10:24:11.257389+00:00",
+  "git_head": "159658bb1d151f4c440319d466a1c7cb2c912832"
 }

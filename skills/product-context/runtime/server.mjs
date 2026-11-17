@@ -24,7 +24,7 @@ let claimIssuePages = [];
 const pageKey = value => '/' + value.replace(/^\/+/, '');
 
 const instructions = `Maintain product documents in the CURRENT subscription-authenticated host session. This MCP server calls no model/provider and has no API fallback or schedule. Read the product-context skill before generation. Write source specs/ADRs/decisions FIRST; preserve old evidence and distinguish accepted target, implemented behavior and proposals. Do not invent a rationale or human approval. Call openwiki_begin; existing wikis use update and interrupted runs resume. Plans are limited to ${maxPages} factual pages including quickstart. Consume the assigned page queue and sparse Claim decisions. A SOURCE_CHANGED error means pages may be saved but the workflow is incomplete: inspect sources and explicitly update again if needed, without init/reset. Finish must succeed without sourceChanged and with complete metadata. Then call product_context_status and product_context_record_review with the exact snapshot and an explicit questions array collected from documents AND existing open questions. Resolve questions only with answers. Do not use a raw CLI record to bypass a failed wiki completion. Existing API workflows are preserved and block generation until explicitly reviewed. Do not launch standalone OpenWiki, extra models or background jobs.`;
-const server = new McpServer({ name: 'product-context', version: '0.3.1' }, { instructions });
+const server = new McpServer({ name: 'product-context', version: '0.4.1' }, { instructions });
 
 async function unlock() {
   manager.active = null;
@@ -143,7 +143,7 @@ const transport = new StdioServerTransport();
 transport.onclose = async () => { await unlock(); };
 for (const signal of ['SIGTERM', 'SIGINT']) process.once(signal, async () => { await unlock(); await server.close(); process.exit(0); });
 if (process.argv.includes('--self-check')) {
-  process.stdout.write(JSON.stringify({ ok: true, host, model_calls: 0, version: '0.3.1' }) + '\n');
+  process.stdout.write(JSON.stringify({ ok: true, host, model_calls: 0, version: '0.4.1' }) + '\n');
 } else if (process.argv.includes('--check-auth')) {
   process.stdout.write(JSON.stringify(subscription(host)) + '\n');
 } else {

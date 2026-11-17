@@ -161,7 +161,9 @@ def main() -> int:
     server = target / 'runtime/server.mjs'
     report = {'mode': 'install' if args.install else 'plan', 'version': VERSION, 'hosts': hosts,
               'runtime': str(target), 'commands': [registration(host, server) for host in hosts],
-              'model_calls': 0, 'api_fallback': False, 'schedules_installed': False}
+              'model_calls': 0, 'api_fallback': False, 'schedules_installed': False,
+              'completion': 'local_only', 'automation_ready': False,
+              'next_action': 'Use product_setup.py setup/doctor --repo PRODUCT for product PR configuration, OAuth and publication verification.'}
     if args.install:
         for executable in ['node', 'npm', 'python3', *hosts]:
             if not shutil.which(executable):
