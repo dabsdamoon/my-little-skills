@@ -1,0 +1,47 @@
+- banner
+  - navigation "상단" [ref=e26]
+    - link "내 기관" [ref=e32]
+  - heading "호움산부인과 · Houm PFC" [level=1, ref=e27]
+  - navigation "섹션" [ref=e28]
+    - link "기관 정보" [ref=e33]
+    - link "기관 목록" [ref=e34]
+    - link "횟수권 구매" [ref=e35]
+- main
+  - region "기관 정보" [ref=e29]
+    - heading "기관 정보" [level=2, ref=e36]
+    - DescriptionList
+      - term "주소"
+      - definition
+        - StaticText "서울 서초구 샘플로 10"
+      - term "전화"
+      - definition
+        - link "02-000-0000" [ref=e42]
+      - term "결제 책임 기관"
+      - definition
+        - StaticText "호움산부인과"
+  - region "기관 목록" [ref=e30]
+    - heading "기관 목록" [level=2, ref=e37]
+    - list
+      - listitem [level=1]
+        - heading "호움산부인과 · Houm PFC" [level=3, ref=e43]
+        - StaticText "서초점"
+        - button "호움산부인과 · Houm PFC 서초점 기관 열기" [ref=e44]
+          - StaticText "기관 열기"
+      - listitem [level=1]
+        - heading "호움산부인과 · Houm PFC" [level=3, ref=e45]
+        - StaticText "송파점"
+        - button "호움산부인과 · Houm PFC 송파점 기관 열기" [ref=e46]
+          - StaticText "기관 열기"
+      - listitem [level=1]
+        - heading "늘봄재활의학과" [level=3, ref=e47]
+        - StaticText "본점"
+        - button "늘봄재활의학과 본점 기관 열기" [ref=e48]
+          - StaticText "기관 열기"
+  - region "횟수권 구매" [ref=e31]
+    - heading "횟수권 구매" [level=2, ref=e38]
+    - group "구매할 횟수권"
+      - Legend
+        - StaticText "구매할 횟수권"
+      - radio "5회권 · 100,000원" [checked=true, ref=e40]
+      - radio "10회권 · 180,000원" [checked=false, ref=e41]
+    - button "신청 확인" [ref=e39]

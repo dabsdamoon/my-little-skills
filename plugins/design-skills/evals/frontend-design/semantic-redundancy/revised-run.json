@@ -1,0 +1,105 @@
+{
+  "condition": "revised",
+  "started_at": "2026-11-17T07:44:20.055207+00:00",
+  "cli_version": "2.1.326 (Claude Code)",
+  "model": "claude-sonnet-5-5",
+  "prompt_sha256": "6ab481e00684cd23c2d7674c48ba94b62017a2d606f996347c8561f268abcced",
+  "guidance_sha256": "e729134c63de11791e1c383b4e7f9f64b9f26793261ba92192ac26e7748cfa5a",
+  "system_sha256": "36d754a0f1b663c196b2039ab53d1bf76d834eb8e1903c6f5985d4f1c1ec8398",
+  "init": {
+    "tools": [],
+    "mcp_servers": [],
+    "skills": [],
+    "plugins": [
+      {
+        "name": "orca-agent-view",
+        "path": "<user-home>/Library/Application Support/orca/claude-agent-view/d533031cfe078329e8cb/orca-agent-view",
+        "source": "orca-agent-view@inline",
+        "version": "0.2.0"
+      },
+      {
+        "name": "cc-plugin-sec-default",
+        "path": "builtin",
+        "source": "cc-plugin-sec-default@builtin"
+      },
+      {
+        "name": "cc-plugin-agents-md",
+        "path": "builtin",
+        "source": "cc-plugin-agents-md@builtin"
+      },
+      {
+        "name": "cc-plugin-privacy",
+        "path": "builtin",
+        "source": "cc-plugin-privacy@builtin"
+      },
+      {
+        "name": "cc-plugin-plugin-authoring",
+        "path": "builtin",
+        "source": "cc-plugin-plugin-authoring@builtin"
+      }
+    ],
+    "apiKeySource": "none"
+  },
+  "exit_code": 0,
+  "result": {
+    "subtype": "success",
+    "is_error": false,
+    "num_turns": 1,
+    "duration_ms": 23964,
+    "total_cost_usd": 0.061,
+    "usage": {
+      "input_tokens": 2,
+      "cache_creation_input_tokens": 5739,
+      "cache_read_input_tokens": 0,
+      "output_tokens": 3804,
+      "output_tokens_details": {
+        "thinking_tokens": 1195
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 5739,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [],
+      "speed": "standard",
+      "fallback_credit": null
+    },
+    "modelUsage": {
+      "claude-sonnet-5-5": {
+        "inputTokens": 2,
+        "outputTokens": 3804,
+        "cacheReadInputTokens": 0,
+        "cacheCreationInputTokens": 5739,
+        "webSearchRequests": 0,
+        "costUSD": 0.061,
+        "contextWindow": 1000000,
+        "maxOutputTokens": 128000,
+        "thinkingTokens": 1195,
+        "cacheCreationEphemeral5mInputTokens": 0,
+        "cacheCreationEphemeral1hInputTokens": 5739,
+        "canonicalModel": "claude-sonnet-5-5",
+        "provider": "firstParty",
+        "costBasis": "list"
+      }
+    },
+    "permission_denials": []
+  },
+  "controls": {
+    "fresh_process": true,
+    "project_ancestry": false,
+    "tools": false,
+    "settings_sources": [],
+    "automatic_skills_disabled": true,
+    "mcp_servers": {},
+    "hooks_disabled": true,
+    "auto_memory_disabled": true,
+    "session_persistence": false,
+    "billing": "existing subscription login; SDK cost is not an invoice"
+  },
+  "metadata_normalization": "Only the user-home prefix in plugin paths was replaced; instruction and HTML bytes are preserved separately."
+}

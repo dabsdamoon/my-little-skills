@@ -1,0 +1,21 @@
+{
+  "base_commit": "19d336394008aee4fe94caa64afa806c8e550229",
+  "baseline_skill_git_blob": "66aa8dc28e54a31b7fa6bde44c9066d1445206fd",
+  "files": {
+    "brief.md": "5dec80a2b07338409e4464a28bf85837da0bbc100e4912e8bfc060d6824721a2",
+    "fixture.html": "de020cb13e75377a2fea5317b53dfad957a9c7b78ae7634a22366e64e4dabfac",
+    "prompt.txt": "6ab481e00684cd23c2d7674c48ba94b62017a2d606f996347c8561f268abcced",
+    "rubric.md": "08308ab9de91c75bbc3bec09745957f6708d3ac37c1d0b3c2fd8179ec3475aac",
+    "baseline-skill.md": "575b7d9036794970b9acb0db01cb2ddd3cc46d8b0e366c8f679dad05616d28b5",
+    "revised-skill.md": "e729134c63de11791e1c383b4e7f9f64b9f26793261ba92192ac26e7748cfa5a",
+    "baseline-system.txt": "8a623ebc3ea63b77c7eaa48a832a1295c70239ac72c7056c180680f3f6398981",
+    "control-system.txt": "7975f202b20efd47dc9d843b4e71eaff001f0381056bc64830a36a2fbac6db36",
+    "revised-system.txt": "36d754a0f1b663c196b2039ab53d1bf76d834eb8e1903c6f5985d4f1c1ec8398",
+    "legend-edit-system.txt": "36d754a0f1b663c196b2039ab53d1bf76d834eb8e1903c6f5985d4f1c1ec8398",
+    "legend-edit-prompt.txt": "23c1be00a087ac38485e3b8dda441326d2cf17232f0acf0462abb52b862ddf66",
+    "baseline.html": "b295a59bdd5506f6177d3a44b9511cd447e07ecaeaf1c7a5c30df049539b55b6",
+    "control.html": "f3f1b5a8afa1596bfcf1534a37396ac4f49453f504e7178695bc2c44b4fb3997",
+    "revised.html": "c35c680afb9047d9ccaa6a9c66d8d26d499321b9ef6e2cb17d4b4f2a2aa5562c",
+    "legend-edit.html": "a7ef08b6433b08672af6c77c2949d66ae74d3a23bfc24d54c56c54c48b22a860"
+  }
+}

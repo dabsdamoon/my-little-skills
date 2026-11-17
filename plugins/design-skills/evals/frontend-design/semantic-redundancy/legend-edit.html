@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>회원 서비스</title>
+<style>
+:root{--ink:#1f2e27;--mute:#5d6b63;--line:#d9e0d6;--accent:#1f6b4f;--soft:#eef5f0}
+body{margin:0;font:16px/1.6 system-ui,"Noto Sans KR","Apple SD Gothic Neo",sans-serif;color:var(--ink);background:#fafbf8}
+header,main{max-width:960px;margin:auto;padding:24px}
+header{border-bottom:1px solid var(--line)}
+header h1{font-size:1.5rem;margin:8px 0 12px}
+.tabs{display:flex;gap:8px 20px;flex-wrap:wrap}
+a{color:var(--accent)}
+.tabs a{padding:6px 0;text-underline-offset:4px}
+section{margin:28px 0;padding:20px 24px;background:#fff;border:1px solid var(--line);border-radius:10px}
+h2{font-size:1.2rem;margin:0 0 14px;line-height:1.3}
+h3{font-size:1rem;margin:0;line-height:1.4}
+.who{display:none;font-weight:700;font-size:1.1rem;margin:0 0 12px}
+dl{display:grid;grid-template-columns:120px 1fr;gap:10px 12px;margin:0}
+dt{color:var(--mute)}dd{margin:0}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+li:first-child{border-top:0;padding-top:0}
+li div{flex:1}
+li span{color:var(--mute);font-size:.9rem}
+button{font:inherit;padding:8px 14px;border:1px solid var(--accent);background:#fff;color:var(--accent);border-radius:6px;cursor:pointer;min-height:44px}
+button:hover{background:var(--soft)}
+button[aria-pressed=true]{background:var(--soft);font-weight:600}
+#open-confirmation,#close-confirmation{background:var(--accent);color:#fff}
+#open-confirmation:hover,#close-confirmation:hover{background:#17543e}
+:focus-visible{outline:3px solid #e0a100;outline-offset:2px}
+fieldset{border:0;padding:0;margin:0 0 16px}
+legend{font-weight:600;padding:0;margin-bottom:8px}
+legend{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+label{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;min-height:24px;cursor:pointer}
+label:has(:checked){border-color:var(--accent);background:var(--soft)}
+input[type=radio]{width:20px;height:20px;accent-color:var(--accent);margin:0}
+dialog{max-width:min(90vw,420px);border:1px solid var(--line);border-radius:12px;padding:24px;color:var(--ink)}
+dialog::backdrop{background:rgba(20,30,25,.5)}
+dialog p{margin:0 0 8px}
+.pass{font-size:1.15rem;font-weight:700}
+.fac{color:var(--mute)}
+@media(max-width:600px){header h1{display:none}header,main{padding:16px}section{padding:16px;margin:20px 0}dl{grid-template-columns:90px 1fr}.who{display:block}li{flex-wrap:wrap}li div{flex-basis:100%}}
+</style>
+<header><nav aria-label="상단"><a href="#clinic">내 기관</a></nav><h1>호움산부인과 · Houm PFC</h1><nav class="tabs" aria-label="섹션"><a href="#clinic">기관 정보</a><a href="#providers">기관 목록</a><a href="#purchase">횟수권 구매</a></nav></header>
+<main>
+<section id="clinic" aria-labelledby="clinic-title"><h2 id="clinic-title">기관 정보</h2><p class="who">호움산부인과 · Houm PFC</p><dl><dt>주소</dt><dd>서울 서초구 샘플로 10</dd><dt>전화</dt><dd><a href="tel:020000000">02-000-0000</a></dd><dt>결제 책임 기관</dt><dd>호움산부인과</dd></dl></section>
+<section id="providers" aria-labelledby="providers-title"><h2 id="providers-title">기관 목록</h2><ul>
+<li><div><h3>호움산부인과 · Houm PFC</h3><span>서초점</span></div><button type="button" data-label="호움산부인과 · Houm PFC 서초점">기관 열기</button></li>
+<li><div><h3>호움산부인과 · Houm PFC</h3><span>송파점</span></div><button type="button" data-label="호움산부인과 · Houm PFC 송파점">기관 열기</button></li>
+<li><div><h3>늘봄재활의학과</h3><span>본점</span></div><button type="button" data-label="늘봄재활의학과 본점">기관 열기</button></li></ul></section>
+<section id="purchase" aria-labelledby="purchase-title"><h2 id="purchase-title">횟수권 구매</h2><fieldset><legend>구매할 횟수권</legend><label><input type="radio" name="pass" value="5" checked>5회권 · 100,000원</label><label><input type="radio" name="pass" value="10">10회권 · 180,000원</label></fieldset><button type="button" id="open-confirmation">신청 확인</button></section>
+<dialog id="confirmation" aria-labelledby="confirm-title"><h2 id="confirm-title">신청 확인</h2><p class="fac">호움산부인과 · Houm PFC</p><p id="selected-pass" class="pass">5회권 · 100,000원</p><button type="button" id="close-confirmation">닫기</button></dialog>
+</main>
+<script>
+const sourceData={provider:{name:'호움산부인과 · Houm PFC',organizationName:'호움산부인과',description:'Pelvic Floor Center',address:'서울 서초구 샘플로 10',phone:'02-000-0000',billingOrganization:'호움산부인과'},passes:{5:{count:5,price:'100,000원'},10:{count:10,price:'180,000원'}}};
+const dlg=document.getElementById('confirmation');
+document.getElementById('open-confirmation').onclick=()=>{
+  const p=sourceData.passes[document.querySelector('input[name="pass"]:checked').value];
+  document.getElementById('selected-pass').textContent=p.count+'회권 · '+p.price;
+  dlg.showModal();
+};
+document.getElementById('close-confirmation').onclick=()=>dlg.close();
+const btns=document.querySelectorAll('#providers button');
+btns.forEach(b=>{b.setAttribute('aria-label',b.dataset.label+' 기관 열기');b.onclick=()=>{
+  btns.forEach(o=>{o.textContent='기관 열기';o.setAttribute('aria-pressed','false');o.setAttribute('aria-label',o.dataset.label+' 기관 열기')});
+  b.textContent='기관 선택됨';b.setAttribute('aria-pressed','true');b.setAttribute('aria-label',b.dataset.label+' 기관 선택됨');
+}});
+</script></html>

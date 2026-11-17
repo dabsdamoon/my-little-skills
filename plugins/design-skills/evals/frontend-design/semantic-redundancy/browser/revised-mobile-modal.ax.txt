@@ -1,0 +1,7 @@
+- dialog "신청 확인"
+  - heading "신청 확인" [level=2, ref=e49]
+  - paragraph
+    - StaticText "호움산부인과 · Houm PFC"
+  - paragraph
+    - StaticText "10회권 · 180,000원"
+  - button "닫기" [ref=e50]
