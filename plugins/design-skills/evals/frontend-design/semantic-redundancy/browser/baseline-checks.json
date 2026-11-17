@@ -1,0 +1,19 @@
+{
+  "arm": "baseline",
+  "viewports": [
+    [
+      1440,
+      1000
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "keyboard_selection": "10-session pass selected via ArrowDown",
+  "group_accessible_name": "구매할 횟수권",
+  "modal": "provider and selected pass present; background absent from accessibility tree at both sizes",
+  "horizontal_overflow": false,
+  "semantic_duplication": "human review of saved snapshots and screenshots required",
+  "generated_html_edited": false
+}

@@ -31,6 +31,12 @@ Identify the problem a reference solves and the principle worth transferring: at
 
 For a task screen, begin with the controls and information needed during use; a promotional introduction belongs only where it serves the task.
 
+When composing or changing information, review the assembled screen: shared shell, headings, tabs, selected states, summaries, metadata, and content. Identify what that composition already communicates, including differently worded statements of the same fact. Give each information unit a primary placement suited to the task and its scope. At another placement, identify the additional action, distinction, context, confirmation, or access it provides. Consolidate placements that add none, preserving source data and access to distinct details. Keep this review within the requested edit.
+
+Keep names on rows that distinguish entities or scopes. Give a standalone dialog, or a viewport where the primary identity is unavailable, enough local context. An expansion that explains an unfamiliar acronym adds meaning. Preserve accessible names for controls and groups when simplifying visible labels; a visually hidden legend can retain “구매할 횟수권”.
+
+For example, when “호움산부인과 · Houm PFC” already identifies the provider and PFC's meaning is established, an intro saying “Pelvic Floor Center” and metadata repeating “호움산부인과” add no identity. Remove those extra placements while keeping address and contact details. The same organization's name can still identify a distinct billing responsibility or distinguish providers in a list.
+
 ## Make deliberate visual choices
 
 - **Structure:** encode priorities through grouping, adjacency, area, alignment, and disclosure. Explain how the chosen organization supports the task. A hero, card grid, or sidebar earns its place through that explanation.
@@ -72,6 +78,8 @@ Verify the flow over time for both missing feedback and motion that communicates
 Use the project's stack and reusable components. Match implementation effort to the chosen design. Exercise actual content and important states, including loading, empty, error, selected, disabled, and unavailable where relevant. Keep responsive behavior, keyboard focus, touch targets, and readable contrast intact. Plan CSS selector specificity deliberately; rules such as `.section` and `.cta` can cancel each other's padding and margin.
 
 Inspect rendered results at relevant sizes when rendering tools are available. For motion, watch playback at normal speed from the triggering change through the settled result, including supported interruption and resumption. Use recordings or frame stepping to investigate faults; selected frames cannot establish continuous playback, and geometry checks cannot establish visual quality. Distinguish code inspection, interaction checks, visual observation, and user preference; none substitutes for the others. State what was observed and what remains unverified.
+
+For information changes, inspect the composed result at desktop and mobile sizes, including detached dialogs and states where primary context disappears. Check semantic repetition and retained context together; verify the accessible names after removing a visible label. Inspect each affected component in its surrounding screen.
 
 ## Deliver and hand off
 
