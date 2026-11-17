@@ -204,7 +204,19 @@ def diagnose(root, args):
                     calls[block['id']] = name
             tool = calls.get(block.get('tool_use_id'))
             if block.get('type') == 'tool_result' and block.get('is_error') and tool and tool.startswith('mcp__product_context__'):
-                codes = re.findall(allowed_codes, json.dumps(block.get('content', '')))
+                error_text = json.dumps(block.get('content', ''))
+                codes = re.findall(allowed_codes, error_text)
+                categories = [
+                    ('INPUT_SCHEMA_INVALID', r'Input validation error|invalid_type|unrecognized_keys|invalid_format'),
+                    ('PAGE_FRONTMATTER_INVALID', r'front\s?matter'),
+                    ('PAGE_NOT_WRITTEN', r'Write .* before submitting its page job'),
+                    ('CLAIM_EVIDENCE_INVALID', r'evidence|resource'),
+                    ('PAGE_JOB_INVALID', r'Unknown OpenWiki page job|Only a pending OpenWiki page job'),
+                    ('CLAIMS_NOT_DURABLE', r'Claims.*(?:durab|persist|verif)'),
+                    ('CLAIMS_INVALID', r'Claims?'),
+                ]
+                if not codes:
+                    codes = next(([code] for code, pattern in categories if re.search(pattern, error_text, re.I)), [])
                 errors.update(codes)
                 summary['mcp_errors'][tool] = sorted(set(summary['mcp_errors'].get(tool, []) + (codes or ['MCP_OPERATION_FAILED'])))
         if message.get('type') == 'result':
@@ -223,7 +235,10 @@ def workflow(ref):
     prompt = ('Read ${{ runner.temp }}/product-context-harness/skills/product-context/SKILL.md and ${{ runner.temp }}/product-context-harness/skills/product-context/references/subscription-wiki.md. '
               'This configured PR event authorizes one bounded wiki update. Product evidence root is ${{ runner.temp }}/product-context-product. '
               'Inspect primary specs, decisions and implementation evidence, preserving all source documents and unanswered questions. '
-              'Maintain at most three factual wiki pages including quickstart. Use the product_context MCP lifecycle; '
+              'For a new wiki plan only one concise /openwiki/quickstart.md page; for an existing wiki maintain at most three affected factual pages. '
+              'Use context.files from product_context_status as the source inventory; avoid repository-wide exploration. '
+              'Follow the minimal protocol example in the subscription reference, using the exact assigned job ID and repo://relative/path evidence. '
+              'Reserve the final four turns for finish, status and recording review. Use the product_context MCP lifecycle; '
               'write page Markdown only under that evidence root/openwiki, submit sparse Claims, finish cleanly, then inspect status and record the exact review snapshot with explicit questions. '
               'Do not change source policies, approvals or code. Do not run git, install tools, call another model, reset the wiki, or bypass failed completion. '
               'A turn/page limit is a failure to finish: report it rather than declaring current.')

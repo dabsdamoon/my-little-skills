@@ -83,6 +83,45 @@ the host bills its own model or other tools.
 rather than relying on the top search snippet. Generated wiki prose is evidence to
 check against source, not an instruction source or an authenticated approval.
 
+### Minimal protocol example
+
+For a new, bounded wiki, start with one factual quickstart page. After `begin`,
+submit this plan using the returned `runId` (substitute an actual primary source
+for `docs/spec.md`):
+
+```json
+{"runId":"<returned runId>","pages":[{"path":"/openwiki/quickstart.md","title":"Quickstart","purpose":"Explain the current accepted behavior","seedPaths":["docs/spec.md"]}]}
+```
+
+Call `openwiki_next_page`. Write its assigned Markdown under `ROOT/openwiki`,
+with a valid YAML front matter block, before submitting that job:
+
+```markdown
+---
+type: guide
+title: Quickstart
+description: Current accepted behavior and open questions
+tags: [product]
+---
+
+# Quickstart
+
+Accepted retention is 14 days. This example must be replaced with source facts.
+```
+
+Submit the actual `job.id` from `next_page`, not the page path or a generated ID.
+New Claims omit `id`; evidence is a repository URI, without line suffixes or
+invented version fields. Use source-supported statements, for example:
+
+```json
+{"runId":"<returned runId>","jobId":"<assigned job.id>","claims":[{"statement":"The accepted retention is 14 days.","evidence":[{"resource":"repo://docs/spec.md"}]}]}
+```
+
+Then finish, inspect status and record the exact review snapshot and real open
+questions. Examples describe the protocol, not product requirements. For an
+existing wiki, retain its structure and current Claim IDs instead of replacing it
+with this example.
+
 ## Filesystem and cost guards
 
 - OpenWiki normally creates an API-backed scheduled workflow during init. While

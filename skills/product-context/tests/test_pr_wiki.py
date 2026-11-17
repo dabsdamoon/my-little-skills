@@ -208,17 +208,18 @@ class PrWikiTests(unittest.TestCase):
         secret = 'PRIVATE_TOKEN_SHOULD_NOT_APPEAR'
         log.write_text(json.dumps([
             {'type': 'system', 'subtype': 'init', 'mcp_servers': [{'name': 'product_context', 'status': 'failed'}], 'tools': ['Read', 'mcp__product_context__openwiki_begin'], 'env': {'TOKEN': secret}},
-            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'begin', 'name': 'mcp__product_context__openwiki_begin', 'input': {'secret': secret}}, {'type': 'tool_use', 'id': 'read', 'name': 'Read', 'input': {}}]}},
-            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'begin', 'is_error': True, 'content': 'SUBSCRIPTION_REQUIRED: ' + secret}, {'type': 'tool_result', 'tool_use_id': 'read', 'content': 'Docs mention SOURCE_CHANGED and LOCKED.'}]}},
+            {'type': 'assistant', 'message': {'content': [{'type': 'tool_use', 'id': 'begin', 'name': 'mcp__product_context__openwiki_begin', 'input': {'secret': secret}}, {'type': 'tool_use', 'id': 'submit', 'name': 'mcp__product_context__openwiki_submit_page', 'input': {}}, {'type': 'tool_use', 'id': 'read', 'name': 'Read', 'input': {}}]}},
+            {'type': 'user', 'message': {'content': [{'type': 'tool_result', 'tool_use_id': 'begin', 'is_error': True, 'content': 'SUBSCRIPTION_REQUIRED: ' + secret}, {'type': 'tool_result', 'tool_use_id': 'submit', 'is_error': True, 'content': 'Could not deterministically repair front matter in private/path: ' + secret}, {'type': 'tool_result', 'tool_use_id': 'read', 'content': 'Docs mention SOURCE_CHANGED and LOCKED.'}]}},
             {'type': 'result', 'subtype': 'success', 'num_turns': 9, 'is_error': False, 'result': secret, 'permission_denials': []}
         ]))
         result = self.run_cli('diagnose', '--execution-file', str(log))
         self.assertEqual(result['mcp'], {'product_context': 'failed'})
         self.assertEqual(result['tool_calls']['mcp__product_context__openwiki_begin'], 1)
-        self.assertEqual(result['error_codes'], ['SUBSCRIPTION_REQUIRED'])
-        self.assertEqual(result['mcp_errors'], {'mcp__product_context__openwiki_begin': ['SUBSCRIPTION_REQUIRED']})
+        self.assertEqual(result['error_codes'], ['PAGE_FRONTMATTER_INVALID', 'SUBSCRIPTION_REQUIRED'])
+        self.assertEqual(result['mcp_errors'], {'mcp__product_context__openwiki_begin': ['SUBSCRIPTION_REQUIRED'], 'mcp__product_context__openwiki_submit_page': ['PAGE_FRONTMATTER_INVALID']})
         self.assertEqual(result['result']['num_turns'], 9)
         self.assertNotIn(secret, json.dumps(result))
+        self.assertNotIn('private/path', json.dumps(result))
 
     def test_ci_subscription_auth_reaches_mcp_when_only_safe_parent_env_is_inherited(self):
         self.prepare()
