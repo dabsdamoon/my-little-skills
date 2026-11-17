@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:41f0ddd00e976ffebe748b380e2ad444c84271ea400a86fc5bf96aa4b51de27d",
+  "pageVersion": "sha256:e86b6d104cd8b4dc446567e86e8e604506e961090ca1a69c3e148319ba837c1d",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -38,27 +38,27 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/references/subscription-wiki.md",
-          "version": "repo-file-v1:sha256:73b8004890aa7a340fcdb313b72d1f235aa500c0f1244d6cd517e1e5705a2c3d"
+          "version": "repo-file-v1:sha256:d484cf93a25aea56cad06c96c35474057ae6f7beaa92624ea820d633d7422958"
         }
       ]
     },
     {
       "id": "claim_31dd4b305b974839a23d40c89881c57f",
-      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.4.0 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
+      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.4.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:61a9a8ce86dbcc17502e5a680ec35093044e7534ca76c0dc1d2e6f046b5b20cc"
+          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
         }
       ]
     },
     {
       "id": "claim_e82512ebc6714ecfa44eb55add9f96fc",
-      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.4.0; existing custom workflows are preserved and block generation.",
+      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.4.1; existing custom workflows are preserved and block generation.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:61a9a8ce86dbcc17502e5a680ec35093044e7534ca76c0dc1d2e6f046b5b20cc"
+          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
         }
       ]
     },
@@ -75,6 +75,6 @@
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-17T09:53:16.882Z"
+    "at": "2026-11-17T10:23:54.771Z"
   }
 }
