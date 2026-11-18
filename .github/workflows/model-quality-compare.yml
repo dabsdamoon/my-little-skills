@@ -1,0 +1,24 @@
+name: Model comparison skill checks
+on:
+  pull_request:
+    paths:
+      - skills/model-quality-compare/**
+      - plugins/research-workflow-skills/**
+      - .github/workflows/model-quality-compare.yml
+  push:
+    branches: [main]
+    paths:
+      - skills/model-quality-compare/**
+      - plugins/research-workflow-skills/**
+      - .github/workflows/model-quality-compare.yml
+permissions:
+  contents: read
+jobs:
+  deterministic-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Exercise CLI contracts without model calls
+        run: python3 -m unittest discover -s skills/model-quality-compare/tests -v
+      - name: Verify canonical and plugin skill copies match
+        run: diff -r --exclude=__pycache__ skills/model-quality-compare plugins/research-workflow-skills/skills/model-quality-compare

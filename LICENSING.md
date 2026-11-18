@@ -38,7 +38,7 @@ relicensing of all material in this repository.
 | `houm-refactoring` | `plugins/houmy-skills/skills/houm-refactoring`<br>`skills/houm-refactoring` |
 | `houmlike-design` | `plugins/houmy-skills/skills/houmlike-design`<br>`skills/houmlike-design` |
 | `make-llm-wiki-raw` | `plugins/llm-wiki-skills/skills/make-llm-wiki-raw`<br>`skills/make-llm-wiki-raw` |
-| `model-quality-compare` | `skills/model-quality-compare` |
+| `model-quality-compare` | `plugins/research-workflow-skills/skills/model-quality-compare`<br>`skills/model-quality-compare` |
 | `notion-dashboard-builder` | `plugins/notion-workspace-skills/skills/notion-dashboard-builder`<br>`skills/notion-dashboard-builder` |
 | `pr-creator` | `plugins/developer-workflow-skills/skills/pr-creator` |
 | `product-context` | `plugins/product-context-skills/skills/product-context`<br>`skills/product-context` |
