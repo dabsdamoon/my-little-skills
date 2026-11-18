@@ -3,7 +3,7 @@
 Reusable product evidence and decision tooling with optional subscription-host
 OpenWiki maintenance. The offline Python CLI needs no OpenWiki or model provider.
 
-Install from the my-little-skills marketplace after version 0.4.1 is published:
+Install from the my-little-skills marketplace:
 
 ```text
 Claude Code: /plugin install product-context-skills@my-little-skills
@@ -59,7 +59,8 @@ python3 skills/product-context/scripts/setup_subscription_wiki.py --host both --
 The first command is a read-only plan. Setup requires Python 3.10+, Node.js
 22.22+, npm and subscription logins for the selected hosts. It installs a pinned
 OpenWiki 0.9.0 runtime with npm scripts disabled under
-`~/.local/share/product-context/0.4.1`, then registers the user MCP server
+`~/.local/share/product-context/<runtime-version>` using the version in
+`skills/product-context/runtime/package.json`, then registers the user MCP server
 `product_context` with Claude Code and Codex. Restart the hosts afterward.
 
 The current subscribed agent writes the pages. The bridge calls no model,

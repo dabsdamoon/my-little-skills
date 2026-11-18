@@ -1,6 +1,7 @@
 ---
 name: generate-git-work-report
 description: Generate repeatable, timestamped, evidence-backed project execution histories and detailed work logs from a local Git repository, including conservative humanize-korean editing for Korean narrative and polished reference-matched DOCX/PDF deliverables. Use when a user asks for a Git-based 수행이력, 업무일지, work log, project history, delivery report, audit trail, external project summary, internal evidence report, or professionally formatted office report derived from commit, merge, tag, author, date, and file-change history.
+license: MIT
 ---
 
 # Generate Git Work Report

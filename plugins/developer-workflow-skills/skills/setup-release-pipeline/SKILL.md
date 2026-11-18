@@ -1,6 +1,7 @@
 ---
 name: setup-release-pipeline
 description: Use when a project deploys from a host-tracked branch such as Vercel, Netlify, or Render and the user wants `main` to remain the canonical latest-code/release-candidate branch while production ships only when a `production` pointer branch is explicitly advanced from `main` via `run_deploy.sh`. Best for reducing GitHub Actions/secrets setup, avoiding automatic live deploys on every merge to `main`, and giving agents a repeatable low-touch release workflow.
+license: MIT
 ---
 
 # Setup Release Pipeline (`production` pointer branch)

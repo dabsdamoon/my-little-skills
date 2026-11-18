@@ -1,6 +1,7 @@
 ---
 name: houm-refactoring
 description: "Refactor Houmy Python/FastAPI and React/Vite codebase. TRIGGER when: user asks to refactor, clean up, restructure, simplify, or remove dead code. Also triggers on 'implicit code', 'magic', 'coupling', 'discoverability', or 'make explicit'. Covers backend (Python/FastAPI/SQLAlchemy) and frontend (React/TypeScript/Vite)."
+license: MIT
 ---
 
 # Houmy Refactoring Skill

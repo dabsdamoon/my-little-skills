@@ -65,7 +65,7 @@ class ProductSetupTests(unittest.TestCase):
             'repos/acme/product': {'full_name': 'acme/product', 'default_branch': 'develop'},
             'repos/acme/product/actions/secrets': {'secrets': []},
             'repos/acme/product/actions/organization-secrets': {'secrets': []},
-            'repos/dabsdamoon/my-little-skills/contents/skills/product-context/runtime/package.json?ref='+PIN: contents({'version': '0.4.1'}),
+            'repos/dabsdamoon/my-little-skills/contents/skills/product-context/runtime/package.json?ref='+PIN: contents({'version': '0.4.4'}),
         }}
         self.save()
         bin_dir = self.root / 'bin'

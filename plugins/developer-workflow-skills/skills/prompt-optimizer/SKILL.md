@@ -1,6 +1,7 @@
 ---
 name: prompt-optimizer
 description: "Cuts LLM API cost by restructuring prompts for prompt caching and trimming input and output tokens, across Claude, OpenAI, and Gemini. Use when asked to reduce token usage or API spend, make a prompt cache-friendly, raise a low cache hit rate, decide where cache breakpoints or TTLs go, or estimate what a prompt costs per request. Not for making a prompt clearer or better-behaved (use claude-api prompt-audit, or writing-skills:system-prompt-creator for a new system prompt); for a full cost pass over existing Claude API code, use claude-api cost-optimize."
+license: MIT
 ---
 
 # Prompt Optimizer

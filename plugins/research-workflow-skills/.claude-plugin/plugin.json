@@ -1,7 +1,8 @@
 {
   "name": "research-workflow-skills",
   "description": "Research workflow toolkit: autonomous experiment-loop iteration (keep/discard, noise guards, audit trails) and experiment-diagnosis (continue/switch/stop/pivot verdicts from the metric trajectory and the method's ceiling)",
-  "version": "1.1.0",
+  "version": "1.1.1",
+  "license": "MIT",
   "author": {
     "name": "dabsdamoon"
   }

@@ -2,6 +2,7 @@
 name: dual-track-checklist-verifier
 description: Verifies and ticks off a pull request's unchecked test-plan or checklist items (`- [ ]`) by re-running each check on the PR's current head commit, then updates the PR body with only what it proved and the evidence. Use when asked to verify the PR checklist, check off the test plan, confirm QA items, or verify and update a PR before merge. Handles any PR test plan and dual-track-pr-creator bodies, where automated results never tick customer, usability, or production claims.
 argument-hint: [pr-number]
+license: MIT
 ---
 
 # Dual-Track Checklist Verifier

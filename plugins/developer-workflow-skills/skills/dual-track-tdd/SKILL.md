@@ -1,6 +1,7 @@
 ---
 name: dual-track-tdd
 description: Plan and deliver uncertain product work by running evidence-driven discovery ahead of test-driven implementation. Use when a feature, MVP, Phase 0, UX flow, or product experiment still has desirability or usability risk but also needs production-quality delivery; when a user asks for Dual-Track Agile, discovery plus delivery, prototype-to-TDD, or a comparison of prototype-first and TDD approaches; or when a plan must define explicit evidence, handoff, and acceptance gates before coding.
+license: MIT
 ---
 
 # Dual-Track TDD

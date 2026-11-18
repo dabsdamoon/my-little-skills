@@ -1,6 +1,7 @@
 ---
 name: selecting-video-shorts
 description: Select purpose-aware, self-contained Shorts excerpts from long videos using reviewed transcripts and traceable source ranges. Use for 쇼츠 주제 선정, 클립 발췌, or long-form-to-short planning, especially educational clips that must finish an explanation before inviting further viewing. Produces a selection brief rather than rendering or publishing videos.
+license: MIT
 ---
 
 # Selecting Video Shorts

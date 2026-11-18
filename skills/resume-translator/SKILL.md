@@ -1,6 +1,7 @@
 ---
 name: resume-translator
 description: This skill should be used when users request translation of resumes or CVs between English and Japanese, Korean, or Chinese. It handles Word document (.docx) format resumes and offers options to preserve the original formatting or create a culturally-appropriate format based on target language conventions.
+license: MIT
 ---
 
 # Resume Translator

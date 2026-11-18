@@ -1,6 +1,7 @@
 ---
 name: model-quality-compare
 description: Run a controlled, blinded quality shootout between Claude subscription model tiers (Opus, Sonnet, Haiku, Fable) on one identical task. Use when the user asks "which Claude model is best for X", "compare model quality", "Opus vs Sonnet vs Haiku", "model shootout", "benchmark Claude tiers", or "test the models in my subscription". Dispatches one model-pinned subagent per model with an identical frozen prompt, saves each output, then scores objective-first with a blinded-judge fallback and writes a comparison report.
+license: MIT
 ---
 
 # Model Quality Compare

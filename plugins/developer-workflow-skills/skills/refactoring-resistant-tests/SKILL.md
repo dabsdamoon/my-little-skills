@@ -1,6 +1,7 @@
 ---
 name: refactoring-resistant-tests
 description: Use when writing, modifying, repairing, or reviewing automated tests of any kind, including unit, component, API, integration, and end-to-end tests. Also use when a feature needs coverage or tests broke after a refactor. Applies to Vitest, Jest, pytest, Testing Library, Playwright, SQLite fixtures, connector and parser tests, deployment scripts, selectors, assertions, fixtures, and mocking decisions.
+license: MIT
 ---
 
 # Refactoring-Resistant Tests

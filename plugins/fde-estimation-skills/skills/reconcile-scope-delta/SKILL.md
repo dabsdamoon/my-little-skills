@@ -1,6 +1,7 @@
 ---
 name: reconcile-scope-delta
 description: Reconcile customer outcomes, field discoveries, as-built implementation evidence, and estimation roles into a traceable scope delta with independent replacement-value, remaining-work, and change-adjustment allocations. Use when a user needs to distinguish original scope, necessary derived work, customer-validated discoveries, supplier-initiated work, future options, and unresolved items before generating an estimate or negotiating a change.
+license: MIT
 ---
 
 # Reconcile Scope Delta

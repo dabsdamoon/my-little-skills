@@ -1,6 +1,7 @@
 ---
 name: analytique
 description: Critique an idea, opinion, plan, or claim the user puts forward. Use when the user asks to criticize it, poke holes in it, challenge its assumptions, check whether it holds up, or judge its feasibility. Not for code review, debugging, editing a document's wording, or implementation planning.
+license: MIT
 ---
 
 # Analytique

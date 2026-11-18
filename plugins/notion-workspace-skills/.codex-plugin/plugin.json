@@ -1,7 +1,8 @@
 {
   "name": "notion-workspace-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Notion workspace design and migration workflows for root-owned databases, roadmaps, task boards, approvals, and role-aware operational views",
+  "license": "MIT",
   "author": {
     "name": "dabsdamoon"
   },

@@ -1,6 +1,7 @@
 ---
 name: dual-track-pr-creator
 description: Create evidence-aware pull request bodies for Dual-Track product work by classifying a change as Discovery/prototype, Delivery/TDD, or a justified combined PR, then preserving the correct evidence gate, review question, and engineering risk analysis. Use when asked to write, review, or open a PR for a prototype, product experiment, discovery handoff, Dual-Track Agile slice, TDD delivery, or any change where customer learning must not be confused with engineering completion.
+license: MIT
 ---
 
 # Dual-Track PR Creator
