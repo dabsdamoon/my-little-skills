@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:e86b6d104cd8b4dc446567e86e8e604506e961090ca1a69c3e148319ba837c1d",
+  "pageVersion": "sha256:0fa58012ef220e0c9ebeef88ddc9f1b9d2bc1e63f3bfdb0859d28413ff0e5c4c",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -8,7 +8,7 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
         }
       ]
     },
@@ -18,7 +18,7 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009"
+          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
         }
       ]
     },
@@ -28,7 +28,7 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/SKILL.md",
-          "version": "repo-file-v1:sha256:e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e"
+          "version": "repo-file-v1:sha256:c1a17ca3d95e0f230f418048396bb4895639022863cb1105abc9442d475f3346"
         }
       ]
     },
@@ -68,13 +68,33 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/SKILL.md",
-          "version": "repo-file-v1:sha256:e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e"
+          "version": "repo-file-v1:sha256:c1a17ca3d95e0f230f418048396bb4895639022863cb1105abc9442d475f3346"
+        }
+      ]
+    },
+    {
+      "id": "claim_5f32879389934db0ae7d01afe3d53c78",
+      "statement": "visual-explainer is bundled in design-skills for Claude Code and Codex, and its upstream record pins v0.15.0 with original MIT notices.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
+        }
+      ]
+    },
+    {
+      "id": "claim_aa8ef856237a498dbf7c32e8f3b857b2",
+      "statement": "Maintainer-authored skills listed in LICENSING.md are MIT licensed, while imported skills and assets retain their own licenses and attribution.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-17T10:23:54.771Z"
+    "at": "2026-11-18T05:46:11.671Z"
   }
 }

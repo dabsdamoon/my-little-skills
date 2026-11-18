@@ -5,7 +5,7 @@ description: What my-little-skills provides and how the product-context wiki wor
 tags: [product, skills, product-context]
 verified:
   - by: openwiki/0.9.0
-    at: 2026-11-17T10:23:54.771Z
+    at: 2026-11-18T05:46:11.671Z
 sources:
   - id: openwiki-source-e806ba82c1dc93b631154825
     resource: repo://plugins/product-context-skills/README.md
@@ -15,7 +15,7 @@ sources:
     resource: repo://skills/product-context/references/subscription-wiki.md
   - id: openwiki-source-901fc0d98522e338a3c22bbb
     resource: repo://skills/product-context/SKILL.md
-generated: { by: "claude-code", at: "2026-11-17T10:23:54.771Z" }
+generated: { by: "claude-code", at: "2026-11-18T05:46:11.671Z" }
 ---
 
 # Quickstart
@@ -29,6 +29,11 @@ my-little-skills is a curated Agent Skills and plugin marketplace for Codex/Open
 - Claude Code: `/plugin marketplace add dabsdamoon/my-little-skills`, then `/plugin install <plugin-name>@my-little-skills`.
 - Codex: `codex plugin marketplace add dabsdamoon/my-little-skills --ref main`, then `codex plugin add <plugin>@my-little-skills`.
 - `pr-creator` is distributed only through `developer-workflow-skills`; `humanize-korean` requires explicitly installing `writing-skills`.
+
+## Visual explainer and licensing
+
+- `visual-explainer` is bundled in `design-skills` for Claude Code and Codex. It turns concepts, flows, plans and changes into HTML figures; invoke `/design-skills:visual-explainer` in Claude Code or `$visual-explainer` in Codex. Its upstream record pins v0.15.0 and keeps the original MIT notices. Basic rendering needs Node.js.
+- Maintainer-authored skills listed in `LICENSING.md` are MIT licensed with standalone license files. Imported skills and assets keep their own licenses and attribution.
 
 ## Product-context harness
 
