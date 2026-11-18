@@ -1,6 +1,7 @@
 ---
 name: subagent-creator
 description: Creates Claude Code subagents (.claude/agents/*.md) and matching Codex custom agents (.codex/agents/*.toml) grounded in the current repository. Use when asked to create, add, or design a subagent, custom agent, or specialized agent such as a reviewer, test runner, or researcher with limited tools. Checks the existing agent roster for duplicates before writing.
+license: MIT
 ---
 
 # Subagent Creator

@@ -1,6 +1,7 @@
 ---
 name: experiment-loop
 description: Autonomous keep/discard experiment iteration against a single machine-readable metric with a fixed per-run budget. Use when iterating on any experiment whose script prints its metric — model training, benchmark tuning, optimizer comparisons.
+license: MIT
 ---
 
 # Experiment loop

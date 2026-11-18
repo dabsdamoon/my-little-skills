@@ -1,6 +1,7 @@
 ---
 name: product-context
 description: Use when installing or diagnosing product-context, preparing a PR for a product with wiki automation, checking whether subscription wiki setup is complete, or when specifications, decisions, implementation evidence, or handoff documents may be stale.
+license: MIT
 ---
 
 # Product Context

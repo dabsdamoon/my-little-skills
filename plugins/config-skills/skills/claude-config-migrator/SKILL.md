@@ -7,6 +7,7 @@ description: >
   Claude config", "copy skills from repo X to repo Y", "transfer Claude setup between projects",
   "import Claude rules from another repo", or "set up this repo with my Claude config from
   another project". Handles discovery, relevance analysis, adaptation, and conflict resolution.
+license: MIT
 ---
 
 # Claude Config Migrator

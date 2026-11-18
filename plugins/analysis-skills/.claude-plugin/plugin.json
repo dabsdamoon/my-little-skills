@@ -1,7 +1,8 @@
 {
   "name": "analysis-skills",
   "description": "Critical thinking, evidence-backed decision reports, business scenario analysis, health statistics evidence reports, and context-preserving video Shorts selection",
-  "version": "1.4.1",
+  "version": "1.4.2",
+  "license": "MIT",
   "author": {
     "name": "dabsdamoon"
   }

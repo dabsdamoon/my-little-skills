@@ -4,6 +4,20 @@ THE FOLLOWING SETS FORTH ATTRIBUTION NOTICES FOR THIRD PARTY SOFTWARE THAT MAY B
 
 ---
 
+## visual-explainer, Pele, and Lucide
+
+`visual-explainer` v0.15.0 is imported from
+https://github.com/nicobailon/visual-explainer at revision
+`9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad`.
+
+- Nico Bailon's MIT notice is reproduced unchanged at
+  `skills/visual-explainer/LICENSE` and in the `design-skills` distribution.
+- The bundled Pele MIT notice (kepano) and Lucide ISC icon notice are preserved
+  together in `skills/visual-explainer/kit/vendor/PELE-LICENSE` and its mirror.
+- Local integration and file hashes are recorded in `UPSTREAM.md` and
+  `UPSTREAM-FILES.json` alongside each distributed skill.
+
+
 ## **BSD 2-Clause License**
 
 The following components are licensed under BSD 2-Clause License reproduced below:

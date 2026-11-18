@@ -1,6 +1,7 @@
 ---
 name: debugging-retrospective
 description: Generate educational debugging retrospectives that summarize debugging sessions, analyze the problem-solving process, and extract lessons learned. Use when the user asks to summarize a debugging session, create a debugging postmortem, document what was learned from debugging, write a debugging retrospective, or analyze a debugging process for educational purposes.
+license: MIT
 ---
 
 # Debugging Retrospective

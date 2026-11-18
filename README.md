@@ -198,7 +198,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | Plugin | Skills | Description |
 |--------|--------|-------------|
 | **document-skills** | xlsx, docx, pptx, pdf | Create, read, edit spreadsheets, Word docs, presentations, and PDFs |
-| **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder | Frontend UI, generative art, visual design, and brand styling |
+| **design-skills** | frontend-design, algorithmic-art, canvas-design, brand-guidelines, theme-factory, slack-gif-creator, web-artifacts-builder, visual-explainer | Frontend UI, visual explanations and diagrams, generative art, visual design, and brand styling |
 | **character-production-skills** | layered-character-production | Project MagicGirlSquad character continuity, layered rigs, costume damage, expressions, and playable review |
 | **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, dual-track-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, database-migrations, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **analysis-skills** | analytique, building-decision-reports, building-health-evidence-reports, selecting-video-shorts | Critical analysis, evidence-backed business decision reports, scenario modeling, health statistics evidence packs, and context-preserving Shorts selection |
@@ -213,6 +213,25 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **academy-guide** | academy-guide | Recommends Claude Academy courses, tutorials, and use cases when users ask how to use Claude |
 | **discernment-nudge** | discernment-nudge | Appends two or three follow-up questions after a substantive answer to help check facts, reasoning, and missing context |
 | **translation-skills** | translate-book | Translate entire books (PDF/DOCX/EPUB) into any language using parallel sub-agents |
+
+## Visual explanations
+
+`visual-explainer` turns concepts, system flows, plans, and before/after changes
+into HTML figures with short captions. It is bundled in `design-skills` for
+Claude Code and Codex. Ask for `$visual-explainer` in Codex or
+`/design-skills:visual-explainer` in Claude Code, for example: "Explain how the
+spec, implementation, PR, and wiki connect using a diagram."
+
+Canonical source: [skills/visual-explainer](skills/visual-explainer/SKILL.md).
+The [upstream record](skills/visual-explainer/UPSTREAM.md) pins v0.15.0 and keeps
+the original MIT and bundled library notices. Basic rendering needs Node.js;
+the optional MCP and export helpers are not enabled by importing the skill.
+
+## Licensing
+
+Maintainer-authored skills listed in [LICENSING.md](LICENSING.md) are MIT licensed
+and include standalone license files. Imported skills and assets retain their
+own licenses and attribution, including Anthropic's document-skill terms.
 
 ## What's Included from Upstream
 

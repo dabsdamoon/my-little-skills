@@ -1,6 +1,7 @@
 ---
 name: update-houmy-notes
 description: Write concise update notes to docs/UPDATE.md in the Houmy repository. Use when code changes are complete and need to be documented as release notes. Triggers on "update notes", "write update", "document changes", or after implementing features/fixes in the Houmy repo. IMPORTANT - this skill must be delegated to a sonnet-model Task subagent for cost efficiency.
+license: MIT
 ---
 
 # Update Houmy Notes

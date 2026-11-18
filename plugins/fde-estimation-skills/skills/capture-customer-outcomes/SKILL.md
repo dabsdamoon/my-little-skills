@@ -1,6 +1,7 @@
 ---
 name: capture-customer-outcomes
 description: Capture a traceable customer outcome and contract baseline from naive requirements, emails, messages, interviews, proposals, statements of work, and contracts. Use when a user needs to preserve what a customer originally asked for, distinguish requested outcomes from detailed solution assumptions, reconstruct initial included and excluded scope, or prepare the first canonical input for an FDE estimate or change-scope analysis.
+license: MIT
 ---
 
 # Capture Customer Outcomes

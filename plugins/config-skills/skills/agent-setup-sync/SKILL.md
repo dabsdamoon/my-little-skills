@@ -1,6 +1,7 @@
 ---
 name: agent-setup-sync
 description: Keeps Claude Code and Codex skills and plugins the same on every machine by recording decisions in the dotfiles baseline (agents/baseline.json) and applying them with agent-sync. Use when asked to turn a skill or plugin on or off for good, set up agents on a new machine, sync or audit the agent setup, clean up duplicate or stale skills, or find out why a skill is not being picked up. Not for writing a new skill (skill-creator) or moving one repository's .claude config to another (claude-config-migrator).
+license: MIT
 ---
 
 # Agent Setup Sync

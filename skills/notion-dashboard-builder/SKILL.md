@@ -1,6 +1,7 @@
 ---
 name: notion-dashboard-builder
 description: Build or reorganize operational Notion pages by creating real databases directly under a requested root page, migrating or classifying records, and adding situation-appropriate timeline, board, calendar, and approval views. Use this skill whenever a user asks for a Notion roadmap, project hub, task board, operating timeline, approval tracker, role/area-filtered dashboard, cleaner top-level display, or replacement of linked database views with independently owned databases—even if they only say the current Notion page is cluttered or hard to navigate.
+license: MIT
 ---
 
 # Notion Dashboard Builder

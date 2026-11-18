@@ -1,6 +1,7 @@
 ---
 name: document-field-discovery
 description: Document Forward Deployed Engineering field discoveries, observed workflows, data constraints, inferred needs, prototypes, solution alternatives, decisions, and customer validation. Use when a user needs to turn site notes, interviews, data profiling, demos, or implementation-time learning into a defensible field-discovery and solution-definition record without misrepresenting FDE inference as an original customer request.
+license: MIT
 ---
 
 # Document Field Discovery

@@ -1,6 +1,7 @@
 ---
 name: generate-estimate-package
 description: Generate and verify an evidence-backed FDE estimate package from finalized customer baseline, field discovery, as-built evidence, estimation policy, and scope traceability artifacts. Use when a user asks for a budgetary estimate, 개산견적서, basis of estimate, 견적산정근거서, replacement valuation, remaining-work estimate, additional-work adjustment request, or a consistent Markdown, DOCX, and PDF estimate family.
+license: MIT
 ---
 
 # Generate Estimate Package

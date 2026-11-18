@@ -1,7 +1,7 @@
 ---
 name: resume-formatter
 description: This skill should be used when users request reformatting of a resume to match a specific company template or format. It extracts content from source resumes and maps them to target template structures while preserving content quality. Useful for headhunters, recruiting companies, and applicants who need to fit their resume into company-specific formats.
-license: Complete terms in LICENSE.txt
+license: MIT
 ---
 
 # Resume Formatter

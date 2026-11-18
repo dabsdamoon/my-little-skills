@@ -1,6 +1,7 @@
 ---
 name: wikify-raw
 description: Ingest raw sources from the user's Obsidian LLM-Wiki vault into generated wiki pages. Use when the user asks to wikify, ingest, process, connect, or convert raw/inbox or raw/sources documents into source summaries, entities, concepts, syntheses, index updates, and log entries.
+license: MIT
 ---
 
 # Wikify Raw

@@ -1,6 +1,7 @@
 ---
 name: gcloud-direnv-setup
 description: Sets up per-directory Google Cloud credentials with gcloud configurations and direnv .envrc files, preferring user Application Default Credentials, then service-account impersonation, with key files only as a last resort. Use when the user mentions gcloud, direnv, .envrc, ADC, GOOGLE_APPLICATION_CREDENTIALS, GOOGLE_CLOUD_PROJECT, quota-project warnings, switching GCP projects or Google accounts per directory, org policies that block service account keys, or GCP auth that works in the terminal but not in Claude Code or Codex.
+license: MIT
 ---
 
 # GCloud + Direnv Setup

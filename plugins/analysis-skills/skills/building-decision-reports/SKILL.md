@@ -1,6 +1,7 @@
 ---
 name: building-decision-reports
 description: Create or revise durable Markdown business decision reports — 사업성, 고객군, 매출모델 — that turn repository data, web research, and business assumptions into executive-ready analysis with explicit evidence states, scenario math, and labeled SVG charts. Use when the user asks for such a decision report, or to improve the conclusions or charts of one. Not for other reports (status, work, release or research notes), a chat-only critique, or raw health-statistics collection.
+license: MIT
 ---
 
 # Building Decision Reports

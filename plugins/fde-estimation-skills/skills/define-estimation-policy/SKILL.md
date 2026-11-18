@@ -1,6 +1,7 @@
 ---
 name: define-estimation-policy
 description: Interactively define a reproducible software estimation policy with user-reviewed job families and entry, junior, or senior staffing; KOSA or level-specific web rate evidence; effort units; overhead; technical fee; profit; risk; discount; tax; rounding; confidence; and validity. Use when a user needs the staffing, pricing, and arithmetic rules for an FDE budgetary estimate, basis of estimate, replacement valuation, remaining-work quote, or change-adjustment proposal.
+license: MIT
 ---
 
 # Define Estimation Policy

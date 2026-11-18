@@ -1,6 +1,7 @@
 ---
 name: experiment-diagnosis
 description: Diagnose a running or finished experiment and decide the next move — continue, switch phase, stop, or pivot — from the metric trajectory, its noise floor, and the method's known ceiling. Use when asking "how's it going / should I keep going or change approach?" about a training run or experiment series.
+license: MIT
 ---
 
 # Experiment diagnosis

@@ -1,7 +1,7 @@
 ---
 name: deploy-check
 description: Pre-merge production safety analysis. Scans git diff for destructive changes, breaking API contracts, missing migrations, environment dependencies, and rollback risks before deploying to production.
-license: Complete terms in LICENSE.txt
+license: MIT
 ---
 
 # Deploy Check — Pre-Merge Production Safety Analysis

@@ -1,7 +1,7 @@
 ---
 name: houmlike-design
 description: Create web UI, operator consoles, landing pages, and design artifacts for Houm. Applies Houm's brand identity, design tokens, Korean-first typography, and accessibility floor. Use when designing or building any visual or interactive surface for Houm — customer-facing product, internal tooling, or print and PDF collateral.
-license: Complete terms in LICENSE.txt
+license: MIT
 ---
 
 # Houmlike Design

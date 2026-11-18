@@ -1,6 +1,7 @@
 ---
 name: collect-as-built-evidence
 description: Collect a bounded, read-only as-built evidence record from a Git repository and related implementation artifacts. Use when a user needs to inventory delivered or remaining product scope, connect code, tests, deployment, architecture, and operating documents to customer outcomes and FDE decisions, or prepare implementation evidence for a scope delta, budgetary estimate, work valuation, or change-adjustment discussion.
+license: MIT
 ---
 
 # Collect As-Built Evidence

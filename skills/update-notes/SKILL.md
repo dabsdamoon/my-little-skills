@@ -1,6 +1,7 @@
 ---
 name: update-notes
 description: "Write concise project update notes, release notes, or changelog entries after code or documentation changes. Use when the user asks to summarize recent changes, document completed work, update UPDATE.md, CHANGELOG.md, or release notes, or create a project-facing change summary."
+license: MIT
 ---
 
 # Update Notes

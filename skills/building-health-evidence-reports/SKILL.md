@@ -1,6 +1,7 @@
 ---
 name: building-health-evidence-reports
 description: Use when someone asks for 보건의료 통계 or 근거자료 as a deliverable — 제왕절개율·분만·수술·질병·진료 통계, 공식 지표, a health topic's latest data or overseas cases and policies, or an evidence pack on a health topic. Triggers include "X율 통계청 자료 좀", "국내외 근거자료 필요합니다", "해외는 어떻게 하나요" about a health topic, 심평원·건보공단·KOSIS·OECD 자료 요청, and refreshing a prior health evidence pack. Not for writing or checking lecture scripts, narration, or translations; a project's own evidence rules (its CLAUDE.md) take precedence over this skill.
+license: MIT
 ---
 
 # Building Health Evidence Reports

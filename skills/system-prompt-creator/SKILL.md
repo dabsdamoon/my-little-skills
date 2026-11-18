@@ -1,6 +1,7 @@
 ---
 name: system-prompt-creator
 description: Guide for writing effective system prompts (system messages/instructions) that are reliable, steerable, secure, and maintainable. Use this skill when asked to create a system prompt, write system instructions, design an LLM persona, or set up agent behavior rules. The skill follows industry best practices from OpenAI, Anthropic, Google, and OWASP security guidelines.
+license: MIT
 ---
 
 # System Prompt Creator

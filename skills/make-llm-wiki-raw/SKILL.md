@@ -1,6 +1,7 @@
 ---
 name: make-llm-wiki-raw
 description: Create raw source notes for the user's Obsidian LLM-Wiki vault from pasted text, URLs, local files, PDFs, docs, screenshots, meeting notes, or repository artifacts. Use when the user asks to capture, add, save, stage, or make something raw for LLM-Wiki before wikification.
+license: MIT
 ---
 
 # Make LLM Wiki Raw
