@@ -5,7 +5,7 @@ description: What my-little-skills provides and how the product-context wiki wor
 tags: [product, skills, product-context]
 verified:
   - by: openwiki/0.9.0
-    at: 2026-11-17T10:23:54.771Z
+    at: 2026-11-18T05:14:21.062Z
 sources:
   - id: openwiki-source-e806ba82c1dc93b631154825
     resource: repo://plugins/product-context-skills/README.md

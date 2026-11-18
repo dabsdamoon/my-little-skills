@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "product": "my-little-skills-product-context",
-  "snapshot": "0054a7ed1cda7c78b0f3150d5eddff289734da988f2578e04fc932e1b4e6ec87",
+  "snapshot": "0816224eaf5e426573b4a3d1eabc62494a9b07b5a549761dc0a8dcaf83f96fe3",
   "files": {
-    "README.md": "8229b02348364efabb9b8e8da89bc65da3f965af74849f28f57b24108d638009",
+    "README.md": "3781f0e321a0576b2e624265516bc17201ebe231caf6bfbc57d77a2a53ac509c",
     "plugins/product-context-skills/README.md": "68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9",
     "skills/product-context/SKILL.md": "e342f05b42a9ef2a2ff6263ecf41e6c572825b99f3a23b54d93a76bfa833b89e",
     "skills/product-context/references/format.md": "f7be0fd4922c62b3a5af4edf6a2403fa2fea6049255826f612ec0beca3158ffa",
@@ -22,7 +22,7 @@
   },
   "questions": [],
   "actor": "agent:claude",
-  "note": "Updated quickstart wiki page to reflect version 0.4.1 (plugin README and runtime install path). No source changes.",
-  "recorded_at": "2026-11-17T10:24:11.257389+00:00",
-  "git_head": "159658bb1d151f4c440319d466a1c7cb2c912832"
+  "note": "Rechecked the two stale quickstart claims against README.md (marketplace scope, pr-creator and humanize-korean installation). Both still match, so I confirmed them without changing the page. No source, policy or approval changes.",
+  "recorded_at": "2026-11-18T05:14:36.729309+00:00",
+  "git_head": "cc30eda1e22bc68aeba1f0e8e5b5d502a03b6d90"
 }
