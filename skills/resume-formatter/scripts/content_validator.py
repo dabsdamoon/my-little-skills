@@ -262,7 +262,7 @@ class ContentValidator:
                     text = self.target_doc.paragraphs[j].text.strip()
 
                     # Look for date range patterns
-                    # Format: 2023.07~Present	Hudson AI / AI Researcher/Engineer
+                    # Format: 2023.07~Present	Example AI / AI Researcher/Engineer
                     match = re.search(r'(\d{4}\.\d{2})\s*[~-]\s*(Present|현재|\d{4}\.\d{2})\s+(.+)', text)
                     if match:
                         start_str = match.group(1)

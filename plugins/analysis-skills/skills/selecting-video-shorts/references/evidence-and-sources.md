@@ -20,7 +20,7 @@
 
 ## 조사 시작점
 
-아래는 2026년 10월 20일의 발췌 작업에서 사용한 출처다. 다음 작업에서는 필요한 자료만
+아래는 플랫폼 기능과 인터뷰 발췌를 조사할 때의 시작점이다. 작업에 필요한 자료만
 읽고, 현재 기능이나 규칙을 말하려면 그때 다시 확인한다. 플랫폼과 대상이 달라지면 해당
 플랫폼의 공식 자료로 바꾼다.
 
@@ -58,7 +58,7 @@ ACM DIS 2024. [저자 공개본](https://arxiv.org/html/2311.05867v2)의 3절과
 핵심이면 임상 지침과 인용 연구의 대상·결과·조건을 확인한다. 모든 영상에 의료 자료를
 붙이거나, 하나의 자료가 원본 전체를 검증한 것처럼 쓰지 않는다.
 
-이전 사례에서 사용한 자료는 [WHO 여성 중심 분만 돌봄 지침](https://www.who.int/publications/i/item/9789241550215),
+의료 주장을 검토할 때 참고할 수 있는 자료는 [WHO 여성 중심 분만 돌봄 지침](https://www.who.int/publications/i/item/9789241550215),
 [WHO 신생아 건강 권고](https://cdn.who.int/media/docs/default-source/sexual-health/stillbirth/who-mca-17-07-eng.pdf),
 [ACOG 분만 관리 지침](https://www.acog.org/clinical/clinical-guidance/clinical-practice-guideline/articles/2024/01/first-and-second-stage-labor-management)이다.
 새 작업에서 임상적 결론을 내릴 때는 적절한 최신판과 실제 관련 구절을 다시 확인한다.

@@ -1,5 +1,7 @@
 # Resume Formatter - Installation & Troubleshooting
 
+Examples use fictional candidates, contact details, and organizations.
+
 ## Installation
 
 ### Option 1: Upload to Claude Code (Recommended)
@@ -48,22 +50,20 @@ This caused: `Zip file contains path with invalid characters`
 ✓ SKILL.md - Main skill instructions
 ✓ README.md - User documentation
 ✓ LICENSE.txt - MIT License
-✓ PLAN.md - Implementation plan
 ✓ EDGE_CASES.md - Edge case documentation
-✓ USAGE_EXAMPLE.md - Usage examples
 ✓ references/ - 3 reference guides
 ✓ scripts/ - 3 Python scripts
 ✓ tests/README.md - Placeholder for test files
 ```
 
-**File Size:** 149 KB (clean, no binary files)
+The package includes instructions, reference guides, and scripts; keep real resumes outside it.
 
 ## Using Your Test Files
 
-Your original test files are still available locally at:
+Keep your own test files locally, outside the shared skill package. For example:
 ```
-/Users/dabsdamoon/projects/anthropic-skills/resume-formatter/tests/format_before/
-/Users/dabsdamoon/projects/anthropic-skills/resume-formatter/tests/format_to/
+~/projects/anthropic-skills/resume-formatter/tests/format_before/
+~/projects/anthropic-skills/resume-formatter/tests/format_to/
 ```
 
 To use them with the skill:
@@ -155,17 +155,15 @@ After installation, verify the skill works:
 ## Support
 
 If issues persist:
-1. Check `resume-formatter/USAGE_EXAMPLE.md` for detailed examples
-2. Review `resume-formatter/PLAN.md` for implementation details
-3. Examine `resume-formatter/EDGE_CASES.md` for known limitations
+1. Read `SKILL.md` for the formatting workflow.
+2. Review `references/content_extraction_guide.md` for extraction examples.
+3. Examine `EDGE_CASES.md` for known limitations.
 
 ## Package Details
 
 **Current Version:** 1.0 (2025-11-16)
 
 **Package Contents:**
-- 13 files total
-- 149,311 bytes (146 KB)
 - All ASCII-safe filenames
 - No binary files included
 
@@ -173,7 +171,7 @@ If issues persist:
 ```bash
 # Verify package integrity
 unzip -l resume-formatter.zip
-# Should show 13 files
+# Inspect the contents; do not include real resumes or generated personal records
 ```
 
 ## Next Steps

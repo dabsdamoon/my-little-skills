@@ -1,7 +1,7 @@
 {
   "name": "llm-wiki-skills",
   "description": "LLM-Wiki workflow skills: create raw source notes and wikify raw material into connected Obsidian wiki pages",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "dabsdamoon"
   }

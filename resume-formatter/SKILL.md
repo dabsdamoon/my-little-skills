@@ -6,6 +6,8 @@ license: Complete terms in LICENSE.txt
 
 # Resume Formatter
 
+Examples use fictional candidates, contact details, and organizations.
+
 ## Overview
 
 To reformat resumes from one template to another, use this skill. The skill extracts content from a source resume (applicant's personal format) and intelligently maps it to a target template (company-required format) while preserving all important information.
@@ -318,7 +320,7 @@ After completing the reformatting, provide:
 
 **Example summary:**
 ```
-Reformatted resume for 문다빈 to Meta Search template format.
+Reformatted resume for 예시지원자 to Meta Search template format.
 
 Completeness: 92%
 
@@ -333,7 +335,7 @@ Please review:
 - 병역사항: Military service information not available
 - Contact address: Currently showing old address from source
 
-File: 문다빈_MetaSearch_formatted.docx
+File: 예시지원자_MetaSearch_formatted.docx
 ```
 
 ## Resources
