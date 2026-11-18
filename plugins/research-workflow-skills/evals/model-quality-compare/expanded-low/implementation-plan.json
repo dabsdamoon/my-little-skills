@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "route": "artifact",
+  "created_utc": "2026-11-18T10:03:27.478363+00:00",
+  "models": [
+    "gpt-6.1-sol",
+    "gpt-6.2-sol"
+  ],
+  "trials": 1,
+  "effort": "low",
+  "schedule": [
+    {
+      "index": 1,
+      "model": "gpt-6.1-sol",
+      "trial": 1
+    },
+    {
+      "index": 2,
+      "model": "gpt-6.2-sol",
+      "trial": 1
+    }
+  ],
+  "runner_sha256": "ef67239af1e9f5b8e72329c5ee65a13de2f0250bf097830cfe2ff87ffd1760d1",
+  "helper_sha256": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83",
+  "hashes": {
+    "prompt.txt": "45b6ff8d68a1ed62f6de6e1fcf859afcf15568233bada3ce43d74ee1c2a519d0",
+    "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+    "grading-spec.json": "0726e3a5c54438ae8a9d4125f367a36cefcf8372fa76ef9e51591bf5f1da2e93",
+    "starter/ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+    "starter/ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+    "starter/ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+    "starter/ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+    "starter/tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+  },
+  "limitations": [
+    "native Codex workspace-write sandbox; host isolation is not a container",
+    "task-specific objective checks and subjective rubric must be reported separately",
+    "model IDs requested; immutable backend snapshot not independently verified",
+    "CLI-launch budget is not a hard token/turn/time budget"
+  ]
+}

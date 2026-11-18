@@ -236,6 +236,13 @@ The default GPT pilot uses four CLI calls with 24 original text cases and object
 grading. It records category scores, repeatability, token usage and wall time, and
 produces an HTML report. It never silently switches to API billing.
 
+For implementation, structure and research outcomes, use its
+[artifact workflow](skills/model-quality-compare/references/artifact-workflow.md):
+independent writable starter copies, actual code/data outputs, frozen executable
+checks and separate blinded review. The
+[expanded low-effort evaluation](plugins/research-workflow-skills/evals/model-quality-compare/expanded-low/EVALUATION.md)
+preserves both models' code, research reports, dataset notices and numerical checks.
+
 Read the [skill](skills/model-quality-compare/SKILL.md),
 [metric guide](skills/model-quality-compare/references/metrics.md), and
 [GPT 6.1/6.2 pilot evidence](plugins/research-workflow-skills/evals/model-quality-compare/EVALUATION.md).

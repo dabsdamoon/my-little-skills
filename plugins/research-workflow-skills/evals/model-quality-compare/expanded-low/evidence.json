@@ -1,0 +1,457 @@
+{
+  "created_utc": "2026-11-18T10:00:15.545267+00:00",
+  "models": [
+    "gpt-6.1-sol",
+    "gpt-6.2-sol"
+  ],
+  "effort": "low",
+  "contestant_cli_launches": 8,
+  "sources": {
+    "gpqa": {
+      "repo": "https://github.com/idavidrein/gpqa",
+      "revision": "56686c06f5e19865c153de0fdb11be3890014df7",
+      "license": "CC-BY-4.0 dataset / MIT code"
+    },
+    "research": {
+      "repo": "https://github.com/allenai/discoverybench",
+      "revision": "c31fcf011e070f021a5f5b906896d0821f6880e8",
+      "license": "ODC-By"
+    }
+  },
+  "tracks": {
+    "gpqa": {
+      "unique_cases": 8,
+      "trials_per_model": 2,
+      "models": {
+        "gpt-6.1-sol": {
+          "accuracy": 1,
+          "macro_accuracy": 1,
+          "categories": {
+            "biology": 1,
+            "chemistry": 1,
+            "physics": 1
+          },
+          "trial_accuracy": [
+            1,
+            1
+          ],
+          "trial_sd": 0.0,
+          "completed_trials": 2,
+          "planned_trials": 2,
+          "unavailable_trials": 0,
+          "format_failures": 0,
+          "answer_stability": 1,
+          "mean_wall_seconds": 26.39,
+          "usage": [
+            {
+              "input_tokens": 7703,
+              "cached_input_tokens": 0,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 668,
+              "reasoning_output_tokens": 613
+            },
+            {
+              "input_tokens": 7703,
+              "cached_input_tokens": 0,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 436,
+              "reasoning_output_tokens": 381
+            }
+          ]
+        },
+        "gpt-6.2-sol": {
+          "accuracy": 1,
+          "macro_accuracy": 1,
+          "categories": {
+            "biology": 1,
+            "chemistry": 1,
+            "physics": 1
+          },
+          "trial_accuracy": [
+            1,
+            1
+          ],
+          "trial_sd": 0.0,
+          "completed_trials": 2,
+          "planned_trials": 2,
+          "unavailable_trials": 0,
+          "format_failures": 0,
+          "answer_stability": 1,
+          "mean_wall_seconds": 14.821,
+          "usage": [
+            {
+              "input_tokens": 7783,
+              "cached_input_tokens": 0,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 295,
+              "reasoning_output_tokens": 215
+            },
+            {
+              "input_tokens": 7785,
+              "cached_input_tokens": 4224,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 245,
+              "reasoning_output_tokens": 165
+            }
+          ]
+        }
+      },
+      "hashes": {
+        "suite.json": "4c0ca3638240e972f5c0c895ae18b9a78174a7fb3a13d409d5d557970516c848",
+        "prompt.txt": "5fb6faedc8161571f94f1709f905a13d2694e9cb5c4e680106e050b492e4fd02",
+        "instructions.txt": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440"
+      },
+      "grader_sha256": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83",
+      "case_results": [
+        {
+          "model": "gpt-6.1-sol",
+          "trial": 1,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "gpt-6.2-sol",
+          "trial": 1,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "gpt-6.2-sol",
+          "trial": 2,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "gpt-6.1-sol",
+          "trial": 2,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "plan_sha256": "e4da7f44421063725ea1cf98e776ef4c3edbe9f8c7f62ac8bc28ef7c89749871",
+      "cli_version": "codex-cli 0.170.0"
+    },
+    "implementation": {
+      "trials_per_model": 1,
+      "runner_sha256_at_launch": "ef67239af1e9f5b8e72329c5ee65a13de2f0250bf097830cfe2ff87ffd1760d1",
+      "input_hashes": {
+        "prompt.txt": "45b6ff8d68a1ed62f6de6e1fcf859afcf15568233bada3ce43d74ee1c2a519d0",
+        "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+        "grading-spec.json": "0726e3a5c54438ae8a9d4125f367a36cefcf8372fa76ef9e51591bf5f1da2e93",
+        "starter/ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+        "starter/ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+        "starter/ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+        "starter/ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+        "starter/tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+      },
+      "runs": [
+        {
+          "model": "gpt-6.1-sol",
+          "trial": 1,
+          "status": "completed",
+          "wall_seconds": 69.581,
+          "usage": {
+            "input_tokens": 43005,
+            "cached_input_tokens": 34304,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2871,
+            "reasoning_output_tokens": 148
+          },
+          "events_sha256": "0b07cba505ae690d4c8e555d26a848d790896b29ae2b7f6cb02beb05d661ebc3",
+          "starter_hashes": {
+            "ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+            "ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+          },
+          "artifacts": {
+            "DESIGN.md": "d8d7ea4724c634b1574d8415ee42615596035e80ddbdfa47a99483a102d6e11a",
+            "ledger/service.py": "60af0b27b25b1fa14e2857ec51a3a7e81b61f29597f01c7075bacac92e7d466e",
+            "ledger/domain.py": "755bde81d9672d8ef56887d1f86252d409713c52d7c185c144651e3b694fef28",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "d1d6b0b95d27faa073d080affe8c023089514d891546ff0e82fdcf13360592ae",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091",
+            "tests/test_contract.py": "36ede5feb6bb2afb22505a2e777a9a088b919bfd18cea05e39e28b8bd872953b"
+          },
+          "shell_commands": 4,
+          "trajectory_review": "Commands inspected; no observed network/external-model/grader/sibling access"
+        },
+        {
+          "model": "gpt-6.2-sol",
+          "trial": 1,
+          "status": "completed",
+          "wall_seconds": 68.558,
+          "usage": {
+            "input_tokens": 41989,
+            "cached_input_tokens": 23168,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2533,
+            "reasoning_output_tokens": 188
+          },
+          "events_sha256": "09984f5284ef6745a8ec767675d161f0ef666e59cf21499fa9fbab8509d92cd9",
+          "starter_hashes": {
+            "ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+            "ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+          },
+          "artifacts": {
+            "DESIGN.md": "4dde0e90a0d5058e776ba348f8d88556b0b128d70ce2cfe89d897749929fcb86",
+            "ledger/service.py": "5b2594cb54a7e9bea3529f5cdb512c8f68497dc9b92db185e5c3e5d07cc43120",
+            "ledger/domain.py": "d8d6b2db6416ad8cf6ece18cfddec1d382f8ceacdbbb745172a2834ac23095d7",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "0e17bacbf78c66d62ac85cc19d6908af26eed39832746b54965dc49eaa2b4ea3",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091",
+            "tests/test_ledger.py": "3bb5fb85af089f512fd757fafbed5764a8327d5e2181cb61a77034f12e7536cb"
+          },
+          "shell_commands": 4,
+          "trajectory_review": "Commands inspected; no observed network/external-model/grader/sibling access"
+        }
+      ],
+      "plan_sha256": "436cf4c0514c5184fbff7e825f27c37999924ba6bb31b51afeb7b9ce878a25d8",
+      "cli_version": "codex-cli 0.170.0",
+      "helper_sha256_at_launch": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83"
+    },
+    "research": {
+      "trials_per_model": 1,
+      "runner_sha256_at_launch": "ef67239af1e9f5b8e72329c5ee65a13de2f0250bf097830cfe2ff87ffd1760d1",
+      "input_hashes": {
+        "prompt.txt": "4b1a1b67466814f5059a249ddd894b547dbb21ff21473566bab4fe17af114472",
+        "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+        "grading-spec.json": "c67a660b88bcf8a0f35e289b29a9aceeb74e120f1aa80ef68f22ee9f8fe463d8",
+        "starter/metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+        "starter/data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+        "starter/SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+        "starter/analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+      },
+      "runs": [
+        {
+          "model": "gpt-6.1-sol",
+          "trial": 1,
+          "status": "completed",
+          "wall_seconds": 78.643,
+          "usage": {
+            "input_tokens": 73452,
+            "cached_input_tokens": 48768,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 3095,
+            "reasoning_output_tokens": 64
+          },
+          "events_sha256": "a63342847065fe19503cc48b59775c50f2cb2500d4ce39d114394ffbb55dbbcf",
+          "starter_hashes": {
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+          },
+          "artifacts": {
+            "report.md": "8a633e4601751a1adc1b1621172629c8e1587ed09c118b2c165766ddebcc50c6",
+            "results.json": "d9fa890cb4d83bcd4f184ed7092014700a845df31f096a629f18e26a8178537a",
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "ee9a9846ffd8b88191b32c5c902342384d7a89a2de2d26b3f899e5612596388f"
+          },
+          "shell_commands": 5,
+          "trajectory_review": "Commands inspected; no observed network/external-model/grader/sibling access"
+        },
+        {
+          "model": "gpt-6.2-sol",
+          "trial": 1,
+          "status": "completed",
+          "wall_seconds": 87.569,
+          "usage": {
+            "input_tokens": 62325,
+            "cached_input_tokens": 31616,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2789,
+            "reasoning_output_tokens": 247
+          },
+          "events_sha256": "a4db73f1242b01e0324a34af9039d685ebf5cdadb99e1e56f83dffc7b25dee60",
+          "starter_hashes": {
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+          },
+          "artifacts": {
+            "report.md": "5672e9bfbc3ded527d3371d8ca8d77c5204bf167cdc274b0a378f608d31226f6",
+            "results.json": "384a48f784baffce714b3ba4f775f0d673096c300ee7df2964363ec4648e963d",
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "90f2212d19cb52c13eeae5707f20ab4e96c3ef921e9a714256b176235c53d389"
+          },
+          "shell_commands": 4,
+          "trajectory_review": "Commands inspected; no observed network/external-model/grader/sibling access"
+        }
+      ],
+      "plan_sha256": "02475ac04aa9bc2f9b3fb145dc8168de8212eff7fbf185faa4dc0c72f0117aa3",
+      "cli_version": "codex-cli 0.170.0",
+      "helper_sha256_at_launch": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83"
+    }
+  },
+  "protocol_sha256": "4e30817c746efbb408557d84fa1539a3efd567b0dfe16e8fc3f5cf98add11aa1"
+}

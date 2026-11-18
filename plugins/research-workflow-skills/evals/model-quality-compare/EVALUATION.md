@@ -77,3 +77,16 @@ score and not the Agents' Last Exam result for Astra.
 A harder follow-up needs a new frozen suite/experiment and a separately counted
 call budget. Retain this ceiling result; do not change answers or selectively
 rerun models to create a winner.
+
+## Follow-ups
+
+The same 24-case suite was run at `low`, two trials/model. Both again scored
+24/24 twice. Mean wall times were 14.046 s (6.1) and 12.985 s (6.2), and mean
+reported output tokens were 455.5 and 404.5. Some low runs reused cached input;
+this historical comparison does not isolate effort as the cause of lower time.
+[low-evidence.json](low-evidence.json) preserves settings/usage.
+
+The user then requested harder online questions and actual implementation,
+structure and research outcomes. See the separate
+[expanded low pilot](expanded-low/EVALUATION.md). Its capability tracks remain
+separate from this initial text-only pilot.

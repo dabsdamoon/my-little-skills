@@ -68,6 +68,9 @@ referenced autoresearch README states MIT without a separate root license file.
 - `visual-explainer`: MIT, copyright Nico Bailon. Its bundled Pele code is MIT
   and the Lucide icon notice is ISC. Preserve `LICENSE`, `kit/vendor/PELE-LICENSE`,
   and the pinned revision in `UPSTREAM.md` in both distributed copies.
+- `model-quality-compare` evaluation data: GPQA dataset notices retain CC BY 4.0,
+  distinct from GPQA's MIT code notice. Copied DiscoveryBench database material
+  retains ODC-By notices. These benchmark data are not relicensed under MIT.
 - Anthropic skills and local adaptations of them keep their existing notices.
   In particular, `docx`, `pdf`, `pptx`, and `xlsx` carry their own proprietary
   terms. Their licenses and instruction bodies are unchanged by this work.

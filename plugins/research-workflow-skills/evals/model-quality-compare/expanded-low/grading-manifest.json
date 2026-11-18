@@ -1,0 +1,9 @@
+{
+  "frozen_utc": "2026-11-18T10:03:26.481474+00:00",
+  "hashes": {
+    "graders/check_implementation.py": "f675c921a723f8c342ae0b3c8e9bf9c46fcac5aca695a84f4d707f908c6c0ac8",
+    "graders/check_research.py": "b52af165102d3260e32856c4b6ad480578f127bf821ec2666120891ac3559ed4"
+  },
+  "docker_image": "python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b",
+  "prelaunch_correction": "Count failed unittest methods once even when several subtests fail; corrected before artifact contestant launches."
+}

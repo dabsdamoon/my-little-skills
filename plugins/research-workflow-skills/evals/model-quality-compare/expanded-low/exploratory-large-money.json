@@ -1,0 +1,19 @@
+{
+  "status": "post-hoc exploratory observation; not part of frozen 13 acceptance tests",
+  "reason": "identity-blinded structure reviewer raised Python integer-string digit limit",
+  "digits": 5001,
+  "results": [
+    {
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Exceeds the limit (4300 digits) for integer string conversion: value has 5001 digits; use sys.set_int_max_str_digits() to increase the limit",
+      "model": "gpt-6.1-sol"
+    },
+    {
+      "accepted": true,
+      "exact": true,
+      "output_length": 5004,
+      "model": "gpt-6.2-sol"
+    }
+  ]
+}

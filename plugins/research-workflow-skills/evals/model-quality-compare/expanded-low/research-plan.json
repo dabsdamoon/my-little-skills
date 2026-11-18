@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "route": "artifact",
+  "created_utc": "2026-11-18T10:03:27.528646+00:00",
+  "models": [
+    "gpt-6.1-sol",
+    "gpt-6.2-sol"
+  ],
+  "trials": 1,
+  "effort": "low",
+  "schedule": [
+    {
+      "index": 1,
+      "model": "gpt-6.1-sol",
+      "trial": 1
+    },
+    {
+      "index": 2,
+      "model": "gpt-6.2-sol",
+      "trial": 1
+    }
+  ],
+  "runner_sha256": "ef67239af1e9f5b8e72329c5ee65a13de2f0250bf097830cfe2ff87ffd1760d1",
+  "helper_sha256": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83",
+  "hashes": {
+    "prompt.txt": "4b1a1b67466814f5059a249ddd894b547dbb21ff21473566bab4fe17af114472",
+    "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+    "grading-spec.json": "c67a660b88bcf8a0f35e289b29a9aceeb74e120f1aa80ef68f22ee9f8fe463d8",
+    "starter/metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+    "starter/data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+    "starter/SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+    "starter/analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+  },
+  "limitations": [
+    "native Codex workspace-write sandbox; host isolation is not a container",
+    "task-specific objective checks and subjective rubric must be reported separately",
+    "model IDs requested; immutable backend snapshot not independently verified",
+    "CLI-launch budget is not a hard token/turn/time budget"
+  ]
+}

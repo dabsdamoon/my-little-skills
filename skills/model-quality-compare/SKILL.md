@@ -14,11 +14,16 @@ reliability and efficiency separately. A tiny pilot is not a general ranking.
 | Request | Route |
 |---|---|
 | GPT versions available in Codex with ChatGPT login | Subscription pilot below |
+| Code implementation/structure or research-goal completion | [Artifact workflow](references/artifact-workflow.md) |
 | Claude subscription tiers on one product task | [Claude workflow](references/claude-workflow.md) |
 | Named public benchmark or another provider | Official dataset/protocol and an explicitly authorized adapter |
 
 A skill cannot switch its host model. Use an actual model-pinned runner. Verify
 available IDs; never substitute a model or silently change subscription to API billing.
+
+For a general-capability request, declare a coverage matrix. The text pilot alone
+does not measure implementation, architecture or completed research. Include
+outcome-based artifact tracks when requested, and mark remaining dimensions unmeasured.
 
 ## Design
 

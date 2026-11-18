@@ -1,0 +1,33 @@
+Complete a reproducible data-analysis investigation using the provided DiscoveryBench
+World Bank dataset. The original research questions are:
+'In what regions does increased education spending positively impact per capita GDP?'
+'What is the impact of increased education expenditure on per capita GDP in developing countries?'
+
+Inspect data.csv and metadata.json. Answer what these data actually support, even
+if that differs from the wording of those questions. Deliver:
+
+1. analyze.py, runnable as `python3 analyze.py CSV_PATH`, using standard library only.
+   It must compute from the file argument, not hardcode this dataset's answers.
+   Print exactly one JSON object with:
+   {"series":{"income":"NY.GNP.PCAP.KD","education":"NY.ADJ.AEDU.GN.ZS"},
+    "groups":{"COUNTRY_CODE":{"label":"Country Group",
+       "level":{"n":INTEGER,"pearson_r":NUMBER_OR_NULL,"ols_slope":NUMBER_OR_NULL},
+       "difference":{"n":INTEGER,"pearson_r":NUMBER_OR_NULL,"ols_slope":NUMBER_OR_NULL}}}}
+   Include each Country Code with the two specified series. Education is X; income
+   is Y. In level analysis, pair by calendar year and keep only finite numeric values
+   for both series. '..' and blank values are missing. Sort by year, not CSV order.
+   OLS uses an intercept. Differences are (X_t-X_(t-1), Y_t-Y_(t-1)) only when the
+   two paired observations are consecutive calendar years; never bridge a gap.
+   n is the number of pairs in that analysis. If n<2, slope/r are null. If X is
+   constant, slope is null; r is null if X or Y is constant. Keep other finite results.
+2. results.json containing the actual output of `python3 analyze.py data.csv`.
+3. report.md explaining the original questions, what variables/data were actually
+   available, the level and differenced findings with sample counts, the analytical
+   choice, what conclusions are warranted, and limitations/provenance. Distinguish
+   association from causal impact and explain any metadata/data inconsistencies.
+4. At least one useful local check of numerical or missing-data behavior. Record
+   the real command/results in the final message. Keep input CSV and metadata unchanged.
+
+No network, installs, other models, outside directories or hidden graders. Complete
+the analysis files, not just a proposal. This is a small observational-data analysis,
+not a demand for an expensive training run or a definitive causal claim.

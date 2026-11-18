@@ -1,0 +1,5 @@
+# Preserve imported benchmark data/notices byte-for-byte, including CRLF and
+# upstream whitespace, so checkout does not invalidate recorded source hashes.
+**/data.csv -text -whitespace
+**/SOURCE-LICENSE.txt -text -whitespace
+source-notices/discoverybench-LICENSE -text -whitespace
