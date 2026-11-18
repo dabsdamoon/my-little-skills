@@ -1,5 +1,7 @@
 # Resume Formatter Skill
 
+Examples use fictional candidates, contact details, and organizations.
+
 A robust Claude Code skill for reformatting resumes from one template to another while preserving content quality.
 
 ## Overview
@@ -99,8 +101,6 @@ The skill maintains:
 - ✓ Recent experience with full detail
 
 ## Development
-
-**Planning:** See `PLAN.md` for full implementation plan based on skill-creator guidelines.
 
 **Testing:**
 ```bash

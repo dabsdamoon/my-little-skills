@@ -1,5 +1,7 @@
 # Template Field Mapping Guide
 
+Examples use fictional candidates, contact details, and organizations.
+
 This guide provides strategies for mapping extracted resume content to various template structures.
 
 ## Common Template Types
@@ -272,7 +274,7 @@ EDUCATION
 
 **경력사항 (Career Summary)**:
 - One line per job: `[Dates] [Company] / [Department] / [Title]`
-- Example: `2023.07 ~ 재직중 Hudson AI / AI Research / AI Researcher`
+- Example: `2023.07 ~ 재직중 Example AI / AI Research / AI Researcher`
 
 **상세경력사항 (Detailed Experience)**:
 - Full block per job

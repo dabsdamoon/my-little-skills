@@ -102,10 +102,6 @@ description: Select purpose-aware, self-contained Shorts excerpts from long vide
   연결된 인접 단어까지 같은 화자라고 바꾸거나, 화자 결정으로 정밀 발화 시간이
   확정됐다고 간주하지 않는다.
 
-길이 계산과 연결 컷의 실제 예가 필요하면
-[적용 사례](references/worked-example.md)를 읽는다. 사례의 인물·분야·개수·길이는
-방법을 설명하는 예이며 다음 작업의 고정 조건이 아니다.
-
 ## 5. 선택할 수 있는 결과로 전달한다
 
 요청에 맞는 분량의 후보 표를 먼저 제시한다. 후보별로 제목 제안, 원본 구간, 계산 가능한

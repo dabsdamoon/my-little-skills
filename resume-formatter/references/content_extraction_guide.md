@@ -1,5 +1,7 @@
 # Content Extraction Guide
 
+Examples use fictional candidates, contact details, and organizations.
+
 This guide provides detailed strategies for extracting content from diverse resume formats.
 
 ## Multi-Source Extraction Strategy
@@ -547,15 +549,15 @@ Assign confidence to each extracted field:
 ```json
 {
   "personal_info": {
-    "name": {"value": "문다빈", "confidence": 0.95, "source": "header"},
-    "phone": {"value": "010-9860-8431", "confidence": 1.0, "source": "header"},
-    "email": {"value": "dabs.damoon@gmail.com", "confidence": 1.0, "source": "header"},
-    "address": {"value": "서울특별시 서초구", "confidence": 0.8, "source": "body"},
+    "name": {"value": "예시지원자", "confidence": 0.95, "source": "header"},
+    "phone": {"value": "010-XXXX-XXXX", "confidence": 1.0, "source": "header"},
+    "email": {"value": "candidate@example.com", "confidence": 1.0, "source": "header"},
+    "address": {"value": "예시시 예시구", "confidence": 0.8, "source": "body"},
     "photo": {"present": false, "confidence": 1.0}
   },
   "experience": [
     {
-      "company": {"value": "Hudson AI", "confidence": 0.9},
+      "company": {"value": "Example AI", "confidence": 0.9},
       "title": {"value": "AI Researcher/Engineer", "confidence": 0.9},
       "start_date": {"value": "2023.07", "confidence": 1.0},
       "end_date": {"value": "Present", "confidence": 1.0},

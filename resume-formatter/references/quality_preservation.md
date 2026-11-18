@@ -1,5 +1,7 @@
 # Quality Preservation Guide
 
+Examples use fictional candidates, contact details, and organizations.
+
 This guide ensures content quality is maintained or improved during resume reformatting.
 
 ## Core Principles
@@ -201,7 +203,7 @@ Low priority roles: One-line summary or omit
 
 **Full Detail** (for most recent/relevant roles):
 ```
-AI Research Engineer | Hudson AI | 2023.07 - Present
+AI Research Engineer | Example AI | 2023.07 - Present
 • Architected multilingual TTS pipeline reducing inference latency 40%
 • Improved perceptual audio quality (MOS, PESQ) through custom vocoder optimization
 • Built data preprocessing automation handling 50+ languages with IPA phonemization
@@ -383,9 +385,9 @@ Before delivery, confirm:
 
 **Source** (free-form resume, 3 pages):
 ```
-문다빈
+예시지원자
 AI Researcher / Engineer
-Phone: 010-9860-8431 | Email: dabs.damoon@gmail.com
+Phone: 010-XXXX-XXXX | Email: candidate@example.com
 
 기술 스택
 - ML/DL Frameworks: PyTorch, TensorFlow, Scikit-Learn, JAX
@@ -394,7 +396,7 @@ Phone: 010-9860-8431 | Email: dabs.damoon@gmail.com
 - LLM/Agents: LangChain, Claude, Gemini, OpenAI API, RAG systems
 
 경력
-Hudson AI - AI Researcher/Engineer (2023.07 - 현재)
+Example AI - AI Researcher/Engineer (2023.07 - 현재)
 
 [많은 상세 내용... 10+ bullet points per project]
 ```
@@ -404,10 +406,10 @@ Hudson AI - AI Researcher/Engineer (2023.07 - 현재)
 지원분야: AI/ML Engineer
 
 인적사항
-성    명: 문다빈
+성    명: 예시지원자
 생년/성별: 정보 없음
-주    소: 서울특별시 서초구
-연 락 처: 010-9860-8431 / dabs.damoon@gmail.com
+주    소: 예시시 예시구
+연 락 처: 010-XXXX-XXXX / candidate@example.com
 
 핵심역량
 • ML/DL Frameworks (PyTorch, TensorFlow) 활용한 음성 synthesis 모델 개발 경험
@@ -415,10 +417,10 @@ Hudson AI - AI Researcher/Engineer (2023.07 - 현재)
 • LLM/RAG 시스템 개발 및 prompt engineering 전문성
 
 경력사항 (총 1년 6개월)
-2023.07 ~ 재직중    Hudson AI / AI Research / AI Researcher/Engineer
+2023.07 ~ 재직중    Example AI / AI Research / AI Researcher/Engineer
 
 상세경력사항
-2023.07 ~ 재직중 (1년 6개월)        Hudson AI / AI Research / AI Researcher
+2023.07 ~ 재직중 (1년 6개월)        Example AI / AI Research / AI Researcher
 
 [AI/ML 스타트업, 직원수 약 50명]
 

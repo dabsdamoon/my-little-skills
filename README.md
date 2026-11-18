@@ -208,7 +208,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **resume-skills** | resume-formatter, resume-translator, resume-project-summary | Resume formatting, EN/JP/KR/CN translation, portfolio summaries from codebases |
 | **config-skills** | claude-config-migrator, agent-setup-sync, update-notes, update-houmy-notes | Migrate Claude Code config between repos, keep Claude Code and Codex skills identical across machines, write update notes |
 | **llm-wiki-skills** | make-llm-wiki-raw, wikify-raw | Capture raw LLM-Wiki sources and turn them into linked Obsidian wiki pages |
-| **houmy-skills** | houmlike-design, houm-cohort, houm-refactoring | Houm brand and UI design system, operational-document typography, cohort metrics, and systematic codebase refactoring |
+| **houmy-skills** | houmlike-design, houm-refactoring | Houm brand and UI design system, operational-document typography and systematic codebase refactoring |
 | **notion-workspace-skills** | notion-dashboard-builder | Create root-owned Notion databases and organize safe migrations, timelines, boards, approvals, and role-aware views |
 | **academy-guide** | academy-guide | Recommends Claude Academy courses, tutorials, and use cases when users ask how to use Claude |
 | **discernment-nudge** | discernment-nudge | Appends two or three follow-up questions after a substantive answer to help check facts, reasoning, and missing context |
@@ -324,7 +324,7 @@ These skills are original to this marketplace — not available in Anthropic's o
 
 | Skill | What It Does |
 |-------|-------------|
-| **make-llm-wiki-raw** | Creates raw source notes in `/Users/dabsdamoon/LLM-Wiki/LLM-Wiki/raw/inbox` from URLs, files, pasted text, or project artifacts |
+| **make-llm-wiki-raw** | Creates raw source notes in `~/LLM-Wiki/LLM-Wiki/raw/inbox` from URLs, files, pasted text, or project artifacts |
 | **wikify-raw** | Ingests raw LLM-Wiki sources into `wiki/sources`, `wiki/entities`, `wiki/concepts`, `wiki/syntheses`, `wiki/index.md`, and `wiki/log.md` |
 
 ### Notion Workspace
@@ -338,7 +338,6 @@ These skills are original to this marketplace — not available in Anthropic's o
 | Skill | What It Does |
 |-------|-------------|
 | **houmlike-design** | Houm design system: tokens with measured contrast, Korean-first typography, WCAG 2.2 / KWCAG 2.2 floor, React + Tailwind v4 scaffolding |
-| **houm-cohort** | Derives obstetric cohort metrics from the Smart-NC mirror — delivery mode, VBAC, perineal trauma, intervention rates — with the denominator rules and coding caveats that decide whether a number is defensible |
 | **houm-refactoring** | Systematic refactoring for Houmy's Python/FastAPI + React/Vite codebase — replaces implicit/magic patterns with explicit, grep-able code |
 | **update-houmy-notes** | Writes update notes specific to the Houmy repository |
 

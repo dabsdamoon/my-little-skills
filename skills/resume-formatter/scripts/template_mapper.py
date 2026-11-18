@@ -131,7 +131,7 @@ class TemplateMapper:
             if '이    름' in text or '성명' in text:
                 name = self._get_value('personal_info.name')
                 if name:
-                    # Format: 이름 : 문다빈 (Dabin Moon) / 남 / 미혼
+                    # Format: 이름 : 예시지원자 (Sample Candidate) / 남 / 미혼
                     gender = self.data.get('personal_info', {}).get('gender', '정보 없음')
                     marital = self.data.get('personal_info', {}).get('marital_status', '정보 없음')
                     para.text = f"이    름 : {name} / {gender} / {marital}"
@@ -182,7 +182,7 @@ class TemplateMapper:
                 insert_idx = i + 1
 
                 for edu in education:
-                    # Format: 2014.09~2015.12   Columbia University 통계학 석사 졸업 (New York, NY, 3.4/4.0)
+                    # Format: 2014.09~2015.12   Example University 통계학 석사 졸업 (New York, NY, 3.4/4.0)
                     start = edu.get('start_date', '')
                     end = edu.get('end_date', '')
                     school = edu.get('school', '')
@@ -388,7 +388,7 @@ class TemplateMapper:
                     company = exp.get('company', '회사명')
                     title = exp.get('title', '직무')
 
-                    # Format: 2023.07~재직 중	Hudson AI / AI Research / AI Researcher
+                    # Format: 2023.07~재직 중	Example AI / AI Research / AI Researcher
                     career_line = f"{start}~{end}\t{company} / {title}"
 
                     new_para = self.doc.paragraphs[insert_idx].insert_paragraph_before(career_line)

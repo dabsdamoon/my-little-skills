@@ -55,7 +55,7 @@
     },
     {
       "name": "houmy-skills",
-      "description": "Houm: brand and UI design system, operational-document typography, cohort metrics, and codebase refactoring",
+      "description": "Houm: brand and UI design system, operational-document typography, and codebase refactoring",
       "source": "./plugins/houmy-skills"
     },
     {

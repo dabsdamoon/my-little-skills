@@ -88,7 +88,7 @@ were not applied. Restart each host to load the new configuration and skill.
 The earlier four-host experiment supplied baseline failures: accidental API
 workflow generation, `sourceChanged` being reported as completion, re-init during
 handoff and omitted structured questions. See the local evaluation report at
-`/Users/dabsdamoon/projects/product-context-eval-20261116/README.md` when available.
+`~/projects/product-context-eval-20261116/README.md` when available.
 
 This change does not claim semantic consistency, authenticated human approvals,
 automatic extraction of prose questions or environment-aware policy replacement.

@@ -10,7 +10,7 @@ Claude Code looks for personal skills in `~/.claude/skills/`. By creating a symb
 
 ```bash
 # Create symlink (run once)
-ln -s /Users/dabsdamoon/projects/anthropic-skills/skills ~/.claude/skills
+ln -s ~/projects/anthropic-skills/skills ~/.claude/skills
 ```
 
 ## Verification
@@ -19,7 +19,7 @@ ln -s /Users/dabsdamoon/projects/anthropic-skills/skills ~/.claude/skills
 # Check symlink exists
 ls -la ~/.claude/skills
 # Expected output:
-# ~/.claude/skills -> /Users/dabsdamoon/projects/anthropic-skills/skills
+# ~/.claude/skills -> ~/projects/anthropic-skills/skills
 
 # List available skills
 ls ~/.claude/skills/

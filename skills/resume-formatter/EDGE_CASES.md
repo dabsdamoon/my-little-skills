@@ -1,5 +1,7 @@
 # Resume Formatter - Edge Cases & Robustness
 
+Examples use fictional candidates, contact details, and organizations.
+
 ## Edge Cases Handled
 
 This document catalogs the various edge cases and challenging resume formats that the resume-formatter skill is designed to handle.
@@ -45,11 +47,11 @@ Reading Order Challenge:
 ┌───────────────────────────────────────────┐
 │ 인적사항                                   │
 ├──────────┬────────────────────────────────┤
-│ 성명     │ 문다빈                         │
+│ 성명     │ 예시지원자                         │
 ├──────────┼────────────────────────────────┤
 │ 생년월일 │ 1990.01.01 (만 34세)           │
 ├──────────┼────────────────────────────────┤
-│ 연락처   │ 010-1234-5678                  │
+│ 연락처   │ 010-XXXX-XXXX                  │
 │          │ email@example.com              │
 └──────────┴────────────────────────────────┘
 
@@ -62,7 +64,7 @@ Challenge: Extract cell-by-cell while maintaining relationships
 ```
 ┌─────────────────────────────────────────┐
 │ [HEADER]                                │
-│ John Smith | 010-1234-5678 | email.com  │ ← Important!
+│ John Smith | 010-XXXX-XXXX | email.com  │ ← Important!
 ├─────────────────────────────────────────┤
 │ [MAIN BODY]                             │
 │ Experience...                           │
