@@ -243,6 +243,12 @@ checks and separate blinded review. The
 [expanded low-effort evaluation](plugins/research-workflow-skills/evals/model-quality-compare/expanded-low/EVALUATION.md)
 preserves both models' code, research reports, dataset notices and numerical checks.
 
+The [native-host controls](skills/model-quality-compare/references/native-hosts.md)
+also support exact Claude model IDs through Claude.ai subscription login. The
+[fresh-session Terra/Sonnet comparison](plugins/research-workflow-skills/evals/model-quality-compare/terra-sonnet-low/EVALUATION.md)
+records context exclusions, eight distinct sessions, safe native inventories,
+unchanged task hashes, and separate objective versus interpretive results.
+
 Read the [skill](skills/model-quality-compare/SKILL.md),
 [metric guide](skills/model-quality-compare/references/metrics.md), and
 [GPT 6.1/6.2 pilot evidence](plugins/research-workflow-skills/evals/model-quality-compare/EVALUATION.md).

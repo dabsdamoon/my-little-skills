@@ -1,0 +1,277 @@
+{
+  "unique_native_sessions": 8,
+  "all_sessions_fresh_and_distinct": true,
+  "artifact_folders_outside_repository": true,
+  "ancestor_AGENTS_CLAUDE_absent": true,
+  "zero_total_context_claimed": false,
+  "limits": [
+    "Native/managed instructions and host tool schemas remain",
+    "low is provider-specific, not equal compute",
+    "Claude implementation requested sandbox but omitted failIfUnavailable; effective native enforcement unverified",
+    "Claude research requested fail-closed sandbox; collected artifacts graded separately inside pinned Docker"
+  ],
+  "runs": [
+    {
+      "task": "gpqa",
+      "model": "gpt-6.1-terra",
+      "trial": 1,
+      "host": "codex",
+      "requested_effort": "low",
+      "common_instruction_sha256": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440",
+      "ephemeral": true,
+      "user_config_ignored": true,
+      "rules_ignored": true,
+      "project_docs_disabled": true,
+      "memories_disabled": true,
+      "host_policies": "core/managed context not independently removed"
+    },
+    {
+      "task": "gpqa",
+      "model": "claude-sonnet-5-5",
+      "trial": 1,
+      "host": "claude",
+      "requested_effort": "low",
+      "common_instruction_sha256": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440",
+      "uuid_matches_launch_init_and_result": true,
+      "api_key_source": "none",
+      "permission_mode": "dontAsk",
+      "tools": [],
+      "skills": [],
+      "custom_plugins": [],
+      "builtin_plugins": [
+        {
+          "name": "cc-plugin-sec-default",
+          "path": "builtin",
+          "source": "cc-plugin-sec-default@builtin"
+        },
+        {
+          "name": "cc-plugin-agents-md",
+          "path": "builtin",
+          "source": "cc-plugin-agents-md@builtin"
+        },
+        {
+          "name": "cc-plugin-telemetry",
+          "path": "builtin",
+          "source": "cc-plugin-telemetry@builtin"
+        },
+        {
+          "name": "cc-plugin-privacy",
+          "path": "builtin",
+          "source": "cc-plugin-privacy@builtin"
+        },
+        {
+          "name": "cc-plugin-plugin-authoring",
+          "path": "builtin",
+          "source": "cc-plugin-plugin-authoring@builtin"
+        }
+      ],
+      "mcp_servers": [],
+      "reported_models": [
+        "claude-sonnet-5-5"
+      ],
+      "external_tool_requests": 0,
+      "permission_denials": [],
+      "sandbox_fail_if_unavailable_requested": false
+    },
+    {
+      "task": "gpqa",
+      "model": "claude-sonnet-5-5",
+      "trial": 2,
+      "host": "claude",
+      "requested_effort": "low",
+      "common_instruction_sha256": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440",
+      "uuid_matches_launch_init_and_result": true,
+      "api_key_source": "none",
+      "permission_mode": "dontAsk",
+      "tools": [],
+      "skills": [],
+      "custom_plugins": [],
+      "builtin_plugins": [
+        {
+          "name": "cc-plugin-sec-default",
+          "path": "builtin",
+          "source": "cc-plugin-sec-default@builtin"
+        },
+        {
+          "name": "cc-plugin-agents-md",
+          "path": "builtin",
+          "source": "cc-plugin-agents-md@builtin"
+        },
+        {
+          "name": "cc-plugin-telemetry",
+          "path": "builtin",
+          "source": "cc-plugin-telemetry@builtin"
+        },
+        {
+          "name": "cc-plugin-privacy",
+          "path": "builtin",
+          "source": "cc-plugin-privacy@builtin"
+        },
+        {
+          "name": "cc-plugin-plugin-authoring",
+          "path": "builtin",
+          "source": "cc-plugin-plugin-authoring@builtin"
+        }
+      ],
+      "mcp_servers": [],
+      "reported_models": [
+        "claude-sonnet-5-5"
+      ],
+      "external_tool_requests": 0,
+      "permission_denials": [],
+      "sandbox_fail_if_unavailable_requested": false
+    },
+    {
+      "task": "gpqa",
+      "model": "gpt-6.1-terra",
+      "trial": 2,
+      "host": "codex",
+      "requested_effort": "low",
+      "common_instruction_sha256": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440",
+      "ephemeral": true,
+      "user_config_ignored": true,
+      "rules_ignored": true,
+      "project_docs_disabled": true,
+      "memories_disabled": true,
+      "host_policies": "core/managed context not independently removed"
+    },
+    {
+      "task": "implementation",
+      "model": "gpt-6.1-terra",
+      "trial": 1,
+      "host": "codex",
+      "requested_effort": "low",
+      "common_instruction_sha256": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+      "ephemeral": true,
+      "user_config_ignored": true,
+      "rules_ignored": true,
+      "project_docs_disabled": true,
+      "memories_disabled": true,
+      "host_policies": "core/managed context not independently removed",
+      "same_frozen_starter_and_collected_hashes": true
+    },
+    {
+      "task": "implementation",
+      "model": "claude-sonnet-5-5",
+      "trial": 1,
+      "host": "claude",
+      "requested_effort": "low",
+      "common_instruction_sha256": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+      "uuid_matches_launch_init_and_result": true,
+      "api_key_source": "none",
+      "permission_mode": "dontAsk",
+      "tools": [
+        "Bash",
+        "Edit",
+        "Read",
+        "Write"
+      ],
+      "skills": [],
+      "custom_plugins": [],
+      "builtin_plugins": [
+        {
+          "name": "cc-plugin-sec-default",
+          "path": "builtin",
+          "source": "cc-plugin-sec-default@builtin"
+        },
+        {
+          "name": "cc-plugin-agents-md",
+          "path": "builtin",
+          "source": "cc-plugin-agents-md@builtin"
+        },
+        {
+          "name": "cc-plugin-telemetry",
+          "path": "builtin",
+          "source": "cc-plugin-telemetry@builtin"
+        },
+        {
+          "name": "cc-plugin-privacy",
+          "path": "builtin",
+          "source": "cc-plugin-privacy@builtin"
+        },
+        {
+          "name": "cc-plugin-plugin-authoring",
+          "path": "builtin",
+          "source": "cc-plugin-plugin-authoring@builtin"
+        }
+      ],
+      "mcp_servers": [],
+      "reported_models": [
+        "claude-sonnet-5-5"
+      ],
+      "external_tool_requests": 0,
+      "permission_denials": [],
+      "sandbox_fail_if_unavailable_requested": false,
+      "same_frozen_starter_and_collected_hashes": true
+    },
+    {
+      "task": "research",
+      "model": "gpt-6.1-terra",
+      "trial": 1,
+      "host": "codex",
+      "requested_effort": "low",
+      "common_instruction_sha256": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+      "ephemeral": true,
+      "user_config_ignored": true,
+      "rules_ignored": true,
+      "project_docs_disabled": true,
+      "memories_disabled": true,
+      "host_policies": "core/managed context not independently removed",
+      "same_frozen_starter_and_collected_hashes": true
+    },
+    {
+      "task": "research",
+      "model": "claude-sonnet-5-5",
+      "trial": 1,
+      "host": "claude",
+      "requested_effort": "low",
+      "common_instruction_sha256": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+      "uuid_matches_launch_init_and_result": true,
+      "api_key_source": "none",
+      "permission_mode": "dontAsk",
+      "tools": [
+        "Bash",
+        "Edit",
+        "Read",
+        "Write"
+      ],
+      "skills": [],
+      "custom_plugins": [],
+      "builtin_plugins": [
+        {
+          "name": "cc-plugin-sec-default",
+          "path": "builtin",
+          "source": "cc-plugin-sec-default@builtin"
+        },
+        {
+          "name": "cc-plugin-agents-md",
+          "path": "builtin",
+          "source": "cc-plugin-agents-md@builtin"
+        },
+        {
+          "name": "cc-plugin-telemetry",
+          "path": "builtin",
+          "source": "cc-plugin-telemetry@builtin"
+        },
+        {
+          "name": "cc-plugin-privacy",
+          "path": "builtin",
+          "source": "cc-plugin-privacy@builtin"
+        },
+        {
+          "name": "cc-plugin-plugin-authoring",
+          "path": "builtin",
+          "source": "cc-plugin-plugin-authoring@builtin"
+        }
+      ],
+      "mcp_servers": [],
+      "reported_models": [
+        "claude-sonnet-5-5"
+      ],
+      "external_tool_requests": 0,
+      "permission_denials": [],
+      "sandbox_fail_if_unavailable_requested": true,
+      "same_frozen_starter_and_collected_hashes": true
+    }
+  ]
+}

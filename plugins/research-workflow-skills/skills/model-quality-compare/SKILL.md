@@ -14,6 +14,7 @@ reliability and efficiency separately. A tiny pilot is not a general ranking.
 | Request | Route |
 |---|---|
 | GPT versions available in Codex with ChatGPT login | Subscription pilot below |
+| Exact Claude versions or mixed Codex/Claude subscription comparison | [Native hosts](references/native-hosts.md) |
 | Code implementation/structure or research-goal completion | [Artifact workflow](references/artifact-workflow.md) |
 | Claude subscription tiers on one product task | [Claude workflow](references/claude-workflow.md) |
 | Named public benchmark or another provider | Official dataset/protocol and an explicitly authorized adapter |
@@ -61,6 +62,11 @@ config/rules, replaces built-in instructions with common instructions, disables
 tools/plugins/skills, and uses an empty temporary cwd per trial. Native harness
 or managed context may remain: this measures a **Codex session**, not a bare model.
 Do not bypass unsupported controls or change settings for just one contestant.
+
+Fresh means no inherited conversation, personal rules/skills or automatic memory;
+the question or frozen starter plus common instructions are supplied. Native tool
+and system/managed context can remain. Never call this zero total context. See
+[native-hosts.md](references/native-hosts.md) for Claude's equivalent controls.
 
 Runs are sequential, alternating forward/reverse order (ABBA for two models).
 The budget counts contestant CLI launches; Codex may internally retry transport.

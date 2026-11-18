@@ -90,3 +90,8 @@ The user then requested harder online questions and actual implementation,
 structure and research outcomes. See the separate
 [expanded low pilot](expanded-low/EVALUATION.md). Its capability tracks remain
 separate from this initial text-only pilot.
+
+The [Terra/Sonnet low extension](terra-sonnet-low/EVALUATION.md) reuses the expanded
+tasks under explicitly fresh native sessions, including a Claude.ai subscription
+adapter and a published context audit. Its joint qualitative review is separate
+from the initial two-model reviewer scores.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Collect controlled coding/research artifacts using native Codex subscription login.
+"""Collect controlled coding/research artifacts using native subscription CLIs.
 
 Task-specific executable checks and blinded structural review are separate from
 collection. Freeze their grading specification before launch. No universal score.
@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import sys
 import time
+import claude_subscription as native_claude
 
 from codex_benchmark import (classify, load_plan, now, sha, strict_json,
                              subscription_env, validate_manifest, write_json)
@@ -50,6 +51,7 @@ def plan(args):
         raise ValueError('non-empty starter and at least two distinct models required')
     if not 1 <= args.trials <= 3:
         raise ValueError('trials must be 1..3; budget additional trials explicitly')
+    providers = native_claude.host_map(args.models, args.claude_models)
     strict_json(args.grading_spec.read_text())
     args.out.mkdir(parents=True, exist_ok=False)
     shutil.copytree(starter, args.out / 'starter', ignore=shutil.ignore_patterns(*IGNORED))
@@ -62,6 +64,7 @@ def plan(args):
             schedule.append({'index': len(schedule) + 1, 'model': model, 'trial': trial})
     names = ['prompt.txt', 'instructions.txt', 'grading-spec.json'] + ['starter/' + p for p in original]
     data = {'schema': 1, 'route': 'artifact', 'created_utc': now(), 'models': args.models,
+            'providers': providers, 'host_adapter_sha256': sha(Path(native_claude.__file__)),
             'trials': args.trials, 'effort': args.effort, 'schedule': schedule,
             'runner_sha256': sha(Path(__file__)),
             'helper_sha256': sha(Path(__file__).with_name('codex_benchmark.py')),
@@ -85,7 +88,7 @@ def command(args, design, workspace, answer, model):
                 'features.remote_plugin': False, 'features.multi_agent': False,
                 'features.multi_agent_v2': False, 'features.view_image': False,
                 'features.image_generation': False, 'features.in_app_browser': False,
-                'features.hooks': False, 'features.skill_search': False,
+                'features.hooks': False, 'features.skill_search': False, 'features.memories': False,
                 'web_search': 'disabled', 'sandbox_workspace_write.network_access': False}
     cmd = [args.codex, 'exec', '--ignore-user-config', '--ignore-rules', '--ephemeral',
            '--skip-git-repo-check', '--sandbox', 'workspace-write', '--cd', str(workspace),
@@ -119,20 +122,18 @@ def run(args):
         raise ValueError('starter file set changed after freeze')
     if design['runner_sha256'] != sha(Path(__file__)) or design['helper_sha256'] != sha(Path(__file__).with_name('codex_benchmark.py')):
         raise ValueError('runner changed after freeze')
+    if design.get('host_adapter_sha256') and design['host_adapter_sha256'] != sha(Path(native_claude.__file__)):
+        raise ValueError('host adapter changed after freeze')
     if len(design['schedule']) > args.max_calls:
         raise ValueError('experiment exceeds --max-calls; no calls made')
     lock = args.out / '.run-lock'
     lock.mkdir()
     try:
         env = subscription_env()
-        auth = subprocess.run([args.codex, 'login', 'status'], env=env, capture_output=True, text=True)
-        if auth.returncode or 'Logged in using ChatGPT' not in auth.stdout + auth.stderr:
-            raise ValueError('ChatGPT subscription login required; no API fallback')
-        version = subprocess.run([args.codex, '--version'], env=env, check=True,
-                                 capture_output=True, text=True).stdout.strip()
+        hosts, version = native_claude.preflight(args, design, env)
         manifest = args.out / 'runs.json'
         data = strict_json(manifest.read_text()) if manifest.exists() else {
-            'plan_sha256': sha(args.out / 'plan.json'), 'cli_version': version, 'runs': []}
+            'plan_sha256': sha(args.out / 'plan.json'), 'cli_version': version, 'hosts': hosts, 'runs': []}
         validate_manifest(data, design)
         if data['plan_sha256'] != sha(args.out / 'plan.json') or data['cli_version'] != version:
             raise ValueError('plan/CLI changed since previous attempts')
@@ -145,7 +146,8 @@ def run(args):
         for item in design['schedule']:
             if item['index'] in recorded:
                 continue
-            r = dict(item, status='started', started_utc=now())
+            host = design.get('providers', {}).get(item['model'], 'codex')
+            r = dict(item, status='started', started_utc=now(), host=host)
             data['runs'].append(r)
             write_json(manifest, data)  # reserve attempt before invoking a model
             name = f"run-{item['index']:02d}"
@@ -153,7 +155,10 @@ def run(args):
             shutil.copytree(args.out / 'starter', workspace, ignore=shutil.ignore_patterns(*IGNORED))
             r['workspace'] = str(workspace.relative_to(args.out))
             r['starter_hashes'] = files(workspace)
-            cmd = command(args, design, workspace, args.out / (name + '.answer.txt'), item['model'])
+            answer_path = args.out / (name + '.answer.txt')
+            cmd = (native_claude.command(args.claude, item['model'], design['effort'],
+                                         (args.out/'instructions.txt').read_text(), artifact=True) if host=='claude'
+                   else command(args, design, workspace, answer_path, item['model']))
             r['command'] = cmd
             print(f"Starting {name}: {item['model']} ({design['effort']})", flush=True)
             start = time.perf_counter()
@@ -165,6 +170,15 @@ def run(args):
                      finished_utc=now(), events_sha256=sha(events_path))
             try:
                 events = [strict_json(x) for x in events_path.read_text().splitlines() if x.strip()]
+                if host == 'claude':
+                    native_path = args.out / (name + '.native.jsonl')
+                    events_path.rename(native_path)
+                    events, answer, metadata = native_claude.normalize(events, item['model'], artifact=True,
+                        expected_session=cmd[cmd.index('--session-id')+1])
+                    answer_path.write_text(answer)
+                    events_path.write_text(''.join(json.dumps(e, ensure_ascii=False)+'\n' for e in events))
+                    r.update(metadata, native_events_file=native_path.name, native_events_sha256=sha(native_path),
+                             events_sha256=sha(events_path))
                 allowed = {'command_execution', 'file_change', 'plan_update'}
                 filtered = [e for e in events if e.get('type') != 'item.completed'
                             or e.get('item', {}).get('type') not in allowed]
@@ -188,12 +202,14 @@ def main():
     for name in ('out', 'starter', 'prompt', 'grading-spec'):
         c.add_argument('--' + name, type=Path, required=True)
     c.add_argument('--models', nargs='+', required=True)
+    c.add_argument('--claude-models', nargs='*', default=[])
     c.add_argument('--effort', choices=['low', 'medium', 'high'], default='low')
     c.add_argument('--trials', type=int, default=1)
     c.set_defaults(func=plan)
     c = commands.add_parser('run')
     c.add_argument('--out', type=Path, required=True)
     c.add_argument('--codex', default='codex')
+    c.add_argument('--claude', default='claude')
     c.add_argument('--max-calls', type=int, default=2)
     c.set_defaults(func=run)
     args = p.parse_args()
