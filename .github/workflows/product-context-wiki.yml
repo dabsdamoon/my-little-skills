@@ -49,7 +49,7 @@
         },
         {
           "name": "Fetch reviewed harness outside the Action checkout",
-          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin 330e5598ec45e49b0aa4f0257f29b2665b11fb9d\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
+          "run": "git init \"$RUNNER_TEMP/product-context-harness\"\ngit -C \"$RUNNER_TEMP/product-context-harness\" remote add origin https://github.com/dabsdamoon/my-little-skills.git\ngit -C \"$RUNNER_TEMP/product-context-harness\" fetch --depth 1 origin d6eb558c5f92595e08536cc8aaccfb1249193a0e\ngit -C \"$RUNNER_TEMP/product-context-harness\" checkout --detach FETCH_HEAD"
         },
         {
           "name": "Preserve PR evidence separately from Action config restoration",
