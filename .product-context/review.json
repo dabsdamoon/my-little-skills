@@ -1,17 +1,17 @@
 {
   "schema_version": 1,
   "product": "my-little-skills-product-context",
-  "snapshot": "72352bc396a2b820fb3fc3fa8fc45f4cee9bfd0ae9c51763b7116e5fd29e21fb",
+  "snapshot": "e4d42d35920c4b695e3e7598d09e902fe4894a6d3ade7ae37842ff643fdb2a79",
   "files": {
     "README.md": "3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d",
-    "plugins/product-context-skills/README.md": "68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9",
+    "plugins/product-context-skills/README.md": "834a7904be591d7fca841def64fef563e50b0dad2b18820a7b3d0d0aa179613a",
     "skills/product-context/SKILL.md": "c1a17ca3d95e0f230f418048396bb4895639022863cb1105abc9442d475f3346",
     "skills/product-context/references/format.md": "f7be0fd4922c62b3a5af4edf6a2403fa2fea6049255826f612ec0beca3158ffa",
     "skills/product-context/references/pr-automation.md": "220e4ec1053463444e6e6ee46b190ad7a83cc38f8d9b520cf8ef4605eff0516c",
     "skills/product-context/references/product-setup.md": "bc259542e6228083bc4fe66ea54a759bfeae2a515cfee1ea327e71cfce8f91c9",
-    "skills/product-context/references/subscription-wiki.md": "d484cf93a25aea56cad06c96c35474057ae6f7beaa92624ea820d633d7422958",
+    "skills/product-context/references/subscription-wiki.md": "d7a5846ad1d73370aadfaa7730d0e127d447d8a226a19a19c97c38a7fef6e093",
     "skills/product-context/runtime/guard.mjs": "0b2bf4f044703d896877cc0332973c283acfc225220af3988a318051626daab7",
-    "skills/product-context/runtime/server.mjs": "1d532a8a0ce86a2940c74bb1b575751bf8bd954ec5bef4b7891e1ef8f54cf2dd",
+    "skills/product-context/runtime/server.mjs": "07173397ff784d322634400a94ba7ff897ed9e746440425d9c1b8726b0eb0a6a",
     "skills/product-context/scripts/context_core.py": "1cfa49c804a50f6eb1e94c3bcd56e6349848e6db55c1da7f20329a95c2a5006c",
     "skills/product-context/scripts/context_store.py": "d529354ac0706c0f7f6504357470472c10efcab8bdddcc36ac933502f5a5ff98",
     "skills/product-context/scripts/github_setup.py": "e40d128d370441aac1cb6e03eae62b4396f0d3f34fc7615a48e55fb3358f60c5",
@@ -22,7 +22,7 @@
   },
   "questions": [],
   "actor": "agent:claude",
-  "note": "Refreshed quickstart: reconfirmed four stale claims against README and SKILL.md, added visual-explainer and licensing facts. No source or policy changes.",
-  "recorded_at": "2026-11-18T05:46:31.699489+00:00",
-  "git_head": "9835e1e5c59432646333bca2530d723b6ee9689d"
+  "note": "Refreshed quickstart for PR: removed stale \"after 0.4.1 is published\" wording and replaced the hard-coded 0.4.1 runtime path with <runtime-version>, per the plugin README. Reconfirmed the subscription work-budget claim. No source or policy changes.",
+  "recorded_at": "2026-11-18T06:03:57.214963+00:00",
+  "git_head": "5fa0c9f1bc3fb4251d95335efc14f1637f927e28"
 }

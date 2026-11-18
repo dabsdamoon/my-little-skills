@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:0fa58012ef220e0c9ebeef88ddc9f1b9d2bc1e63f3bfdb0859d28413ff0e5c4c",
+  "pageVersion": "sha256:b842a5714991513e170b414fc6cc1565505b26ca456e8eaba8d81086bf61f8de",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -38,27 +38,27 @@
       "evidence": [
         {
           "resource": "repo://skills/product-context/references/subscription-wiki.md",
-          "version": "repo-file-v1:sha256:d484cf93a25aea56cad06c96c35474057ae6f7beaa92624ea820d633d7422958"
+          "version": "repo-file-v1:sha256:d7a5846ad1d73370aadfaa7730d0e127d447d8a226a19a19c97c38a7fef6e093"
         }
       ]
     },
     {
       "id": "claim_31dd4b305b974839a23d40c89881c57f",
-      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace after version 0.4.1 is published, and that root skills/product-context is canonical with the plugin copy as its distribution mirror.",
+      "statement": "The plugin README says product-context-skills is installable from the my-little-skills marketplace, and that root skills/product-context is canonical with the plugin copy as its exact distribution mirror.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
+          "version": "repo-file-v1:sha256:834a7904be591d7fca841def64fef563e50b0dad2b18820a7b3d0d0aa179613a"
         }
       ]
     },
     {
       "id": "claim_e82512ebc6714ecfa44eb55add9f96fc",
-      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/0.4.1; existing custom workflows are preserved and block generation.",
+      "statement": "MCP setup is an explicit per-machine step requiring Python 3.10+, Node.js 22.22+, npm and subscription logins, installing a pinned OpenWiki 0.9.0 runtime under ~/.local/share/product-context/<runtime-version> taken from runtime/package.json; existing custom workflows are preserved and block generation.",
       "evidence": [
         {
           "resource": "repo://plugins/product-context-skills/README.md",
-          "version": "repo-file-v1:sha256:68927124eb1315ae16ccd98db03af396171592a3a4bb0b5ad5f93b2ebead29d9"
+          "version": "repo-file-v1:sha256:834a7904be591d7fca841def64fef563e50b0dad2b18820a7b3d0d0aa179613a"
         }
       ]
     },
@@ -95,6 +95,6 @@
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-18T05:46:11.671Z"
+    "at": "2026-11-18T06:03:37.679Z"
   }
 }

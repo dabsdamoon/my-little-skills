@@ -5,7 +5,7 @@ description: What my-little-skills provides and how the product-context wiki wor
 tags: [product, skills, product-context]
 verified:
   - by: openwiki/0.9.0
-    at: 2026-11-18T05:46:11.671Z
+    at: 2026-11-18T06:03:37.679Z
 sources:
   - id: openwiki-source-e806ba82c1dc93b631154825
     resource: repo://plugins/product-context-skills/README.md
@@ -15,7 +15,7 @@ sources:
     resource: repo://skills/product-context/references/subscription-wiki.md
   - id: openwiki-source-901fc0d98522e338a3c22bbb
     resource: repo://skills/product-context/SKILL.md
-generated: { by: "claude-code", at: "2026-11-18T05:46:11.671Z" }
+generated: { by: "claude-code", at: "2026-11-18T06:03:37.679Z" }
 ---
 
 # Quickstart
@@ -48,9 +48,9 @@ The `product-context` skill provides an offline CLI that checks product evidence
 
 ## Plugin and setup details
 
-- The `product-context-skills` plugin README says it is installable after version 0.4.1 is published: `/plugin install product-context-skills@my-little-skills` (Claude Code) or `codex plugin add product-context-skills@my-little-skills` (Codex).
-- The root `skills/product-context` is the canonical bundle; the plugin's copy is its distribution mirror.
-- MCP setup is an explicit per-machine step (`setup_subscription_wiki.py --host both`, read-only plan first, then `--install`). It needs Python 3.10+, Node.js 22.22+, npm and subscription logins, and installs a pinned OpenWiki 0.9.0 runtime under `~/.local/share/product-context/0.4.1`.
+- The `product-context-skills` plugin README says it is installable from the my-little-skills marketplace: `/plugin install product-context-skills@my-little-skills` (Claude Code) or `codex plugin add product-context-skills@my-little-skills` (Codex).
+- The root `skills/product-context` is the canonical bundle; the plugin's copy is its exact distribution mirror.
+- MCP setup is an explicit per-machine step (`setup_subscription_wiki.py --host both`, read-only plan first, then `--install`). It needs Python 3.10+, Node.js 22.22+, npm and subscription logins, and installs a pinned OpenWiki 0.9.0 runtime with npm scripts disabled under `~/.local/share/product-context/<runtime-version>`, where the version comes from `skills/product-context/runtime/package.json`.
 - Existing custom workflows are preserved and block generation.
 
 ## Product-aware setup and completion report
