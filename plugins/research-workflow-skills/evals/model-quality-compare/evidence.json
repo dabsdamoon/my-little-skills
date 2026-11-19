@@ -1,0 +1,561 @@
+{
+  "kind": "observed subscription pilot, not a named benchmark",
+  "created_utc": "2026-11-18T09:34:08.747933+00:00",
+  "cli_version": "codex-cli 0.170.0",
+  "settings": {
+    "models": [
+      "gpt-6.1-sol",
+      "gpt-6.2-sol"
+    ],
+    "effort": "medium",
+    "unique_cases": 24,
+    "trials_per_model": 2,
+    "order": [
+      "gpt-6.1-sol",
+      "gpt-6.2-sol",
+      "gpt-6.2-sol",
+      "gpt-6.1-sol"
+    ]
+  },
+  "frozen_hashes": {
+    "suite.json": "aa1d0f1ec7122308866933e024a0163c84af3e11201bd3952143f82c5a3dfe29",
+    "prompt.txt": "6f7f82a533cc6a5c36fd1481837c3ee961cef5f79902e2f2a7cb8d81311eaa80",
+    "instructions.txt": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440"
+  },
+  "models": {
+    "gpt-6.1-sol": {
+      "accuracy": 1,
+      "macro_accuracy": 1,
+      "categories": {
+        "code-comprehension": 1,
+        "grounding": 1,
+        "instruction-following": 1,
+        "knowledge": 1,
+        "korean": 1,
+        "reasoning": 1
+      },
+      "trial_accuracy": [
+        1,
+        1
+      ],
+      "trial_sd": 0.0,
+      "completed_trials": 2,
+      "planned_trials": 2,
+      "unavailable_trials": 0,
+      "format_failures": 0,
+      "answer_stability": 1,
+      "mean_wall_seconds": 15.392,
+      "usage": [
+        {
+          "input_tokens": 7662,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 524,
+          "reasoning_output_tokens": 316
+        },
+        {
+          "input_tokens": 7666,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 606,
+          "reasoning_output_tokens": 398
+        }
+      ]
+    },
+    "gpt-6.2-sol": {
+      "accuracy": 1,
+      "macro_accuracy": 1,
+      "categories": {
+        "code-comprehension": 1,
+        "grounding": 1,
+        "instruction-following": 1,
+        "knowledge": 1,
+        "korean": 1,
+        "reasoning": 1
+      },
+      "trial_accuracy": [
+        1,
+        1
+      ],
+      "trial_sd": 0.0,
+      "completed_trials": 2,
+      "planned_trials": 2,
+      "unavailable_trials": 0,
+      "format_failures": 0,
+      "answer_stability": 1,
+      "mean_wall_seconds": 16.7065,
+      "usage": [
+        {
+          "input_tokens": 7748,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 466,
+          "reasoning_output_tokens": 190
+        },
+        {
+          "input_tokens": 7746,
+          "cached_input_tokens": 0,
+          "cache_write_input_tokens": 0,
+          "output_tokens": 478,
+          "reasoning_output_tokens": 202
+        }
+      ]
+    }
+  },
+  "collection_corrections": [
+    {
+      "index": 1,
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "reason": "reparsed original CLI events; raw files preserved"
+    },
+    {
+      "index": 2,
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "reason": "reparsed original CLI events; raw files preserved"
+    },
+    {
+      "index": 3,
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "reason": "reparsed original CLI events; raw files preserved"
+    },
+    {
+      "index": 4,
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "reason": "reparsed original CLI events; raw files preserved"
+    }
+  ],
+  "evidence_audit": [
+    "Legacy experiment: launch-time runner hash was not recorded. Commands and CLI version remain recorded; no hash is invented retrospectively.",
+    "Legacy launch used a narrower environment filter; additional CODEX auth/endpoint overrides were not independently attested. The current runner uses an OS-variable allowlist.",
+    "run 1: no collection-time event hash; checked final message against hashed answer",
+    "run 2: no collection-time event hash; checked final message against hashed answer",
+    "run 3: no collection-time event hash; checked final message against hashed answer",
+    "run 4: no collection-time event hash; checked final message against hashed answer"
+  ],
+  "responses": [
+    {
+      "index": 1,
+      "model": "gpt-6.1-sol",
+      "trial": 1,
+      "wall_seconds": 14.264,
+      "usage": {
+        "input_tokens": 7662,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 524,
+        "reasoning_output_tokens": 316
+      },
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "collection_answer_sha256": "87d2b3364cc96bc46aee7139f0b65b7bae976b24f0d8117a1a48944e514744a3",
+      "archival_events_sha256": "227f6e59d2d5adb8e1b4f67768ec821f787bbcc45e09404476438c54110604af",
+      "answer": {
+        "R1": 1386,
+        "R2": 56,
+        "R3": "3/5",
+        "R4": 38,
+        "N1": "modus ponens",
+        "N2": "kelvin",
+        "N3": "AUG",
+        "N4": 16,
+        "C1": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ],
+          true
+        ],
+        "C2": [
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "C3": [
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          []
+        ],
+        "C4": [
+          5,
+          0,
+          1,
+          99,
+          2,
+          2,
+          3
+        ],
+        "I1": "RED|GREEN|BLUE",
+        "I2": [
+          8,
+          6,
+          4
+        ],
+        "I3": {
+          "status": "pending",
+          "count": 0
+        },
+        "I4": "bd",
+        "G1": 2,
+        "G2": "UNKNOWN",
+        "G3": 50,
+        "G4": "CONFLICT",
+        "K1": "B",
+        "K2": "금요일",
+        "K3": [
+          "민수",
+          "준호",
+          "영희"
+        ],
+        "K4": 9
+      }
+    },
+    {
+      "index": 2,
+      "model": "gpt-6.2-sol",
+      "trial": 1,
+      "wall_seconds": 16.67,
+      "usage": {
+        "input_tokens": 7748,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 466,
+        "reasoning_output_tokens": 190
+      },
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "collection_answer_sha256": "a5523c6d9d0a4f33ef62a20f75a4b72b02966d8ab1a70dc05f39c75e3f022ed7",
+      "archival_events_sha256": "e2f1b2f1426da6f6807c9a116d1bb1f0e187efb39a64d36fa60231ee77579e4f",
+      "answer": {
+        "R1": 1386,
+        "R2": 56,
+        "R3": "3/5",
+        "R4": 38,
+        "N1": "modus ponens",
+        "N2": "kelvin",
+        "N3": "AUG",
+        "N4": 16,
+        "C1": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ],
+          true
+        ],
+        "C2": [
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "C3": [
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          []
+        ],
+        "C4": [
+          5,
+          0,
+          1,
+          99,
+          2,
+          2,
+          3
+        ],
+        "I1": "RED|GREEN|BLUE",
+        "I2": [
+          8,
+          6,
+          4
+        ],
+        "I3": {
+          "status": "pending",
+          "count": 0
+        },
+        "I4": "bd",
+        "G1": 2,
+        "G2": "UNKNOWN",
+        "G3": 50,
+        "G4": "CONFLICT",
+        "K1": "B",
+        "K2": "금요일",
+        "K3": [
+          "민수",
+          "준호",
+          "영희"
+        ],
+        "K4": 9
+      }
+    },
+    {
+      "index": 3,
+      "model": "gpt-6.2-sol",
+      "trial": 2,
+      "wall_seconds": 16.743,
+      "usage": {
+        "input_tokens": 7746,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 478,
+        "reasoning_output_tokens": 202
+      },
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "collection_answer_sha256": "a5523c6d9d0a4f33ef62a20f75a4b72b02966d8ab1a70dc05f39c75e3f022ed7",
+      "archival_events_sha256": "f2e1c505cf553ac74682f63d7058e091f9c6f8fcfb83e57599542e730e1c3e7a",
+      "answer": {
+        "R1": 1386,
+        "R2": 56,
+        "R3": "3/5",
+        "R4": 38,
+        "N1": "modus ponens",
+        "N2": "kelvin",
+        "N3": "AUG",
+        "N4": 16,
+        "C1": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ],
+          true
+        ],
+        "C2": [
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "C3": [
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          []
+        ],
+        "C4": [
+          5,
+          0,
+          1,
+          99,
+          2,
+          2,
+          3
+        ],
+        "I1": "RED|GREEN|BLUE",
+        "I2": [
+          8,
+          6,
+          4
+        ],
+        "I3": {
+          "status": "pending",
+          "count": 0
+        },
+        "I4": "bd",
+        "G1": 2,
+        "G2": "UNKNOWN",
+        "G3": 50,
+        "G4": "CONFLICT",
+        "K1": "B",
+        "K2": "금요일",
+        "K3": [
+          "민수",
+          "준호",
+          "영희"
+        ],
+        "K4": 9
+      }
+    },
+    {
+      "index": 4,
+      "model": "gpt-6.1-sol",
+      "trial": 2,
+      "wall_seconds": 16.52,
+      "usage": {
+        "input_tokens": 7666,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 606,
+        "reasoning_output_tokens": 398
+      },
+      "original_status": "control_violation",
+      "audited_status": "completed",
+      "collection_answer_sha256": "87d2b3364cc96bc46aee7139f0b65b7bae976b24f0d8117a1a48944e514744a3",
+      "archival_events_sha256": "9a8ecb5fb15afa25a5a26fd9fc23754985607e775dde41a2cd10c7e2ba281007",
+      "answer": {
+        "R1": 1386,
+        "R2": 56,
+        "R3": "3/5",
+        "R4": 38,
+        "N1": "modus ponens",
+        "N2": "kelvin",
+        "N3": "AUG",
+        "N4": 16,
+        "C1": [
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3
+          ],
+          true
+        ],
+        "C2": [
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            0,
+            2,
+            3
+          ]
+        ],
+        "C3": [
+          [
+            [
+              0,
+              1
+            ],
+            [
+              2,
+              3
+            ],
+            [
+              4,
+              5
+            ]
+          ],
+          []
+        ],
+        "C4": [
+          5,
+          0,
+          1,
+          99,
+          2,
+          2,
+          3
+        ],
+        "I1": "RED|GREEN|BLUE",
+        "I2": [
+          8,
+          6,
+          4
+        ],
+        "I3": {
+          "status": "pending",
+          "count": 0
+        },
+        "I4": "bd",
+        "G1": 2,
+        "G2": "UNKNOWN",
+        "G3": 50,
+        "G4": "CONFLICT",
+        "K1": "B",
+        "K2": "금요일",
+        "K3": [
+          "민수",
+          "준호",
+          "영희"
+        ],
+        "K4": 9
+      }
+    }
+  ]
+}

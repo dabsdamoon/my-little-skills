@@ -1,0 +1,229 @@
+{
+  "checks": 7,
+  "passed": 0,
+  "details": [
+    {
+      "id": "original",
+      "passed": false,
+      "actual": {
+        "series": {},
+        "groups": {}
+      },
+      "expected": {
+        "series": {
+          "income": "NY.GNP.PCAP.KD",
+          "education": "NY.ADJ.AEDU.GN.ZS"
+        },
+        "groups": {
+          "SSF": {
+            "label": "Sub-Saharan Africa",
+            "level": {
+              "n": 5,
+              "pearson_r": -0.9664207841515776,
+              "ols_slope": -159.13145557434953
+            },
+            "difference": {
+              "n": 4,
+              "pearson_r": -0.455752459815624,
+              "ols_slope": -80.4775107405355
+            }
+          },
+          "LMC": {
+            "label": "Lower middle income",
+            "level": {
+              "n": 41,
+              "pearson_r": -0.480538161583764,
+              "ols_slope": -635.0742417239451
+            },
+            "difference": {
+              "n": 40,
+              "pearson_r": 0.07876056406367796,
+              "ols_slope": 11.063895227186732
+            }
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "reordered",
+      "passed": false,
+      "actual": {
+        "series": {},
+        "groups": {}
+      },
+      "expected": {
+        "series": {
+          "income": "NY.GNP.PCAP.KD",
+          "education": "NY.ADJ.AEDU.GN.ZS"
+        },
+        "groups": {
+          "LMC": {
+            "label": "Lower middle income",
+            "level": {
+              "n": 41,
+              "pearson_r": -0.480538161583764,
+              "ols_slope": -635.0742417239451
+            },
+            "difference": {
+              "n": 40,
+              "pearson_r": 0.07876056406367796,
+              "ols_slope": 11.063895227186732
+            }
+          },
+          "SSF": {
+            "label": "Sub-Saharan Africa",
+            "level": {
+              "n": 5,
+              "pearson_r": -0.9664207841515776,
+              "ols_slope": -159.13145557434953
+            },
+            "difference": {
+              "n": 4,
+              "pearson_r": -0.455752459815624,
+              "ols_slope": -80.4775107405355
+            }
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "gapped",
+      "passed": false,
+      "actual": {
+        "series": {},
+        "groups": {}
+      },
+      "expected": {
+        "series": {
+          "income": "NY.GNP.PCAP.KD",
+          "education": "NY.ADJ.AEDU.GN.ZS"
+        },
+        "groups": {
+          "SSF": {
+            "label": "Sub-Saharan Africa",
+            "level": {
+              "n": 5,
+              "pearson_r": -0.9664207841515776,
+              "ols_slope": -159.13145557434953
+            },
+            "difference": {
+              "n": 4,
+              "pearson_r": -0.455752459815624,
+              "ols_slope": -80.4775107405355
+            }
+          },
+          "LMC": {
+            "label": "Lower middle income",
+            "level": {
+              "n": 40,
+              "pearson_r": -0.47412249378566157,
+              "ols_slope": -632.3076099237733
+            },
+            "difference": {
+              "n": 38,
+              "pearson_r": 0.07936376747731401,
+              "ols_slope": 10.735253411294124
+            }
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "scaled",
+      "passed": false,
+      "actual": {
+        "series": {},
+        "groups": {}
+      },
+      "expected": {
+        "series": {
+          "income": "NY.GNP.PCAP.KD",
+          "education": "NY.ADJ.AEDU.GN.ZS"
+        },
+        "groups": {
+          "SSF": {
+            "label": "Sub-Saharan Africa",
+            "level": {
+              "n": 5,
+              "pearson_r": -0.9664207841515776,
+              "ols_slope": -318.26291114869906
+            },
+            "difference": {
+              "n": 4,
+              "pearson_r": -0.455752459815624,
+              "ols_slope": -160.955021481071
+            }
+          },
+          "LMC": {
+            "label": "Lower middle income",
+            "level": {
+              "n": 41,
+              "pearson_r": -0.480538161583764,
+              "ols_slope": -1270.1484834478902
+            },
+            "difference": {
+              "n": 40,
+              "pearson_r": 0.07876056406367796,
+              "ols_slope": 22.127790454373464
+            }
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "constant",
+      "passed": false,
+      "actual": {
+        "series": {},
+        "groups": {}
+      },
+      "expected": {
+        "series": {
+          "income": "NY.GNP.PCAP.KD",
+          "education": "NY.ADJ.AEDU.GN.ZS"
+        },
+        "groups": {
+          "SSF": {
+            "label": "Sub-Saharan Africa",
+            "level": {
+              "n": 5,
+              "pearson_r": null,
+              "ols_slope": null
+            },
+            "difference": {
+              "n": 4,
+              "pearson_r": null,
+              "ols_slope": null
+            }
+          },
+          "LMC": {
+            "label": "Lower middle income",
+            "level": {
+              "n": 41,
+              "pearson_r": null,
+              "ols_slope": null
+            },
+            "difference": {
+              "n": 40,
+              "pearson_r": null,
+              "ols_slope": null
+            }
+          }
+        }
+      },
+      "stderr": ""
+    },
+    {
+      "id": "saved-results-reproduce",
+      "passed": false
+    },
+    {
+      "id": "report-artifact",
+      "passed": false
+    }
+  ]
+}

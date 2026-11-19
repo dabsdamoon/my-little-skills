@@ -1,0 +1,691 @@
+{
+  "models": [
+    "gpt-6.1-terra",
+    "claude-sonnet-5-5"
+  ],
+  "effort": "low",
+  "contestant_launches": 8,
+  "same_previous_frozen_tasks": true,
+  "tracks": {
+    "gpqa": {
+      "plan": {
+        "schema": 1,
+        "created_utc": "2026-11-18T10:33:02.529784+00:00",
+        "suite": "gpqa-diamond-8-subset-low-v1",
+        "runner_sha256": "aa036327ba0cc2aa04a3094c8aaf50f84f4787caadfa90ae5bcca64b2f21d7e2",
+        "providers": {
+          "gpt-6.1-terra": "codex",
+          "claude-sonnet-5-5": "claude"
+        },
+        "host_adapter_sha256": "64bffa6f0b7fa105a508f30e12c0b39c1e1f50f28e3826e200cc8022ea32bd34",
+        "case_count": 8,
+        "models": [
+          "gpt-6.1-terra",
+          "claude-sonnet-5-5"
+        ],
+        "trials": 2,
+        "effort": "low",
+        "schedule": [
+          {
+            "model": "gpt-6.1-terra",
+            "trial": 1,
+            "index": 1
+          },
+          {
+            "model": "claude-sonnet-5-5",
+            "trial": 1,
+            "index": 2
+          },
+          {
+            "model": "claude-sonnet-5-5",
+            "trial": 2,
+            "index": 3
+          },
+          {
+            "model": "gpt-6.1-terra",
+            "trial": 2,
+            "index": 4
+          }
+        ],
+        "auth": "native-subscriptions",
+        "hashes": {
+          "suite.json": "4c0ca3638240e972f5c0c895ae18b9a78174a7fb3a13d409d5d557970516c848",
+          "prompt.txt": "5fb6faedc8161571f94f1709f905a13d2694e9cb5c4e680106e050b492e4fd02",
+          "instructions.txt": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440"
+        },
+        "limitations": [
+          "original text pilot, not a named public benchmark",
+          "same cases repeated; repetitions are not independent new questions",
+          "model IDs are requested aliases; backend snapshot not independently verified",
+          "equal reasoning effort is not equal compute; CLI includes a harness",
+          "no vision, code generation/execution, agent tools, safety or long-context coverage",
+          "end-to-end CLI wall time is not TTFT or pure generation speed",
+          "subscription quota consumed; separate API price not applicable"
+        ]
+      },
+      "models": {
+        "gpt-6.1-terra": {
+          "accuracy": 0.9375,
+          "macro_accuracy": 0.9166666666666666,
+          "categories": {
+            "biology": 0.75,
+            "chemistry": 1,
+            "physics": 1
+          },
+          "trial_accuracy": [
+            0.875,
+            1
+          ],
+          "trial_sd": 0.08838834764831845,
+          "completed_trials": 2,
+          "planned_trials": 2,
+          "unavailable_trials": 0,
+          "format_failures": 0,
+          "answer_stability": 0.875,
+          "mean_wall_seconds": 12.065,
+          "usage": [
+            {
+              "input_tokens": 7705,
+              "cached_input_tokens": 4096,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 418,
+              "reasoning_output_tokens": 363
+            },
+            {
+              "input_tokens": 7703,
+              "cached_input_tokens": 0,
+              "cache_write_input_tokens": 0,
+              "output_tokens": 489,
+              "reasoning_output_tokens": 434
+            }
+          ]
+        },
+        "claude-sonnet-5-5": {
+          "accuracy": 0.75,
+          "macro_accuracy": 0.7777777777777778,
+          "categories": {
+            "biology": 1,
+            "chemistry": 0.5,
+            "physics": 0.8333333333333333
+          },
+          "trial_accuracy": [
+            0.75,
+            0.75
+          ],
+          "trial_sd": 0.0,
+          "completed_trials": 2,
+          "planned_trials": 2,
+          "unavailable_trials": 0,
+          "format_failures": 0,
+          "answer_stability": 0.75,
+          "mean_wall_seconds": 14.435,
+          "usage": [
+            {
+              "input_tokens": 3829,
+              "cached_input_tokens": 0,
+              "cache_write_input_tokens": 3827,
+              "output_tokens": 1758
+            },
+            {
+              "input_tokens": 3828,
+              "cached_input_tokens": 3452,
+              "cache_write_input_tokens": 374,
+              "output_tokens": 1299
+            }
+          ]
+        }
+      },
+      "collection_corrections": [
+        {
+          "index": 2,
+          "original_status": "control_violation",
+          "audited_status": "completed",
+          "reason": "known built-in host catalog was misclassified as personal plugins; raw and original normalized evidence preserved"
+        },
+        {
+          "index": 3,
+          "original_status": "control_violation",
+          "audited_status": "completed",
+          "reason": "known built-in host catalog was misclassified as personal plugins; raw and original normalized evidence preserved"
+        }
+      ],
+      "grader_sha256": "1d4fd81836641f3a5c932cffec35c1ff65171071a428d40599a94e2becf96d47",
+      "host_adapter_grader_sha256": "56823d0f88f7a8bce48520a3066da56364a3d0b1354750e66a69b153fb4afe58",
+      "trials": [
+        {
+          "model": "gpt-6.1-terra",
+          "trial": 1,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": false
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "trial": 1,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": false
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": false
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "trial": 2,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": false
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": false
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "model": "gpt-6.1-terra",
+          "trial": 2,
+          "cases": [
+            {
+              "id": "GPQA01",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA02",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA03",
+              "category": "physics",
+              "passed": true
+            },
+            {
+              "id": "GPQA04",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA05",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA06",
+              "category": "chemistry",
+              "passed": true
+            },
+            {
+              "id": "GPQA07",
+              "category": "biology",
+              "passed": true
+            },
+            {
+              "id": "GPQA08",
+              "category": "biology",
+              "passed": true
+            }
+          ]
+        }
+      ]
+    },
+    "implementation": {
+      "plan": {
+        "schema": 1,
+        "route": "artifact",
+        "created_utc": "2026-11-18T10:37:31.911561+00:00",
+        "models": [
+          "gpt-6.1-terra",
+          "claude-sonnet-5-5"
+        ],
+        "providers": {
+          "gpt-6.1-terra": "codex",
+          "claude-sonnet-5-5": "claude"
+        },
+        "host_adapter_sha256": "1bedf12cc080721df16c54958975ba3b47218a39e1dd43daa6e01742bdb25bed",
+        "trials": 1,
+        "effort": "low",
+        "schedule": [
+          {
+            "index": 1,
+            "model": "gpt-6.1-terra",
+            "trial": 1
+          },
+          {
+            "index": 2,
+            "model": "claude-sonnet-5-5",
+            "trial": 1
+          }
+        ],
+        "runner_sha256": "ebfb38a633c08be8cc6542f9d152ae9af954feb7e3eb8d05baaa7bb32e10492a",
+        "helper_sha256": "3e5d6b38ab5029f91d9c6df4cfcf801fc0a0fed86527d5fc3f5c6290a6326656",
+        "hashes": {
+          "prompt.txt": "45b6ff8d68a1ed62f6de6e1fcf859afcf15568233bada3ce43d74ee1c2a519d0",
+          "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+          "grading-spec.json": "0726e3a5c54438ae8a9d4125f367a36cefcf8372fa76ef9e51591bf5f1da2e93",
+          "starter/ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+          "starter/ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+          "starter/ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+          "starter/ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+          "starter/tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+        },
+        "limitations": [
+          "native Codex workspace-write sandbox; host isolation is not a container",
+          "task-specific objective checks and subjective rubric must be reported separately",
+          "model IDs requested; immutable backend snapshot not independently verified",
+          "CLI-launch budget is not a hard token/turn/time budget"
+        ]
+      },
+      "hosts": {
+        "claude": {
+          "authentication": "claude.ai subscription",
+          "auth_method": "claude.ai",
+          "cli_version": "2.1.327 (Claude Code)"
+        },
+        "codex": {
+          "authentication": "ChatGPT subscription",
+          "cli_version": "codex-cli 0.170.0"
+        }
+      },
+      "runs": [
+        {
+          "model": "gpt-6.1-terra",
+          "trial": 1,
+          "status": "completed",
+          "host": "codex",
+          "wall_seconds": 51.56,
+          "usage": {
+            "input_tokens": 32912,
+            "cached_input_tokens": 24576,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2406,
+            "reasoning_output_tokens": 39
+          },
+          "reported_models": null,
+          "native_tools": null,
+          "native_skills": null,
+          "native_builtin_plugins": null,
+          "native_user_plugins": null,
+          "native_mcp_servers": null,
+          "native_permission_mode": null,
+          "native_api_key_source": null,
+          "native_external_tool_requests": null,
+          "permission_denials": null,
+          "events_sha256": "787a093707dd8fb52a7dc93eac31e2053f33e1e4a23ad65c83627652c00c2d50",
+          "native_events_sha256": null,
+          "artifacts": {
+            "DESIGN.md": "c843b8d04201daf15da57b9b6ba6a183651d16c736ee55b8e9aba7cc2ede369e",
+            "ledger/service.py": "7f760069f011eb7a74a9b36167214f509d2ea38c688d12dbf67f68b398f18ef8",
+            "ledger/domain.py": "c16e2a91907b7d9266eecdbc585f7403487693a812276f88f86b49fd09c19121",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a532061979f1be950ea2e41d9db0c6c3ad8b9c1cea55bbba480848f915cc0275",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091",
+            "tests/test_ledger.py": "a3c5391402ba67b644d39e7236695398fc760ccaea7514975f81811f2261f766"
+          },
+          "starter_hashes": {
+            "ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+            "ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+          }
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "trial": 1,
+          "status": "completed",
+          "host": "claude",
+          "wall_seconds": 36.19,
+          "usage": {
+            "input_tokens": 46218,
+            "cached_input_tokens": 30964,
+            "cache_write_input_tokens": 15246,
+            "output_tokens": 5778
+          },
+          "reported_models": [
+            "claude-sonnet-5-5"
+          ],
+          "native_tools": [
+            "Bash",
+            "Edit",
+            "Read",
+            "Write"
+          ],
+          "native_skills": [],
+          "native_builtin_plugins": [
+            {
+              "name": "cc-plugin-sec-default",
+              "path": "builtin",
+              "source": "cc-plugin-sec-default@builtin"
+            },
+            {
+              "name": "cc-plugin-agents-md",
+              "path": "builtin",
+              "source": "cc-plugin-agents-md@builtin"
+            },
+            {
+              "name": "cc-plugin-telemetry",
+              "path": "builtin",
+              "source": "cc-plugin-telemetry@builtin"
+            },
+            {
+              "name": "cc-plugin-privacy",
+              "path": "builtin",
+              "source": "cc-plugin-privacy@builtin"
+            },
+            {
+              "name": "cc-plugin-plugin-authoring",
+              "path": "builtin",
+              "source": "cc-plugin-plugin-authoring@builtin"
+            }
+          ],
+          "native_user_plugins": [],
+          "native_mcp_servers": [],
+          "native_permission_mode": null,
+          "native_api_key_source": null,
+          "native_external_tool_requests": null,
+          "permission_denials": [],
+          "events_sha256": "54ae9275b820b80f80af7a48ebeff8fd78ca190557894cfd7d51496ee9865e46",
+          "native_events_sha256": "a563ab1ea2796aefcc60a0c37caf4a4e17fdcec695db5e17f8d12f1ee15df004",
+          "artifacts": {
+            "DESIGN.md": "b2caf35d281699fcf5b95c98806d0eec8bad5524eee25f4e45c0c54c090aa0d2",
+            "ledger/service.py": "136c18795c405866af646bc366c6bfc71465413bcc378b4197cadf90339bbdef",
+            "ledger/domain.py": "42ff3e180eff265b3e6ae283a39b0f88d4e992ff9d588f89a0c521d16dbdd4f4",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a3cb5b4a5d9e984b2498143eef4e1961dd2f1c0327f741d467db0594f4f6a165",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091",
+            "tests/test_ledger.py": "758473a06d94ed9c9fafc6970964aabab6b4378febb1e9474ba7162479566160"
+          },
+          "starter_hashes": {
+            "ledger/service.py": "7734828850093aa42c5c7d303d9e43bf0548ff43c8e40f7e83461e6aade99190",
+            "ledger/domain.py": "ce78908a9af2e8a7f9bb7d85e199b031302ea03d7f54b742910d869ae93b7a64",
+            "ledger/__init__.py": "0359ad671960a99f413440b26cfbda499b18455bee9375679c7e2882ada91db4",
+            "ledger/repository.py": "a62f7498db0646e06024ced80a7da375fa0206a14aa0cf43640c41627793c9aa",
+            "tests/test_public.py": "45d1a8ebe260c34e9fa1dd4c57db3428fe3767bc6b4ee18f06ece0e8f9743091"
+          }
+        }
+      ]
+    },
+    "research": {
+      "plan": {
+        "schema": 1,
+        "route": "artifact",
+        "created_utc": "2026-11-18T12:50:12.233988+00:00",
+        "models": [
+          "gpt-6.1-terra",
+          "claude-sonnet-5-5"
+        ],
+        "providers": {
+          "gpt-6.1-terra": "codex",
+          "claude-sonnet-5-5": "claude"
+        },
+        "host_adapter_sha256": "56823d0f88f7a8bce48520a3066da56364a3d0b1354750e66a69b153fb4afe58",
+        "trials": 1,
+        "effort": "low",
+        "schedule": [
+          {
+            "index": 1,
+            "model": "gpt-6.1-terra",
+            "trial": 1
+          },
+          {
+            "index": 2,
+            "model": "claude-sonnet-5-5",
+            "trial": 1
+          }
+        ],
+        "runner_sha256": "793778d38192944d25ec1e0ec8175c872526bbbcadc7f5c816dae21dec163f29",
+        "helper_sha256": "1d4fd81836641f3a5c932cffec35c1ff65171071a428d40599a94e2becf96d47",
+        "hashes": {
+          "prompt.txt": "4b1a1b67466814f5059a249ddd894b547dbb21ff21473566bab4fe17af114472",
+          "instructions.txt": "bb30e289e5bf986d20510ca960d15bf9f285eeaed36589cb56350ee9263c62fc",
+          "grading-spec.json": "c67a660b88bcf8a0f35e289b29a9aceeb74e120f1aa80ef68f22ee9f8fe463d8",
+          "starter/metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+          "starter/data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+          "starter/SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+          "starter/analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+        },
+        "limitations": [
+          "native Codex workspace-write sandbox; host isolation is not a container",
+          "task-specific objective checks and subjective rubric must be reported separately",
+          "model IDs requested; immutable backend snapshot not independently verified",
+          "CLI-launch budget is not a hard token/turn/time budget"
+        ]
+      },
+      "hosts": {
+        "claude": {
+          "authentication": "claude.ai subscription",
+          "auth_method": "claude.ai",
+          "cli_version": "2.1.327 (Claude Code)"
+        },
+        "codex": {
+          "authentication": "ChatGPT subscription",
+          "cli_version": "codex-cli 0.170.0"
+        }
+      },
+      "runs": [
+        {
+          "model": "gpt-6.1-terra",
+          "trial": 1,
+          "status": "completed",
+          "host": "codex",
+          "wall_seconds": 54.24,
+          "usage": {
+            "input_tokens": 45662,
+            "cached_input_tokens": 33536,
+            "cache_write_input_tokens": 0,
+            "output_tokens": 2488,
+            "reasoning_output_tokens": 58
+          },
+          "reported_models": null,
+          "native_tools": null,
+          "native_skills": null,
+          "native_builtin_plugins": null,
+          "native_user_plugins": null,
+          "native_mcp_servers": null,
+          "native_permission_mode": null,
+          "native_api_key_source": null,
+          "native_external_tool_requests": null,
+          "permission_denials": null,
+          "events_sha256": "3ad748fc0b727b4ba9f7589f10b909ee6c7cc6733a7f33841f25ecfeed06c52e",
+          "native_events_sha256": null,
+          "artifacts": {
+            "report.md": "f6d416a6bff4b545dfa890dd690e9a6e58169b991d42a33853b3b04be2b5ef83",
+            "results.json": "14d4b2c381758c95373e44d372fb00d71fd701cac6dd1f23bdb742eb0dac7a74",
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "c34147a5ee9ccbbc22f27d27e50c94dbb11ca1799804e8709080d6a38961c312"
+          },
+          "starter_hashes": {
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+          }
+        },
+        {
+          "model": "claude-sonnet-5-5",
+          "trial": 1,
+          "status": "completed",
+          "host": "claude",
+          "wall_seconds": 49.687,
+          "usage": {
+            "input_tokens": 127943,
+            "cached_input_tokens": 108779,
+            "cache_write_input_tokens": 19146,
+            "output_tokens": 7177
+          },
+          "reported_models": [
+            "claude-sonnet-5-5"
+          ],
+          "native_tools": [
+            "Bash",
+            "Edit",
+            "Read",
+            "Write"
+          ],
+          "native_skills": [],
+          "native_builtin_plugins": [
+            {
+              "name": "cc-plugin-sec-default",
+              "path": "builtin",
+              "source": "cc-plugin-sec-default@builtin"
+            },
+            {
+              "name": "cc-plugin-agents-md",
+              "path": "builtin",
+              "source": "cc-plugin-agents-md@builtin"
+            },
+            {
+              "name": "cc-plugin-telemetry",
+              "path": "builtin",
+              "source": "cc-plugin-telemetry@builtin"
+            },
+            {
+              "name": "cc-plugin-privacy",
+              "path": "builtin",
+              "source": "cc-plugin-privacy@builtin"
+            },
+            {
+              "name": "cc-plugin-plugin-authoring",
+              "path": "builtin",
+              "source": "cc-plugin-plugin-authoring@builtin"
+            }
+          ],
+          "native_user_plugins": [],
+          "native_mcp_servers": [],
+          "native_permission_mode": "dontAsk",
+          "native_api_key_source": "none",
+          "native_external_tool_requests": 0,
+          "permission_denials": [],
+          "events_sha256": "b972e51b13562431a66df216c5fba4ad59576f7e683be0f75b82791ae8a8424f",
+          "native_events_sha256": "3d80922e4a785723345cdc223b96b3ac2ce2d0de08f312852320a0cbe70852cd",
+          "artifacts": {
+            "report.md": "710763cc137e7db96da3a6f7ddcc6390b9ce06111a502037d72a057e42929363",
+            "results.json": "70cd78c37a3bd58a33b83eebdb5411fdb726e1940fcceb281c3f7b51df1875e0",
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "70958b0ec2bdd4878914e1a7589fcea7c697d8b05dfdf025e87943b43131609a"
+          },
+          "starter_hashes": {
+            "metadata.json": "4950cda0e31210ee9a143f0364aaafc9d638e170ec5d140962d91255084d479d",
+            "data.csv": "6d0b74fa37e75b2686c62075a11ab754fdf878ac400dfcbd4bf9a6a64bfaf4f1",
+            "SOURCE-LICENSE.txt": "11a6d83734845ad09d809667aa219857a5b985b28c258a2eebf5677668a6bd3b",
+            "analyze.py": "4b36f08939b79a753567c476cbea6164658f6f1a3a09884cda9e333b58dc8705"
+          }
+        }
+      ]
+    }
+  }
+}

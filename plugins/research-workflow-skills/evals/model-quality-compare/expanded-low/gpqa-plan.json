@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "created_utc": "2026-11-18T10:00:15.545267+00:00",
+  "suite": "gpqa-diamond-8-subset-low-v1",
+  "runner_sha256": "7d85143b45b46a656c831faca55d0f9ab3d2c69cc530b6b2ed36ac5954581e83",
+  "case_count": 8,
+  "models": [
+    "gpt-6.1-sol",
+    "gpt-6.2-sol"
+  ],
+  "trials": 2,
+  "effort": "low",
+  "schedule": [
+    {
+      "model": "gpt-6.1-sol",
+      "trial": 1,
+      "index": 1
+    },
+    {
+      "model": "gpt-6.2-sol",
+      "trial": 1,
+      "index": 2
+    },
+    {
+      "model": "gpt-6.2-sol",
+      "trial": 2,
+      "index": 3
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "trial": 2,
+      "index": 4
+    }
+  ],
+  "auth": "chatgpt-subscription",
+  "hashes": {
+    "suite.json": "4c0ca3638240e972f5c0c895ae18b9a78174a7fb3a13d409d5d557970516c848",
+    "prompt.txt": "5fb6faedc8161571f94f1709f905a13d2694e9cb5c4e680106e050b492e4fd02",
+    "instructions.txt": "ebd8bbb0cb7650a7126624240768ed08f5d0e53e6ac80609ccbe4d89c4a3e440"
+  },
+  "limitations": [
+    "original text pilot, not a named public benchmark",
+    "same cases repeated; repetitions are not independent new questions",
+    "model IDs are requested aliases; backend snapshot not independently verified",
+    "equal reasoning effort is not equal compute; CLI includes a harness",
+    "no vision, code generation/execution, agent tools, safety or long-context coverage",
+    "end-to-end CLI wall time is not TTFT or pure generation speed",
+    "subscription quota consumed; separate API price not applicable"
+  ]
+}

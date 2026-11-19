@@ -1,0 +1,98 @@
+[
+  {
+    "case_id": "GPQA01",
+    "record_id": "recQ8oxSY2aCwFRS8",
+    "domain": "Physics",
+    "option_order_original_indices": [
+      1,
+      0,
+      3,
+      2
+    ],
+    "question_sha256": "71075d4447ee264b63e5544da7b40502fb235decc31484f33ee97a8ef70c3d1f"
+  },
+  {
+    "case_id": "GPQA02",
+    "record_id": "recLB0EkQ54bYVhnd",
+    "domain": "Physics",
+    "option_order_original_indices": [
+      3,
+      2,
+      0,
+      1
+    ],
+    "question_sha256": "28fc44d6ca68ec833bb9837a558199f6e126ccb90f29dc42a2a4bf34ea4b66a7"
+  },
+  {
+    "case_id": "GPQA03",
+    "record_id": "receYQxnUBvxPcvbQ",
+    "domain": "Physics",
+    "option_order_original_indices": [
+      0,
+      3,
+      1,
+      2
+    ],
+    "question_sha256": "9d42c24c2f67ff118699d880fbb6276f14043e3527a9fea8f6d55fe2bf82e091"
+  },
+  {
+    "case_id": "GPQA04",
+    "record_id": "recYA3LPsCvF1fTMI",
+    "domain": "Chemistry",
+    "option_order_original_indices": [
+      0,
+      3,
+      1,
+      2
+    ],
+    "question_sha256": "27ae63a85927fc2f6be3f0be1f1e2034bd696a8dfc534c40370cd6e11d086e76"
+  },
+  {
+    "case_id": "GPQA05",
+    "record_id": "recIDiDKKrN61Auyr",
+    "domain": "Chemistry",
+    "option_order_original_indices": [
+      0,
+      2,
+      3,
+      1
+    ],
+    "question_sha256": "83e987d2b0fb77cafbbc839bda478a9eec874f56b7db34d8c28c0c7ecfd64ba4"
+  },
+  {
+    "case_id": "GPQA06",
+    "record_id": "reckEnrOPFT9Ru7tW",
+    "domain": "Chemistry",
+    "option_order_original_indices": [
+      2,
+      1,
+      3,
+      0
+    ],
+    "question_sha256": "21b950759e4e088c97c70fcca487f4b3ceddd69dd2563433e332a0dde94eeddb"
+  },
+  {
+    "case_id": "GPQA07",
+    "record_id": "reczQ4I0VpENdMtIj",
+    "domain": "Biology",
+    "option_order_original_indices": [
+      0,
+      3,
+      1,
+      2
+    ],
+    "question_sha256": "691112dd08aec41d1dfd7a48bf6e56a828dc8b340887ad6364daff290f8a88c4"
+  },
+  {
+    "case_id": "GPQA08",
+    "record_id": "rec4L69T0Y1AS4AFS",
+    "domain": "Biology",
+    "option_order_original_indices": [
+      0,
+      2,
+      3,
+      1
+    ],
+    "question_sha256": "0c38e0dd0dd88d69880c74a648cf6671f292b7dbef66ff2c7efb580ecc32d374"
+  }
+]

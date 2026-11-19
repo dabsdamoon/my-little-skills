@@ -202,6 +202,7 @@ The updater logs to `$CODEX_HOME/log/marketplace-updates.log` and keeps one rota
 | **character-production-skills** | layered-character-production | Project MagicGirlSquad character continuity, layered rigs, costume damage, expressions, and playable review |
 | **developer-workflow-skills** | dual-track-tdd, dual-track-pr-creator, pr-creator, dual-track-checklist-verifier, setup-release-pipeline, deploy-check, webapp-testing, refactoring-resistant-tests, generate-git-work-report, docker-ram-checker, database-migrations, mcp-builder, prompt-optimizer, subagent-creator, debugging-retrospective, gcloud-direnv-setup | Evidence-driven product discovery, TDD delivery, track-aware PR docs, release pipelines, deploy checks, Git-based execution histories, browser testing, refactoring-resistant testing, Docker memory checks, debugging postmortems, and more |
 | **analysis-skills** | analytique, building-decision-reports, building-health-evidence-reports, selecting-video-shorts | Critical analysis, evidence-backed business decision reports, scenario modeling, health statistics evidence packs, and context-preserving Shorts selection |
+| **research-workflow-skills** | model-quality-compare, experiment-loop, experiment-diagnosis | Controlled subscription model comparisons, reproducible experiment iteration and diagnosis |
 | **security-skills** | web-security-checklist | Security review checklist and greppable diff review for Next.js, Supabase, Python, and Go apps |
 | **fde-estimation-skills** | capture-customer-outcomes, document-field-discovery, collect-as-built-evidence, define-estimation-policy, reconcile-scope-delta, generate-estimate-package | Interactive, evidence-backed FDE discovery, reviewed staffing, seniority, rate, scope, and effort reconciliation, budgetary estimates, and basis-of-estimate reports |
 | **writing-skills** | doc-coauthoring, internal-comms, skill-creator, system-prompt-creator, humanize-korean, explain-simply | Documentation workflows, internal comms, skill/prompt authoring, Korean AI-text humanizing, decoding jargon-heavy work summaries |
@@ -226,6 +227,32 @@ Canonical source: [skills/visual-explainer](skills/visual-explainer/SKILL.md).
 The [upstream record](skills/visual-explainer/UPSTREAM.md) pins v0.15.0 and keeps
 the original MIT and bundled library notices. Basic rendering needs Node.js;
 the optional MCP and export helpers are not enabled by importing the skill.
+
+## Model comparisons
+
+`research-workflow-skills` includes `model-quality-compare`. Ask to compare available
+GPT versions on your ChatGPT subscription, or use its Claude single-task workflow.
+The default GPT pilot uses four CLI calls with 24 original text cases and objective
+grading. It records category scores, repeatability, token usage and wall time, and
+produces an HTML report. It never silently switches to API billing.
+
+For implementation, structure and research outcomes, use its
+[artifact workflow](skills/model-quality-compare/references/artifact-workflow.md):
+independent writable starter copies, actual code/data outputs, frozen executable
+checks and separate blinded review. The
+[expanded low-effort evaluation](plugins/research-workflow-skills/evals/model-quality-compare/expanded-low/EVALUATION.md)
+preserves both models' code, research reports, dataset notices and numerical checks.
+
+The [native-host controls](skills/model-quality-compare/references/native-hosts.md)
+also support exact Claude model IDs through Claude.ai subscription login. The
+[fresh-session Terra/Sonnet comparison](plugins/research-workflow-skills/evals/model-quality-compare/terra-sonnet-low/EVALUATION.md)
+records context exclusions, eight distinct sessions, safe native inventories,
+unchanged task hashes, and separate objective versus interpretive results.
+
+Read the [skill](skills/model-quality-compare/SKILL.md),
+[metric guide](skills/model-quality-compare/references/metrics.md), and
+[GPT 6.1/6.2 pilot evidence](plugins/research-workflow-skills/evals/model-quality-compare/EVALUATION.md).
+The pilot reached 100% for both models and cannot establish a general winner.
 
 ## Licensing
 

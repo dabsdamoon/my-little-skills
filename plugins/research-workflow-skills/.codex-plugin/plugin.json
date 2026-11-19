@@ -1,0 +1,25 @@
+{
+  "name": "research-workflow-skills",
+  "description": "Research workflows: controlled subscription model comparisons, autonomous experiment iteration, and evidence-based experiment diagnosis",
+  "version": "1.2.0",
+  "license": "MIT",
+  "author": {
+    "name": "dabsdamoon"
+  },
+  "interface": {
+    "displayName": "Research Workflow Skills",
+    "shortDescription": "Compare models and run reproducible experiments",
+    "longDescription": "Controlled subscription model comparisons, bounded experiment iteration, and evidence-based experiment diagnosis.",
+    "developerName": "dabsdamoon",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Execute"
+    ],
+    "defaultPrompt": [
+      "Compare two available models on a small reproducible subscription pilot.",
+      "Diagnose the current experiment and recommend the next step."
+    ]
+  }
+}

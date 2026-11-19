@@ -1,0 +1,18 @@
+{
+  "status": "separate exploratory diagnostic; not included in 13 frozen tests",
+  "digits": 5001,
+  "results": [
+    {
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Exceeds the limit (4300 digits) for integer string conversion: value has 5001 digits; use sys.set_int_max_str_digits() to increase the limit",
+      "model": "gpt-6.1-terra"
+    },
+    {
+      "accepted": false,
+      "error_type": "ValueError",
+      "message": "Exceeds the limit (4300 digits) for integer string conversion: value has 5001 digits; use sys.set_int_max_str_digits() to increase the limit",
+      "model": "claude-sonnet-5-5"
+    }
+  ]
+}

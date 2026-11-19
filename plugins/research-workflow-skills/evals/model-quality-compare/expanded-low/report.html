@@ -1,0 +1,810 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>GPT Sol low 확장 평가</title><style>*{box-sizing:border-box}body{margin:0;background:#f4f3ee;color:#182a35;font:16px/1.65 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}main{max-width:1140px;margin:auto;padding:36px 24px 80px}h1{font-size:clamp(27px,4vw,44px);line-height:1.25;margin:10px 0 16px}h2{margin-top:42px;font-size:25px}h3{font-size:18px}.eyebrow{font-size:12px;letter-spacing:.12em;color:#52656c}.lead{font-size:19px}.panel,details{background:#fff;padding:22px;border:1px solid #d6dcd9;margin:16px 0}.notice{border-left:4px solid #a67022;background:#fff8e8;padding:16px 20px}.scroll{overflow:auto}table{border-collapse:collapse;width:100%;min-width:570px;background:white}th,td{padding:12px 15px;text-align:left;border-bottom:1px solid #d7dfdb;vertical-align:top}th{font-size:13px;color:#52656c}td strong{font-size:20px}.lanes,.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.compare{grid-template-columns:repeat(2,1fr)}.lane{padding:16px 18px;background:#fff;border:1px solid #d6dcd9}.lane b{display:block;font-size:18px}.tag{display:inline-block;font-size:12px;padding:3px 8px;background:#e5eee9}.partial{background:#f6ead0}.bars{background:white;padding:20px}.barrow{display:grid;grid-template-columns:180px 1fr 70px;gap:14px;align-items:center;margin:10px 0}.track{height:18px;background:#e4e9e6}.fill{height:100%;background:#456277}.m1{background:#2b8177}.barrow label{font-size:13px}.fine{font-size:13px;color:#53626b}summary{font-weight:600;cursor:pointer}pre{font:12px/1.6 Menlo,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f6f3;padding:14px}code{overflow-wrap:anywhere}a{color:#28645f}.rtrack{position:relative;height:20px;background:#eff2ef}.zero{position:absolute;left:50%;height:100%;border-left:1px solid #6c7a7d}.rbar{position:absolute;height:100%;background:#456277}.rpositive{background:#2b8177}.negative{font-variant-numeric:tabular-nums}@media(max-width:650px){main{padding:24px 12px 60px}.lanes,.compare{grid-template-columns:1fr}.panel,details{padding:16px}.barrow{grid-template-columns:120px 1fr 60px;gap:9px}h2{font-size:22px}.lead{font-size:17px}}</style></head><body><main><p class="eyebrow">2026-11-18 · LOW · CHATGPT SUBSCRIPTION · 8 CONTESTANT RUNS</p><h1>기능 검증은 동률.<br>일반 역량의 우열은 미확정.</h1><p class="lead">고난도 문항, 실제 코드 수정, 재현 가능한 연구 분석을 실행했다. 구조 검토에서는 한 가지 극단적 경계조건 차이가 발견됐다.</p><div class="lanes"><div class="lane"><span class="tag">정답 검증</span><b>GPQA Diamond</b>8개 공개 문항 → 선택지 채점<br>모델마다 두 번</div><div class="lane"><span class="tag">실행 검증</span><b>다중 파일 구현</b>원장 코드 수정 → 숨김 테스트<br>모델마다 한 번</div><div class="lane"><span class="tag">재현 검증</span><b>연구 목표</b>데이터 분석 → 변형 데이터 재실행<br>모델마다 한 번</div></div><section class="panel"><h2 style="margin-top:0">사전 기준에 따른 객관 검증</h2><div class="scroll"><table><thead><tr><th>검증</th><th>GPT-6.1 Sol</th><th>GPT-6.2 Sol</th><th>해석</th></tr></thead><tbody><tr><td>GPQA 8문항</td><td><strong>8/8 · 8/8</strong></td><td><strong>8/8 · 8/8</strong></td><td>같은 8문항 반복. 전체 벤치마크 점수 아님.</td></tr><tr><td>원장 구현</td><td><strong>13/13</strong></td><td><strong>13/13</strong></td><td>초기 코드는 3/13. 두 구현 모두 사전 검증 통과.</td></tr><tr><td>연구 분석</td><td><strong>7/7</strong></td><td><strong>7/7</strong></td><td>수치·변형 입력·저장 결과 재현. 초기 코드는 0/7.</td></tr></tbody></table></div></section><h2>코드 구조와 연구 해석은 별도 의견이다</h2><div class="scroll"><table><thead><tr><th>익명 LLM 검토 · 각 6점</th><th>GPT-6.1 Sol</th><th>GPT-6.2 Sol</th></tr></thead><tbody><tr><td>구조·불변조건</td><td>5/6</td><td>6/6</td></tr><tr><td>연구 해석·방법·한계</td><td>6/6</td><td>6/6</td></tr></tbody></table></div><p class="fine">평가자: GPT-6.2 Astra. 제출물은 A/B로 익명화했고 이름 매핑은 점수 저장 후 공개했다. 동일 공급자의 단일 LLM 의견이며 객관 정답률과 합산하지 않는다.</p><aside class="notice"><b>추가 관찰: 5,001자리 금액</b><p>6.1 구현은 Python의 기본 정수 문자열 변환 제한에 걸렸다. 6.2 구현은 정확한 잔액을 반환했다. 별도 격리 실행으로 재현했다.</p><p>이 사례는 심사 중 발견한 사후 관찰이다. 사전 테스트 13/13 점수는 유지하며, 일반적인 설계 우위로 확대하지 않는다.</p></aside><h2>구현 전후의 실제 코드</h2><p>두 모델 모두 금액·순서·중복 처리·여러 고객의 원자적 롤백을 구현했다. 아래에서 원본과 두 제출물을 직접 비교할 수 있다.</p><details><summary>수정 전 · float 기반, 원자성·중복 처리 없음</summary><h3>ledger/__init__.py</h3><pre>from .service import Ledger
+</pre><h3>ledger/domain.py</h3><pre>def amount(value):
+    return float(value)
+</pre><h3>ledger/repository.py</h3><pre>class MemoryState:
+    def __init__(self):
+        self.balances = {}
+</pre><h3>ledger/service.py</h3><pre>from .domain import amount
+from .repository import MemoryState
+
+
+class Ledger:
+    def __init__(self):
+        self.state = MemoryState()
+
+    def balance(self, tenant):
+        return f&#x27;{self.state.balances.get(tenant, 0):.2f}&#x27;
+
+    def apply_batch(self, events):
+        result = []
+        for event in events:
+            tenant = event[&#x27;tenant&#x27;]
+            self.state.balances[tenant] = self.state.balances.get(tenant, 0) + amount(event[&#x27;amount&#x27;])
+            result.append({&#x27;tenant&#x27;: tenant, &#x27;event_id&#x27;: event[&#x27;event_id&#x27;],
+                           &#x27;applied&#x27;: True, &#x27;balance&#x27;: self.balance(tenant)})
+        return result
+</pre><h3>tests/test_public.py</h3><pre>import unittest
+from ledger import Ledger
+
+
+class PublicBehavior(unittest.TestCase):
+    def test_deposit(self):
+        ledger = Ledger()
+        result = ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(result, [{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;applied&#x27;:True,&#x27;balance&#x27;:&#x27;10.00&#x27;}])
+
+    def test_independent_balance(self):
+        ledger = Ledger()
+        ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(ledger.balance(&#x27;b&#x27;),&#x27;0.00&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;: unittest.main()
+</pre></details><div class="compare"><div><details><summary>gpt-6.1-sol 제출물</summary><h3>DESIGN.md</h3><pre># Ledger design
+
+`domain.py` validates event shapes and decimal syntax and converts money to integer
+cents. No floating-point or context-limited decimal arithmetic is involved. Names
+are validated but preserved exactly; amounts normalize by numeric cents, including
+signed zero. Decimal strings have digits before the optional decimal point and
+one or two digits after it; an optional leading sign is supported.
+
+`repository.py` owns balances, last sequences, and immutable original receipts.
+`service.py` enforces sequencing, idempotency and nonnegative balances and builds
+public responses. A replay reads the receipt&#x27;s original balance, not today&#x27;s.
+
+Each batch shallow-copies the three state dictionaries. Their values are integers
+or immutable receipts, so staged changes cannot leak into committed state. Only
+successful exhaustion of the single-pass input commits the staged state by one
+reference replacement. Validation failures, conflicts, overdrafts and iterator
+exceptions all discard the snapshot. Inputs are never modified. This trades
+O(total stored state) copying per batch for simple, auditable atomicity.
+
+This is an in-memory, synchronous API, not a concurrent or durable database.
+A future durable backend would replace snapshot copying with a database
+transaction covering balances, sequences and receipts, with a unique constraint
+on (tenant, event_id) and serialization of each tenant&#x27;s updates. Domain parsing
+and public response behavior could remain unchanged; transaction orchestration
+would need to move behind a repository transaction boundary.
+</pre><h3>ledger/__init__.py</h3><pre>from .service import Ledger
+</pre><h3>ledger/domain.py</h3><pre>&quot;&quot;&quot;Validation and exact money representation, independent of stored state.&quot;&quot;&quot;
+from dataclasses import dataclass
+import re
+
+
+_DECIMAL = re.compile(r&#x27;[+-]?[0-9]+(?:\.[0-9]{1,2})?\Z&#x27;)
+
+
+def amount(value):
+    &quot;&quot;&quot;Parse a plain decimal string into integer cents (without rounding).&quot;&quot;&quot;
+    if not isinstance(value, str) or not _DECIMAL.fullmatch(value):
+        raise ValueError(&#x27;amount must be a plain decimal string with at most two places&#x27;)
+    negative = value.startswith(&#x27;-&#x27;)
+    unsigned = value.lstrip(&#x27;+-&#x27;)
+    whole, _, fraction = unsigned.partition(&#x27;.&#x27;)
+    cents = int(whole) * 100 + int(fraction.ljust(2, &#x27;0&#x27;))
+    return -cents if negative else cents
+
+
+def format_money(cents):
+    sign = &#x27;-&#x27; if cents &lt; 0 else &#x27;&#x27;
+    whole, fraction = divmod(abs(cents), 100)
+    return f&#x27;{sign}{whole}.{fraction:02d}&#x27;
+
+
+@dataclass(frozen=True)
+class Event:
+    tenant: str
+    event_id: str
+    seq: int
+    cents: int
+
+    @classmethod
+    def parse(cls, raw):
+        if not isinstance(raw, dict):
+            raise ValueError(&#x27;event must be a dictionary&#x27;)
+        tenant, event_id = raw.get(&#x27;tenant&#x27;), raw.get(&#x27;event_id&#x27;)
+        if any(not isinstance(value, str) or not value.strip()
+               for value in (tenant, event_id)):
+            raise ValueError(&#x27;tenant and event_id must be nonblank strings&#x27;)
+        seq = raw.get(&#x27;seq&#x27;)
+        if isinstance(seq, bool) or not isinstance(seq, int) or seq &lt;= 0:
+            raise ValueError(&#x27;seq must be a positive integer&#x27;)
+        return cls(tenant, event_id, seq, amount(raw.get(&#x27;amount&#x27;)))
+</pre><h3>ledger/repository.py</h3><pre>&quot;&quot;&quot;In-memory state and isolated batch snapshots.&quot;&quot;&quot;
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class Receipt:
+    seq: int
+    cents: int
+    balance: int
+
+
+class MemoryState:
+    def __init__(self):
+        self.balances = {}
+        self.sequences = {}
+        self.receipts = {}
+
+    def snapshot(self):
+        staged = MemoryState()
+        staged.balances = self.balances.copy()
+        staged.sequences = self.sequences.copy()
+        staged.receipts = self.receipts.copy()
+        return staged
+</pre><h3>ledger/service.py</h3><pre>&quot;&quot;&quot;Batch orchestration and ledger transition rules.&quot;&quot;&quot;
+from .domain import Event, format_money
+from .repository import MemoryState, Receipt
+
+
+class Ledger:
+    def __init__(self):
+        self.state = MemoryState()
+
+    def balance(self, tenant):
+        return format_money(self.state.balances.get(tenant, 0))
+
+    def apply_batch(self, events):
+        staged = self.state.snapshot()
+        result = []
+        for raw in events:
+            event = Event.parse(raw)
+            key = (event.tenant, event.event_id)
+            receipt = staged.receipts.get(key)
+            applied = receipt is None
+            if receipt is not None:
+                if (receipt.seq, receipt.cents) != (event.seq, event.cents):
+                    raise ValueError(&#x27;idempotency key reused with different contents&#x27;)
+            else:
+                if event.seq != staged.sequences.get(event.tenant, 0) + 1:
+                    raise ValueError(&#x27;new events must have consecutive sequence numbers&#x27;)
+                balance = staged.balances.get(event.tenant, 0) + event.cents
+                if balance &lt; 0:
+                    raise ValueError(&#x27;insufficient funds&#x27;)
+                receipt = Receipt(event.seq, event.cents, balance)
+                staged.balances[event.tenant] = balance
+                staged.sequences[event.tenant] = event.seq
+                staged.receipts[key] = receipt
+            result.append({&#x27;tenant&#x27;: event.tenant, &#x27;event_id&#x27;: event.event_id,
+                           &#x27;applied&#x27;: applied, &#x27;balance&#x27;: format_money(receipt.balance)})
+        # Commit only after successful exhaustion, including iterator finalization.
+        self.state = staged
+        return result
+</pre><h3>tests/test_contract.py</h3><pre>import copy
+import unittest
+
+from ledger import Ledger
+
+
+def event(tenant=&#x27;a&#x27;, event_id=&#x27;one&#x27;, seq=1, amount=&#x27;10.00&#x27;):
+    return dict(tenant=tenant, event_id=event_id, seq=seq, amount=amount)
+
+
+class LedgerContract(unittest.TestCase):
+    def test_exact_money_and_input_preservation(self):
+        ledger = Ledger()
+        events = [event(amount=&#x27;9007199254740993.01&#x27;),
+                  event(event_id=&#x27;two&#x27;, seq=2, amount=&#x27;0.02&#x27;)]
+        original = copy.deepcopy(events)
+        results = ledger.apply_batch(iter(events))
+        self.assertEqual(events, original)
+        self.assertEqual(results[-1], dict(tenant=&#x27;a&#x27;, event_id=&#x27;two&#x27;,
+                                          applied=True, balance=&#x27;9007199254740993.03&#x27;))
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;9007199254740993.03&#x27;)
+
+    def test_interleaving_and_historical_replays(self):
+        ledger = Ledger()
+        results = ledger.apply_batch([
+            event(amount=&#x27;10&#x27;), event(tenant=&#x27;b&#x27;, amount=&#x27;2&#x27;),
+            event(event_id=&#x27;two&#x27;, seq=2, amount=&#x27;-3&#x27;),
+            event(amount=&#x27;+10.0&#x27;), event(event_id=&#x27;three&#x27;, seq=3, amount=&#x27;-7&#x27;)])
+        self.assertEqual([r[&#x27;applied&#x27;] for r in results], [True, True, True, False, True])
+        self.assertEqual([r[&#x27;balance&#x27;] for r in results], [&#x27;10.00&#x27;, &#x27;2.00&#x27;, &#x27;7.00&#x27;, &#x27;10.00&#x27;, &#x27;0.00&#x27;])
+        self.assertEqual(ledger.apply_batch([event(amount=&#x27;10.00&#x27;)])[0][&#x27;balance&#x27;], &#x27;10.00&#x27;)
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;0.00&#x27;)
+        self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;2.00&#x27;)
+
+    def test_invalid_events(self):
+        bad = [None, [], {}, event(tenant=&#x27; &#x27;), event(event_id=&#x27;&#x27;),
+               event(seq=True), event(seq=0), event(seq=1.0), event(seq=&#x27;1&#x27;)]
+        bad += [event(amount=x) for x in [1, 1.2, None, &#x27;&#x27;, &#x27; 1&#x27;, &#x27;1 &#x27;, &#x27;1e2&#x27;,
+                                         &#x27;NaN&#x27;, &#x27;Infinity&#x27;, &#x27;1.001&#x27;, &#x27;--1&#x27;, &#x27;1\n&#x27;]]
+        for invalid in bad:
+            with self.subTest(invalid=invalid):
+                ledger = Ledger()
+                with self.assertRaises(ValueError):
+                    ledger.apply_batch([event(tenant=&#x27;b&#x27;), invalid])
+                self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;0.00&#x27;)
+                self.assertTrue(ledger.apply_batch([event(tenant=&#x27;b&#x27;)])[0][&#x27;applied&#x27;])
+
+    def test_conflicts_gaps_and_overdraft_roll_back_everything(self):
+        for invalid in [event(amount=&#x27;11&#x27;), event(seq=2),
+                        event(event_id=&#x27;gap&#x27;, seq=3),
+                        event(event_id=&#x27;debit&#x27;, seq=2, amount=&#x27;-10.01&#x27;)]:
+            with self.subTest(invalid=invalid):
+                ledger = Ledger()
+                ledger.apply_batch([event()])
+                with self.assertRaises(ValueError):
+                    ledger.apply_batch([event(tenant=&#x27;b&#x27;), invalid])
+                self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;10.00&#x27;)
+                self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;0.00&#x27;)
+                self.assertTrue(ledger.apply_batch([event(tenant=&#x27;b&#x27;)])[0][&#x27;applied&#x27;])
+                self.assertTrue(ledger.apply_batch([event(event_id=&#x27;next&#x27;, seq=2)])[0][&#x27;applied&#x27;])
+
+    def test_iterator_exception_propagates_and_rolls_back(self):
+        ledger = Ledger()
+        failure = RuntimeError(&#x27;input failed&#x27;)
+
+        def events():
+            yield event()
+            yield event(tenant=&#x27;b&#x27;)
+            raise failure
+
+        with self.assertRaises(RuntimeError) as caught:
+            ledger.apply_batch(events())
+        self.assertIs(caught.exception, failure)
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;0.00&#x27;)
+        self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;0.00&#x27;)
+        self.assertTrue(ledger.apply_batch([event()])[0][&#x27;applied&#x27;])
+
+    def test_empty_and_zero_normalization(self):
+        ledger = Ledger()
+        self.assertEqual(ledger.apply_batch(iter([])), [])
+        self.assertEqual(ledger.balance(&#x27;missing&#x27;), &#x27;0.00&#x27;)
+        results = ledger.apply_batch([event(amount=&#x27;-0.00&#x27;), event(amount=&#x27;+0&#x27;)])
+        self.assertEqual(results, [dict(tenant=&#x27;a&#x27;, event_id=&#x27;one&#x27;, applied=True, balance=&#x27;0.00&#x27;),
+                                   dict(tenant=&#x27;a&#x27;, event_id=&#x27;one&#x27;, applied=False, balance=&#x27;0.00&#x27;)])
+
+
+if __name__ == &#x27;__main__&#x27;:
+    unittest.main()
+</pre><h3>tests/test_public.py</h3><pre>import unittest
+from ledger import Ledger
+
+
+class PublicBehavior(unittest.TestCase):
+    def test_deposit(self):
+        ledger = Ledger()
+        result = ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(result, [{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;applied&#x27;:True,&#x27;balance&#x27;:&#x27;10.00&#x27;}])
+
+    def test_independent_balance(self):
+        ledger = Ledger()
+        ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(ledger.balance(&#x27;b&#x27;),&#x27;0.00&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;: unittest.main()
+</pre></details></div><div><details><summary>gpt-6.2-sol 제출물</summary><h3>DESIGN.md</h3><pre># Ledger design
+
+The domain module validates event fields and converts monetary strings to
+integer cents. Arithmetic uses integers, independent of floating-point precision
+and the active decimal context. Tenant and event IDs are checked for blankness
+but otherwise retained as supplied.
+
+The repository owns current per-tenant sequence and balance, plus immutable
+event records keyed by tenant and event ID. It looks up replays before checking
+sequence continuity so old events can return their original post-event balances.
+The service consumes the iterable once and assembles the public response.
+
+Each batch starts with shallow copies of the repository&#x27;s maps. Their values
+are immutable, so staged writes cannot leak into committed state. Later events
+in the same batch see earlier staged writes. The service replaces the committed
+state only after iteration and response construction finish successfully. Any
+exception propagates without publishing the draft. This is batch atomicity for
+serial calls, not a guarantee of thread-safe concurrent writes.
+
+Copying the maps costs time and memory proportional to retained state, even
+for a small batch. If persistence becomes necessary, the repository can store
+accounts and event records in a database with a unique tenant/event-ID key.
+The service would replace copying and publishing with a transaction that
+commits after iterator exhaustion; the validation and response shape could
+remain unchanged. Concurrent writers would also need transactional protection
+around the per-tenant sequence and balance checks.
+</pre><h3>ledger/__init__.py</h3><pre>from .service import Ledger
+</pre><h3>ledger/domain.py</h3><pre>&quot;&quot;&quot;Validation and exact money conversion at the ledger boundary.&quot;&quot;&quot;
+
+import re
+from decimal import Decimal
+
+
+_PLAIN_DECIMAL = re.compile(r&#x27;[+-]?(?:[0-9]+(?:\.[0-9]{0,2})?|\.[0-9]{1,2})&#x27;)
+
+
+def amount(value):
+    &quot;&quot;&quot;Normalize a plain decimal string to integer cents.&quot;&quot;&quot;
+    if not isinstance(value, str) or not _PLAIN_DECIMAL.fullmatch(value):
+        raise ValueError(&#x27;amount must be a plain decimal string with at most two decimal places&#x27;)
+    whole, _, fraction = value.partition(&#x27;.&#x27;)
+    # Convert without Decimal arithmetic (which would use the ambient context)
+    # or a direct string-to-int conversion (which can have a digit limit).
+    return int(Decimal(whole + fraction.ljust(2, &#x27;0&#x27;)))
+
+
+def format_balance(cents):
+    whole, fraction = divmod(cents, 100)
+    return f&#x27;{Decimal(whole):f}.{fraction:02d}&#x27;
+
+
+def validate_event(event):
+    if not isinstance(event, dict):
+        raise ValueError(&#x27;event must be a dictionary&#x27;)
+    tenant = event.get(&#x27;tenant&#x27;)
+    event_id = event.get(&#x27;event_id&#x27;)
+    seq = event.get(&#x27;seq&#x27;)
+    for name, value in ((&#x27;tenant&#x27;, tenant), (&#x27;event_id&#x27;, event_id)):
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f&#x27;{name} must be a nonblank string&#x27;)
+    if isinstance(seq, bool) or not isinstance(seq, int) or seq &lt; 1:
+        raise ValueError(&#x27;seq must be a positive integer&#x27;)
+    return tenant, event_id, seq, amount(event.get(&#x27;amount&#x27;))
+</pre><h3>ledger/repository.py</h3><pre>&quot;&quot;&quot;In-memory ledger state and its transaction-local updates.&quot;&quot;&quot;
+
+from typing import NamedTuple
+
+
+class EventRecord(NamedTuple):
+    seq: int
+    cents: int
+    balance: int
+
+
+class MemoryState:
+    def __init__(self):
+        self._accounts = {}
+        self._events = {}
+
+    def copy(self):
+        staged = MemoryState()
+        staged._accounts = self._accounts.copy()
+        staged._events = self._events.copy()
+        return staged
+
+    def balance(self, tenant):
+        return self._accounts.get(tenant, (0, 0))[1]
+
+    def apply(self, tenant, event_id, seq, cents):
+        key = tenant, event_id
+        record = self._events.get(key)
+        if record is not None:
+            if (seq, cents) != (record.seq, record.cents):
+                raise ValueError(&#x27;event ID was already used with a different sequence or amount&#x27;)
+            return False, record.balance
+
+        last_seq, balance = self._accounts.get(tenant, (0, 0))
+        if seq != last_seq + 1:
+            raise ValueError(&#x27;new events must have consecutive sequence numbers&#x27;)
+        balance += cents
+        if balance &lt; 0:
+            raise ValueError(&#x27;insufficient funds&#x27;)
+
+        self._accounts[tenant] = (seq, balance)
+        self._events[key] = EventRecord(seq, cents, balance)
+        return True, balance
+</pre><h3>ledger/service.py</h3><pre>from .domain import format_balance, validate_event
+from .repository import MemoryState
+
+
+class Ledger:
+    def __init__(self):
+        self._state = MemoryState()
+
+    def balance(self, tenant):
+        return format_balance(self._state.balance(tenant))
+
+    def apply_batch(self, events):
+        staged = self._state.copy()
+        result = []
+        for event in events:
+            tenant, event_id, seq, cents = validate_event(event)
+            applied, balance = staged.apply(tenant, event_id, seq, cents)
+            result.append({&#x27;tenant&#x27;: tenant, &#x27;event_id&#x27;: event_id,
+                           &#x27;applied&#x27;: applied, &#x27;balance&#x27;: format_balance(balance)})
+        self._state = staged
+        return result
+</pre><h3>tests/test_ledger.py</h3><pre>import unittest
+
+from ledger import Ledger
+
+
+def event(tenant, event_id, seq, amount):
+    return dict(tenant=tenant, event_id=event_id, seq=seq, amount=amount)
+
+
+class LedgerBehavior(unittest.TestCase):
+    def test_interleaved_events_and_historical_replay(self):
+        ledger = Ledger()
+        original = event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;9007199254740993.01&#x27;)
+        result = ledger.apply_batch(iter([
+            original,
+            event(&#x27;b&#x27;, &#x27;first&#x27;, 1, &#x27;2&#x27;),
+            event(&#x27;a&#x27;, &#x27;second&#x27;, 2, &#x27;-0.02&#x27;),
+            event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;+09007199254740993.01&#x27;),
+            event(&#x27;a&#x27;, &#x27;third&#x27;, 3, &#x27;0.01&#x27;),
+        ]))
+        self.assertEqual(result, [
+            dict(tenant=&#x27;a&#x27;, event_id=&#x27;first&#x27;, applied=True, balance=&#x27;9007199254740993.01&#x27;),
+            dict(tenant=&#x27;b&#x27;, event_id=&#x27;first&#x27;, applied=True, balance=&#x27;2.00&#x27;),
+            dict(tenant=&#x27;a&#x27;, event_id=&#x27;second&#x27;, applied=True, balance=&#x27;9007199254740992.99&#x27;),
+            dict(tenant=&#x27;a&#x27;, event_id=&#x27;first&#x27;, applied=False, balance=&#x27;9007199254740993.01&#x27;),
+            dict(tenant=&#x27;a&#x27;, event_id=&#x27;third&#x27;, applied=True, balance=&#x27;9007199254740993.00&#x27;),
+        ])
+        self.assertEqual(original, event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;9007199254740993.01&#x27;))
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;9007199254740993.00&#x27;)
+        self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;2.00&#x27;)
+
+    def test_batch_rolls_back_across_tenants(self):
+        ledger = Ledger()
+        ledger.apply_batch([event(&#x27;a&#x27;, &#x27;initial&#x27;, 1, &#x27;3&#x27;)])
+        with self.assertRaises(ValueError):
+            ledger.apply_batch([
+                event(&#x27;a&#x27;, &#x27;pending&#x27;, 2, &#x27;-3&#x27;),
+                event(&#x27;b&#x27;, &#x27;pending&#x27;, 1, &#x27;4&#x27;),
+                event(&#x27;a&#x27;, &#x27;overdraft&#x27;, 3, &#x27;-0.01&#x27;),
+            ])
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;3.00&#x27;)
+        self.assertEqual(ledger.balance(&#x27;b&#x27;), &#x27;0.00&#x27;)
+        result = ledger.apply_batch([
+            event(&#x27;a&#x27;, &#x27;pending&#x27;, 2, &#x27;1&#x27;),
+            event(&#x27;b&#x27;, &#x27;pending&#x27;, 1, &#x27;2&#x27;),
+        ])
+        self.assertEqual([(r[&#x27;applied&#x27;], r[&#x27;balance&#x27;]) for r in result],
+                         [(True, &#x27;4.00&#x27;), (True, &#x27;2.00&#x27;)])
+
+    def test_iterator_exception_propagates_without_committing(self):
+        ledger = Ledger()
+        failure = RuntimeError(&#x27;input failed&#x27;)
+
+        def broken():
+            yield event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;1&#x27;)
+            raise failure
+
+        with self.assertRaises(RuntimeError) as caught:
+            ledger.apply_batch(broken())
+        self.assertIs(caught.exception, failure)
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;0.00&#x27;)
+        self.assertTrue(ledger.apply_batch([event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;2&#x27;)])[0][&#x27;applied&#x27;])
+
+    def test_invalid_fields_and_sequence_gap(self):
+        ledger = Ledger()
+        valid = event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;1&#x27;)
+        for update in (
+            {&#x27;tenant&#x27;: &#x27;  &#x27;}, {&#x27;event_id&#x27;: &#x27;&#x27;}, {&#x27;seq&#x27;: True}, {&#x27;seq&#x27;: 0},
+            {&#x27;seq&#x27;: 2}, {&#x27;amount&#x27;: 1.0}, {&#x27;amount&#x27;: &#x27;1e0&#x27;}, {&#x27;amount&#x27;: &#x27;NaN&#x27;},
+            {&#x27;amount&#x27;: &#x27;Infinity&#x27;}, {&#x27;amount&#x27;: &#x27;1.001&#x27;}, {&#x27;amount&#x27;: &#x27; 1&#x27;},
+        ):
+            with self.subTest(update=update), self.assertRaises(ValueError):
+                ledger.apply_batch([dict(valid, **update)])
+        self.assertEqual(ledger.balance(&#x27;a&#x27;), &#x27;0.00&#x27;)
+        self.assertEqual(ledger.apply_batch(iter(())), [])
+
+    def test_replay_conflicts_leave_original_record_intact(self):
+        ledger = Ledger()
+        original = event(&#x27;a&#x27;, &#x27;first&#x27;, 1, &#x27;1&#x27;)
+        ledger.apply_batch([original])
+        for conflict in (dict(original, amount=&#x27;2&#x27;), dict(original, seq=2)):
+            with self.subTest(conflict=conflict), self.assertRaises(ValueError):
+                ledger.apply_batch([conflict])
+        self.assertEqual(ledger.apply_batch([original]), [
+            dict(tenant=&#x27;a&#x27;, event_id=&#x27;first&#x27;, applied=False, balance=&#x27;1.00&#x27;),
+        ])
+</pre><h3>tests/test_public.py</h3><pre>import unittest
+from ledger import Ledger
+
+
+class PublicBehavior(unittest.TestCase):
+    def test_deposit(self):
+        ledger = Ledger()
+        result = ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(result, [{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;applied&#x27;:True,&#x27;balance&#x27;:&#x27;10.00&#x27;}])
+
+    def test_independent_balance(self):
+        ledger = Ledger()
+        ledger.apply_batch([{&#x27;tenant&#x27;:&#x27;a&#x27;,&#x27;event_id&#x27;:&#x27;one&#x27;,&#x27;seq&#x27;:1,&#x27;amount&#x27;:&#x27;10.00&#x27;}])
+        self.assertEqual(ledger.balance(&#x27;b&#x27;),&#x27;0.00&#x27;)
+
+
+if __name__ == &#x27;__main__&#x27;: unittest.main()
+</pre></details></div></div><h2>연구는 계산과 결론을 함께 확인했다</h2><p>두 모델 모두 원본 자료의 GDP/GNI 표현 불일치를 찾아냈다. 집단별 수준과 연간 차분을 계산하고, 상관으로 인과 효과를 주장할 수 없다고 설명했다.</p><div class="scroll"><table><thead><tr><th>분석</th><th>관측 수</th><th>상관계수 r</th><th>두 제출물</th></tr></thead><tbody><tr><td>SSF · 수준</td><td>5</td><td>-0.966421</td><td>재현 결과 일치</td></tr><tr><td>SSF · 연간 차분</td><td>4</td><td>-0.455752</td><td>재현 결과 일치</td></tr><tr><td>LMC · 수준</td><td>41</td><td>-0.480538</td><td>재현 결과 일치</td></tr><tr><td>LMC · 연간 차분</td><td>40</td><td>+0.078761</td><td>재현 결과 일치</td></tr></tbody></table></div><p class="fine">행 순서, 결측 연도, 값의 배율·이동, 상수 입력도 따로 검증했다. 데이터에 대한 한 번의 작은 분석이며, 장기 자율 연구나 논문 재현을 검증한 것은 아니다.</p><div class="compare"><div><details><summary>gpt-6.1-sol 연구 보고서</summary><pre># Education expenditure and income: descriptive investigation
+
+## Questions and available evidence
+The original questions ask (1) in what regions increased education spending
+positively impacts per capita GDP and (2) what impact increased education
+expenditure has on per capita GDP in developing countries. This file cannot
+identify causal impacts or answer those questions literally.
+
+The supplied `data.csv` has 12 indicator rows: six series for each of two
+**group aggregates**, not individual countries. Its 41 annual columns span
+1975–2015. The groups are Sub-Saharan Africa (`SSF`) and Lower middle income
+(`LMC`). LMC is an income category, not a geographical region; these categories
+can overlap and do not represent all developing countries.
+
+The requested income series `NY.GNP.PCAP.KD` is **GNI per capita in constant
+2015 US dollars**, not GDP per capita in 2010 dollars. The education series
+`NY.ADJ.AEDU.GN.ZS` is **adjusted savings: education expenditure (% of GNI)**,
+not education spending as a percentage of total government expenditure. The
+metadata&#x27;s introductory description uses the latter GDP and government-budget
+concepts, inconsistent with the actual series codes and names. Its SSA code
+also differs from the actual SSF code. We use the CSV identifiers and labels.
+The metadata&#x27;s phrase “saved for future education expenditures” should not be
+read as evidence that this measures a stock of earmarked future savings;
+the supplied series is an education-expenditure share in the adjusted-savings
+framework. No external indicator documentation was retrieved.
+
+Other available series concern exports growth, gross primary/secondary
+enrollment, and labor-force participation. The last is not total labor-force
+size, despite the introductory metadata wording. They are not used as controls
+in this deliberately small bivariate analysis.
+
+## Method and reproducibility
+Run `python3 analyze.py data.csv &gt; results.json` using Python&#x27;s standard library.
+The script reads its argument, selects the two exact series codes, pairs finite
+numeric observations by year within each group, and sorts chronologically.
+Blank, `..`, nonnumeric, and nonfinite values are excluded without imputation.
+Only groups containing both series are included. Duplicate group/series rows
+are rejected rather than arbitrarily selected.
+
+For each group we report Pearson correlation and OLS with an intercept,
+regressing income Y on education X. The slope is centered cross-product divided
+by centered X sum of squares. We also apply the same calculations to annual
+first differences, using only consecutive calendar years of complete pairs:
+missing years are never bridged. Undefined correlations or slopes are JSON
+null (fewer than two observations, constant X, or constant Y for correlation).
+Differencing is a descriptive sensitivity analysis to common trends, not a
+causal identification strategy. It relates contemporaneous changes and does
+not model delayed education effects. No significance tests are claimed.
+
+## Findings
+Slopes are constant-2015 US dollars per capita per **one percentage-point**
+education share, or dollars of annual income change per percentage-point annual
+share change for differences. Values below are rounded; `results.json` retains
+full computed precision.
+
+| Group | Level years | Level n | Level r | Level slope | Difference intervals | Difference n | Difference r | Difference slope |
+|---|---|---:|---:|---:|---|---:|---:|---:|
+| Lower middle income (LMC) | 1975–2015 | 41 | -0.480538 | -635.074242 | 1975→1976 through 2014→2015 | 40 | 0.078761 | 11.063895 |
+| Sub-Saharan Africa (SSF) | 2011–2015 | 5 | -0.966421 | -159.131456 | 2011→2012 through 2014→2015 | 4 | -0.455752 | -80.477511 |
+
+Education has 41 finite annual observations in each group, but SSF income has
+only five (2011–2015); LMC income has all 41. The apparent 1975–2015 coverage
+therefore does not provide 41 usable income/education pairs for Africa.
+
+Both groups show negative level associations. For LMC, the association of
+annual changes is weakly positive and close to zero, unlike the negative level
+association. For SSF, both are negative, but the change analysis has only four
+pairs. Thus the only positive descriptive result is a very small correlation
+of annual changes for the lower-middle-income aggregate; it is not evidence
+that spending increases positively impact GDP. Neither observed regional
+aggregate provides a positive level association, and these two groups cannot
+rank regions worldwide.
+
+## Interpretation, limitations, and provenance
+These are observational aggregate time series. Reverse causation, omitted
+variables, shared trends, serial dependence, spending measured relative to GNI,
+changing group composition, and aggregation can all affect the estimates.
+A share can change because its income denominator changes without an increase
+in real education resources. The groups overlap and have different usable
+periods, precluding a clean comparative effect interpretation. First differences
+do not resolve confounding or simultaneity and may amplify measurement noise.
+No intervention, instrument, comparison design, or individual-country panel is
+present. Results support only the associations above, not causal effects,
+country-level claims, or a definitive conclusion about developing countries.
+
+Inputs were inspected locally and left unchanged. Supplied metadata attributes
+the data to World Development Indicators through DiscoveryBench, repository
+`https://github.com/allenai/discoverybench`, revision
+`c31fcf011e070f021a5f5b906896d0821f6880e8`, path
+`discoverybench/real/test/worldbank_education_gdp`, license ODC-By; the supplied
+`SOURCE-LICENSE.txt` is retained. This is supplied provenance, not an independent
+verification of source accuracy or aggregation methodology.
+
+A local subprocess/temporary-CSV check passed: reordered year columns yield
+exact r=1 and slope=2, a missing middle year is not bridged, blank/`..`/NaN/inf
+are excluded, and constant series yield null statistics. A rerun of the real
+CSV reproduced `results.json` byte for byte.
+</pre></details><details><summary>gpt-6.1-sol 분석 코드</summary><h3>analyze.py</h3><pre>&quot;&quot;&quot;Descriptive, contemporaneous education/income associations from WDI wide CSV.&quot;&quot;&quot;
+import csv
+import json
+import math
+import re
+import sys
+
+SERIES = {&quot;income&quot;: &quot;NY.GNP.PCAP.KD&quot;, &quot;education&quot;: &quot;NY.ADJ.AEDU.GN.ZS&quot;}
+
+
+def numeric(value):
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        return None
+    return result if math.isfinite(result) else None
+
+
+def summarize(pairs):
+    n = len(pairs)
+    result = {&quot;n&quot;: n, &quot;pearson_r&quot;: None, &quot;ols_slope&quot;: None}
+    if n &lt; 2:
+        return result
+    xs, ys = zip(*pairs)
+    mx, my = math.fsum(xs) / n, math.fsum(ys) / n
+    dx, dy = [x - mx for x in xs], [y - my for y in ys]
+    xx = math.fsum(x*x for x in dx)
+    yy = math.fsum(y*y for y in dy)
+    xy = math.fsum(x*y for x, y in zip(dx, dy))
+    if xx:
+        result[&#x27;ols_slope&#x27;] = numeric(xy / xx)
+    if xx and yy:
+        result[&#x27;pearson_r&#x27;] = numeric(xy / math.sqrt(xx) / math.sqrt(yy))
+    return result
+
+
+def analyze(path):
+    groups = {}
+    with open(path, newline=&#x27;&#x27;, encoding=&#x27;utf-8-sig&#x27;) as handle:
+        reader = csv.DictReader(handle)
+        years = []
+        for field in reader.fieldnames or []:
+            match = re.fullmatch(r&#x27;(\d{4})(?: \[YR\1\])?&#x27;, field.strip())
+            if match:
+                years.append((int(match.group(1)), field))
+        years.sort()
+        for row in reader:
+            code, series = row[&#x27;Country Code&#x27;].strip(), row[&#x27;Series Code&#x27;].strip()
+            if not code or series not in SERIES.values():
+                continue
+            group = groups.setdefault(code, {&#x27;label&#x27;: row[&#x27;Country Group&#x27;], &#x27;data&#x27;: {}})
+            if series in group[&#x27;data&#x27;]:
+                raise ValueError(&#x27;Duplicate group/series: &#x27; + code + &#x27;/&#x27; + series)
+            group[&#x27;data&#x27;][series] = {year: numeric(row[field]) for year, field in years}
+    output = {}
+    for code, group in sorted(groups.items()):
+        data = group[&#x27;data&#x27;]
+        if not all(series in data for series in SERIES.values()):
+            continue
+        x, y = data[SERIES[&#x27;education&#x27;]], data[SERIES[&#x27;income&#x27;]]
+        paired = [(year, x[year], y[year]) for year in sorted(x.keys() &amp; y.keys())
+                  if x[year] is not None and y[year] is not None]
+        differences = [(b[1]-a[1], b[2]-a[2]) for a, b in zip(paired, paired[1:])
+                       if b[0] == a[0]+1]
+        output[code] = {&#x27;label&#x27;: group[&#x27;label&#x27;],
+                        &#x27;level&#x27;: summarize([(x, y) for _, x, y in paired]),
+                        &#x27;difference&#x27;: summarize(differences)}
+    return {&#x27;series&#x27;: SERIES, &#x27;groups&#x27;: output}
+
+
+if __name__ == &#x27;__main__&#x27;:
+    if len(sys.argv) != 2:
+        raise SystemExit(&#x27;Usage: python3 analyze.py CSV_PATH&#x27;)
+    print(json.dumps(analyze(sys.argv[1]), allow_nan=False))
+</pre></details></div><div><details><summary>gpt-6.2-sol 연구 보고서</summary><pre># Education expenditure and income in the supplied World Bank extract
+
+## What the questions become with these data
+
+The original questions ask where increased education spending **positively impacts per capita GDP**, and what its **impact on per capita GDP in developing countries** is. The extract can answer a narrower descriptive question: within each of two World Bank aggregates, how do an education expenditure share and real GNI per capita move together, in levels and in year-to-year changes? It cannot identify an impact on GDP.
+
+- **Income (Y):** `NY.GNP.PCAP.KD`, GNI per capita in constant 2015 US dollars, not GDP per capita in 2010 dollars as the metadata overview suggests. GNI includes net primary income from abroad, unlike GDP.
+- **Education (X):** `NY.ADJ.AEDU.GN.ZS`, “Adjusted savings: education expenditure,” measured in percent of GNI, not percent of total government expenditure. The adjusted-savings label is an accounting classification, not evidence of money set aside for future education as the metadata&#x27;s series description suggests. An increase in this ratio is not necessarily an increase in the amount spent: the denominator can change too.
+- **Groups:** the CSV labels Sub-Saharan Africa as **SSF**, whereas the metadata says **SSA**. Lower middle income (**LMC**) is an income classification, not a geographic region or a proxy for all developing countries. The groups are not necessarily disjoint. The CSV contains aggregate series, not individual country observations.
+- **Coverage:** the CSV has columns for 1975–2015, but only five years of Sub-Saharan African GNI per capita. Both education series and the LMC income series cover all 41 years. Exports growth, gross primary and secondary enrollment, and labor force participation (a rate, not a headcount) are also present but not used as controls.
+
+## Method and findings
+
+Within each group, pair finite numeric values in the same calendar year and discard missing pairs without imputation. Report Pearson&#x27;s correlation and the OLS slope with an intercept, regressing income on the education share. Repeat using same-year changes from the previous calendar year, only where both endpoints have valid pairs. Differencing reduces the influence of persistent levels and some trends that can dominate a levels comparison. It addresses short-run co-movement, not long-run or lagged relationships, and does not by itself remove confounding.
+
+| Group | Analysis | Years (ending year for changes) | n | Pearson r | OLS slope |
+|---|---|---|---:|---:|---:|
+| Sub-Saharan Africa (SSF) | Levels | 2011–2015 | 5 | −0.966 | −159.13 |
+| Sub-Saharan Africa (SSF) | First differences | 2012–2015 | 4 | −0.456 | −80.48 |
+| Lower middle income (LMC) | Levels | 1975–2015 | 41 | −0.481 | −635.07 |
+| Lower middle income (LMC) | First differences | 1976–2015 | 40 | +0.079 | +11.06 |
+
+Slopes are in constant 2015 US dollars of GNI per capita per percentage point of the education share. In first differences, the slope compares changes in those quantities: in LMC, a one-percentage-point larger annual change in the share is associated with an approximately $11 larger annual change in GNI per capita in the fitted line.
+
+Neither aggregate shows a positive association in levels. The LMC association changes sign after differencing, but the positive correlation is close to zero. SSF remains negative after differencing, but four changes are too few to draw a reliable regional conclusion. The two groups are observed over very different periods, so the slope contrast cannot be attributed to region or income classification.
+
+## What is warranted
+
+No geographic region in this extract shows a positive association under either specification, and the weak positive association in LMC annual changes does not establish a positive impact in developing countries. Nor do the negative slopes establish harm. Economic shocks, reverse causality, a changing GNI denominator, differences in aggregate membership or composition, omitted variables and serial dependence can all complicate interpretation. These are contemporaneous, unadjusted descriptive estimates; there is no causal design, country-level evidence, or inference about delayed returns to education.
+
+## Provenance and reproduction
+
+The supplied files come from Allen Institute for AI&#x27;s [DiscoveryBench](https://github.com/allenai/discoverybench), revision `c31fcf011e070f021a5f5b906896d0821f6880e8`, path `discoverybench/real/test/worldbank_education_gdp`. The metadata names the original extract `worldbank_education_gdp.csv`, attributes the underlying data to the World Bank&#x27;s World Development Indicators, and lists ODC-By (see `SOURCE-LICENSE.txt`). This analysis uses the supplied snapshot, not a fresh WDI download. Run `python3 analyze.py data.csv &gt; results.json` to reproduce the estimates.
+</pre></details><details><summary>gpt-6.2-sol 분석 코드</summary><h3>analyze.py</h3><pre>&quot;&quot;&quot;Describe the within-group association of two WDI series.&quot;&quot;&quot;
+import argparse
+import csv
+import json
+import math
+import re
+from decimal import Decimal, InvalidOperation, localcontext
+from itertools import pairwise
+
+SERIES = {&quot;income&quot;: &quot;NY.GNP.PCAP.KD&quot;, &quot;education&quot;: &quot;NY.ADJ.AEDU.GN.ZS&quot;}
+YEAR = re.compile(r&quot;(\d{4})(?:\s+\[YR\1\])?&quot;)
+
+
+def number(cell):
+    try:
+        value = Decimal(cell or &quot;&quot;)
+    except InvalidOperation:
+        return None
+    return value if value.is_finite() else None
+
+
+def json_number(value):
+    result = float(value)
+    return result if math.isfinite(result) else None
+
+
+def summarize(pairs):
+    n = len(pairs)
+    stats = {&quot;n&quot;: n, &quot;pearson_r&quot;: None, &quot;ols_slope&quot;: None}
+    if n &lt; 2:
+        return stats
+
+    x, y = zip(*pairs)
+    # Center for the intercept fit. Shift first to remove common offsets
+    # and to make a constant series yield exactly zero variance.
+    x = [v - x[0] for v in x]
+    y = [v - y[0] for v in y]
+    mean_x, mean_y = sum(x) / n, sum(y) / n
+    dx = [v - mean_x for v in x]
+    dy = [v - mean_y for v in y]
+    xx = sum(v * v for v in dx)
+    yy = sum(v * v for v in dy)
+    if xx:
+        xy = sum(a * b for a, b in zip(dx, dy))
+        stats[&quot;ols_slope&quot;] = json_number(xy / xx)
+        if yy:
+            r = xy / (xx * yy).sqrt()
+            stats[&quot;pearson_r&quot;] = json_number(max(-1, min(1, r)))
+    return stats
+
+
+def analyze(path):
+    rows = {}
+    with open(path, newline=&quot;&quot;, encoding=&quot;utf-8-sig&quot;) as stream:
+        reader = csv.DictReader(stream)
+        years = sorted(
+            (int(match[1]), header)
+            for header in reader.fieldnames or []
+            if (match := YEAR.fullmatch(header.strip()))
+        )
+        for row in reader:
+            series = row[&quot;Series Code&quot;].strip()
+            if series in SERIES.values():
+                code = row[&quot;Country Code&quot;].strip()
+                rows.setdefault(code, {})[series] = row
+
+    groups = {}
+    for code, by_series in sorted(rows.items()):
+        if len(by_series) != len(SERIES):
+            continue
+        education = by_series[SERIES[&quot;education&quot;]]
+        income = by_series[SERIES[&quot;income&quot;]]
+        paired = []
+        for year, header in years:
+            x, y = number(education[header]), number(income[header])
+            if x is not None and y is not None:
+                paired.append((year, x, y))
+
+        with localcontext() as ctx:
+            ctx.prec = 50
+            groups[code] = {
+                &quot;label&quot;: education[&quot;Country Group&quot;],
+                &quot;level&quot;: summarize([(x, y) for _, x, y in paired]),
+                &quot;difference&quot;: summarize([
+                    (x1 - x0, y1 - y0)
+                    for (t0, x0, y0), (t1, x1, y1) in pairwise(paired)
+                    if t1 == t0 + 1
+                ]),
+            }
+    return {&quot;series&quot;: SERIES, &quot;groups&quot;: groups}
+
+
+if __name__ == &quot;__main__&quot;:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(&quot;csv_path&quot;)
+    args = parser.parse_args()
+    print(json.dumps(analyze(args.csv_path), indent=2, allow_nan=False))
+</pre></details></div></div><h2>관측 시간 · 모델의 고유 속도는 아님</h2><p>작업별 시간이 다르고, 캐시·도구 실행·네트워크가 포함된다. 단일 구현/연구 시도에서 속도 우위를 추정할 수 없다.</p><div class="bars"><h3>GPQA 평균</h3><div class="barrow"><label>gpt-6.1-sol</label><div class="track"><div class="fill m0" style="width:30.14%"></div></div><b>26.4초</b></div><div class="barrow"><label>gpt-6.2-sol</label><div class="track"><div class="fill m1" style="width:16.92%"></div></div><b>14.8초</b></div><h3>구현</h3><div class="barrow"><label>gpt-6.1-sol</label><div class="track"><div class="fill m0" style="width:79.46%"></div></div><b>69.6초</b></div><div class="barrow"><label>gpt-6.2-sol</label><div class="track"><div class="fill m1" style="width:78.29%"></div></div><b>68.6초</b></div><h3>연구</h3><div class="barrow"><label>gpt-6.1-sol</label><div class="track"><div class="fill m0" style="width:89.81%"></div></div><b>78.6초</b></div><div class="barrow"><label>gpt-6.2-sol</label><div class="track"><div class="fill m1" style="width:100.00%"></div></div><b>87.6초</b></div></div><h2>측정 범위와 남은 한계</h2><div class="scroll"><table><thead><tr><th>영역</th><th>이번 상태</th></tr></thead><tbody><tr><td>문항 추론·작동하는 구현·수치 재현</td><td>실행하고 채점함. 작은 표본.</td></tr><tr><td>코드 구조·연구 해석</td><td>한 번의 익명 LLM 검토. 참고 의견.</td></tr><tr><td>대규모 저장소·장기 유지보수·웹 문헌 탐색</td><td>미측정.</td></tr><tr><td>GPU 연구·새로운 과학 발견·전체 논문 재현</td><td>미측정.</td></tr></tbody></table></div><p>실제 비교 호출은 8회이며 별도 익명 검토 1회가 있다. ChatGPT 구독을 사용했고 별도 과금 API 어댑터는 선택하지 않았다. 모델 식별자는 요청한 별칭이며 불변 백엔드 스냅샷을 독립 검증하지 않았다.</p><p>구현·연구는 독립된 작업 폴더와 네트워크가 꺼진 native Codex 도구를 사용했다. 채점은 별도의 읽기 전용·비특권·네트워크 차단 Python Docker에서 수행했다. 수집 전후 산출물 해시가 일치했다.</p><h2>출처와 재현 자료</h2><ul><li><a href="https://github.com/idavidrein/gpqa">GPQA</a>: Diamond 8문항 부분 표본, 데이터 CC BY 4.0.</li><li><a href="https://www.swebench.com/original">SWE-bench</a>: 수정 후 테스트하는 방법 참고. 공식 인스턴스를 실행한 것은 아님.</li><li><a href="https://github.com/allenai/discoverybench">DiscoveryBench</a>: 원본 World Bank 데이터를 사용한 과제 변형, ODC-By.</li></ul><p class="fine">PR의 expanded-low 디렉터리에 과제·수정 코드·채점기·개별 결과·버전 및 해시가 보존되어 있다. 단일 종합 점수나 보편적 승자를 만들지 않는다.</p></main></body></html>

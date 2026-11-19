@@ -1,0 +1,77 @@
+{
+  "rubric": {
+    "scale": {
+      "0": "중대한 누락 또는 오류",
+      "1": "구체적인 결함이 있는 부분 충족",
+      "2": "이 과제 규모에서 충분히 충족"
+    },
+    "structure": [
+      "responsibility_and_interfaces",
+      "invariants_and_failure_semantics",
+      "proportionate_maintainability"
+    ],
+    "research": [
+      "answers_from_results",
+      "method_and_inference",
+      "limits_and_provenance"
+    ]
+  },
+  "candidates": {
+    "A": {
+      "structure": {
+        "scores": {
+          "responsibility_and_interfaces": 2,
+          "invariants_and_failure_semantics": 1,
+          "proportionate_maintainability": 2
+        },
+        "evidence": [
+          "implementation/ledger/domain.py:33 및 implementation/ledger/service.py:16 — Event.parse가 입력을 정규화하고 서비스가 상태 전이를 한 곳에서 처리한다.",
+          "implementation/ledger/service.py:19–37 — 재시도는 원래 영수증을 조회하고, 반복이 끝나야 상태를 교체한다. 다만 implementation/ledger/domain.py:16,23의 정수 문자열 변환에는 실행 환경의 자릿수 제한이 적용된다. 상한이 없는 명세에 맞는 5,001자리 양의 정수 금액을 공개 API로 입력하자 ValueError가 발생했다.",
+          "implementation/ledger/repository.py:5–23 및 implementation/DESIGN.md:13–25 — 불변 영수증 덕분에 얕은 복사로 충분한 이유와 복사 비용, 영속화 시 변경할 경계를 설명한다."
+        ]
+      },
+      "research": {
+        "scores": {
+          "answers_from_results": 2,
+          "method_and_inference": 2,
+          "limits_and_provenance": 2
+        },
+        "evidence": [
+          "research/report.md:50–71 — 두 집단의 수준·차분 추정치, 표본 수, 기울기 단위를 제시하고 LMC에서만 연간 변화의 상관이 약한 양수라고 답한다.",
+          "research/report.md:32–48 — 유효한 연도 쌍과 연속 연도 차분을 정의하고 동시점 상관으로 지연 효과를 측정할 수 없는 이유를 설명한다.",
+          "research/report.md:9–29,74–92 — GDP·GNI 및 지출 분모의 불일치, 집계 범위, 교란 요인을 밝히고 자료의 리비전과 경로를 제공한다."
+        ]
+      }
+    },
+    "B": {
+      "structure": {
+        "scores": {
+          "responsibility_and_interfaces": 2,
+          "invariants_and_failure_semantics": 2,
+          "proportionate_maintainability": 2
+        },
+        "evidence": [
+          "implementation/ledger/service.py:12–20 및 implementation/ledger/repository.py:26–43 — 서비스는 입력 순회와 응답 조립을 맡고 저장소는 계정과 영수증을 함께 갱신한다.",
+          "implementation/ledger/repository.py:17–42 및 implementation/ledger/service.py:20 — 불변 레코드를 복사한 상태에서 재사용 키, 순번, 잔액을 검사하고 완주 시 반영한다. implementation/ledger/domain.py:14–22의 금액 변환은 직접 확인한 5,001자리 입력도 정확히 왕복했다.",
+          "implementation/DESIGN.md:13–26 — 보관된 상태 크기에 비례하는 비용과 영속화 시 필요한 트랜잭션 경계를 실제 구현에 맞게 설명한다."
+        ]
+      },
+      "research": {
+        "scores": {
+          "answers_from_results": 2,
+          "method_and_inference": 2,
+          "limits_and_provenance": 2
+        },
+        "evidence": [
+          "research/report.md:16–29 — 표본 수와 네 추정 결과를 제시하고 LMC의 연간 차분 기울기 약 11달러를 단위와 함께 해석한다. 유일한 지리 집단 SSF의 변화 관측치는 네 개임을 명시한다.",
+          "research/report.md:14–25 — 연도별 완전 관측과 연속 연도 차분을 사용한 이유를 설명하고 관측 기간이 다른 두 집단의 기울기 차이를 지역 효과로 해석할 수 없다고 밝힌다.",
+          "research/report.md:5–10,29–33 — 지표·집단 코드의 불일치, GNI 분모 변화와 교란, 자료의 리비전·경로·재현 명령을 명시한다."
+        ]
+      }
+    }
+  },
+  "limitations": [
+    "신원을 가린 단일 LLM 심사자의 정성 평가다. 후보별 단 한 번의 작은 과제 결과만으로 일반적인 역량 순위를 추론할 수 없다.",
+    "제공된 객관 채점과 별도로 확인한 5,001자리 사례는 Python의 정수 문자열 변환 제한이 적용되는 환경에 해당한다."
+  ]
+}

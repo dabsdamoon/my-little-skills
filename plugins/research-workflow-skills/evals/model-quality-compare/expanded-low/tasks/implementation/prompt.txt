@@ -1,0 +1,29 @@
+Implement the ledger upgrade described here in the supplied multi-file Python repository.
+Preserve the public import `from ledger import Ledger`, constructor, `balance(tenant)`
+and `apply_batch(events)`. Use Python standard library only. Work inside this directory.
+
+Contract:
+1. Events are dictionaries with nonblank string tenant/event_id, a positive integer
+   seq (bool is invalid), and amount as a finite plain decimal string with at most
+   two decimal places (no exponent, float, NaN or Infinity). Money must remain exact,
+   even above float's exact-integer range. Balances return two-decimal strings.
+2. Each tenant's NEW events must have consecutive seq numbers, starting at 1.
+   Multiple tenants may interleave. The same event ID may be used by different tenants.
+3. Idempotency key is (tenant,event_id). Replaying the same normalized amount and seq
+   never changes state or advances sequence. It returns applied=false and the balance
+   recorded when that event originally applied, even after later transactions.
+   Reusing a key with a different amount or seq raises ValueError.
+4. A tenant's balance may never become negative. Any invalid event or insufficient
+   funds raises ValueError. A batch is atomic across all tenants, including balance,
+   sequence and idempotency records. An exception raised by the input iterator must
+   also leave state unchanged and propagate. Events is any single-pass iterable.
+5. Return one dict per input event, in input order, with exactly tenant, event_id,
+   applied (bool), balance (two-decimal string). New events have applied=true.
+   Empty input returns []. Do not mutate caller dictionaries or input files.
+6. Fix the implementation across modules as appropriate. Keep domain validation,
+   state ownership and orchestration understandable and proportionate. Preserve
+   public tests, add useful tests, and include DESIGN.md explaining responsibility
+   boundaries, atomicity and a likely future change's impact.
+
+Run `python3 -m unittest discover -s tests -v` and report its actual result.
+Do not access graders, network, other workspaces, outside files or another model.

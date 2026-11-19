@@ -1,0 +1,34 @@
+{
+  "series": {
+    "income": "NY.GNP.PCAP.KD",
+    "education": "NY.ADJ.AEDU.GN.ZS"
+  },
+  "groups": {
+    "LMC": {
+      "label": "Lower middle income",
+      "level": {
+        "n": 41,
+        "pearson_r": -0.480538161583764,
+        "ols_slope": -635.0742417239451
+      },
+      "difference": {
+        "n": 40,
+        "pearson_r": 0.07876056406367794,
+        "ols_slope": 11.063895227186732
+      }
+    },
+    "SSF": {
+      "label": "Sub-Saharan Africa",
+      "level": {
+        "n": 5,
+        "pearson_r": -0.9664207841515774,
+        "ols_slope": -159.13145557434953
+      },
+      "difference": {
+        "n": 4,
+        "pearson_r": -0.45575245981562407,
+        "ols_slope": -80.4775107405355
+      }
+    }
+  }
+}

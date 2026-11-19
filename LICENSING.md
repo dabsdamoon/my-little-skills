@@ -38,7 +38,7 @@ relicensing of all material in this repository.
 | `houm-refactoring` | `plugins/houmy-skills/skills/houm-refactoring`<br>`skills/houm-refactoring` |
 | `houmlike-design` | `plugins/houmy-skills/skills/houmlike-design`<br>`skills/houmlike-design` |
 | `make-llm-wiki-raw` | `plugins/llm-wiki-skills/skills/make-llm-wiki-raw`<br>`skills/make-llm-wiki-raw` |
-| `model-quality-compare` | `skills/model-quality-compare` |
+| `model-quality-compare` | `plugins/research-workflow-skills/skills/model-quality-compare`<br>`skills/model-quality-compare` |
 | `notion-dashboard-builder` | `plugins/notion-workspace-skills/skills/notion-dashboard-builder`<br>`skills/notion-dashboard-builder` |
 | `pr-creator` | `plugins/developer-workflow-skills/skills/pr-creator` |
 | `product-context` | `plugins/product-context-skills/skills/product-context`<br>`skills/product-context` |
@@ -68,6 +68,9 @@ referenced autoresearch README states MIT without a separate root license file.
 - `visual-explainer`: MIT, copyright Nico Bailon. Its bundled Pele code is MIT
   and the Lucide icon notice is ISC. Preserve `LICENSE`, `kit/vendor/PELE-LICENSE`,
   and the pinned revision in `UPSTREAM.md` in both distributed copies.
+- `model-quality-compare` evaluation data: GPQA dataset notices retain CC BY 4.0,
+  distinct from GPQA's MIT code notice. Copied DiscoveryBench database material
+  retains ODC-By notices. These benchmark data are not relicensed under MIT.
 - Anthropic skills and local adaptations of them keep their existing notices.
   In particular, `docx`, `pdf`, `pptx`, and `xlsx` carry their own proprietary
   terms. Their licenses and instruction bodies are unchanged by this work.

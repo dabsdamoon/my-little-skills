@@ -1,0 +1,22 @@
+[
+  {
+    "checks": 13,
+    "passed": 13,
+    "successful": true,
+    "failures": [],
+    "log": "test_conflict_rolls_back_balance_and_idempotency (__main__.Acceptance.test_conflict_rolls_back_balance_and_idempotency) ... ok\ntest_cross_tenant_atomicity (__main__.Acceptance.test_cross_tenant_atomicity) ... ok\ntest_duplicate_in_same_batch (__main__.Acceptance.test_duplicate_in_same_batch) ... ok\ntest_idempotency_original_balance_and_normalized_amount (__main__.Acceptance.test_idempotency_original_balance_and_normalized_amount) ... ok\ntest_input_unchanged_and_empty (__main__.Acceptance.test_input_unchanged_and_empty) ... ok\ntest_insufficient_funds_rolls_back_all_state (__main__.Acceptance.test_insufficient_funds_rolls_back_all_state) ... ok\ntest_interleaved_single_pass_and_shared_id (__main__.Acceptance.test_interleaved_single_pass_and_shared_id) ... ok\ntest_invalid_amounts (__main__.Acceptance.test_invalid_amounts) ... ok\ntest_invalid_identity_and_sequence (__main__.Acceptance.test_invalid_identity_and_sequence) ... ok\ntest_iterator_exception_rollback (__main__.Acceptance.test_iterator_exception_rollback) ... ok\ntest_large_exact_money (__main__.Acceptance.test_large_exact_money) ... ok\ntest_legacy_and_output_shape (__main__.Acceptance.test_legacy_and_output_shape) ... ok\ntest_sequence_replay_and_gaps (__main__.Acceptance.test_sequence_replay_and_gaps) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\n",
+    "model": "gpt-6.1-terra",
+    "index": 1,
+    "trial": 1
+  },
+  {
+    "checks": 13,
+    "passed": 13,
+    "successful": true,
+    "failures": [],
+    "log": "test_conflict_rolls_back_balance_and_idempotency (__main__.Acceptance.test_conflict_rolls_back_balance_and_idempotency) ... ok\ntest_cross_tenant_atomicity (__main__.Acceptance.test_cross_tenant_atomicity) ... ok\ntest_duplicate_in_same_batch (__main__.Acceptance.test_duplicate_in_same_batch) ... ok\ntest_idempotency_original_balance_and_normalized_amount (__main__.Acceptance.test_idempotency_original_balance_and_normalized_amount) ... ok\ntest_input_unchanged_and_empty (__main__.Acceptance.test_input_unchanged_and_empty) ... ok\ntest_insufficient_funds_rolls_back_all_state (__main__.Acceptance.test_insufficient_funds_rolls_back_all_state) ... ok\ntest_interleaved_single_pass_and_shared_id (__main__.Acceptance.test_interleaved_single_pass_and_shared_id) ... ok\ntest_invalid_amounts (__main__.Acceptance.test_invalid_amounts) ... ok\ntest_invalid_identity_and_sequence (__main__.Acceptance.test_invalid_identity_and_sequence) ... ok\ntest_iterator_exception_rollback (__main__.Acceptance.test_iterator_exception_rollback) ... ok\ntest_large_exact_money (__main__.Acceptance.test_large_exact_money) ... ok\ntest_legacy_and_output_shape (__main__.Acceptance.test_legacy_and_output_shape) ... ok\ntest_sequence_replay_and_gaps (__main__.Acceptance.test_sequence_replay_and_gaps) ... ok\n\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\n",
+    "model": "claude-sonnet-5-5",
+    "index": 2,
+    "trial": 1
+  }
+]
