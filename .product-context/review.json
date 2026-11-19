@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "product": "my-little-skills-product-context",
-  "snapshot": "e4d42d35920c4b695e3e7598d09e902fe4894a6d3ade7ae37842ff643fdb2a79",
+  "snapshot": "c8df18af11278ccff721c40912843361492996786102c1c24d910d759dc4e266",
   "files": {
-    "README.md": "3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d",
+    "README.md": "720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f",
     "plugins/product-context-skills/README.md": "834a7904be591d7fca841def64fef563e50b0dad2b18820a7b3d0d0aa179613a",
     "skills/product-context/SKILL.md": "c1a17ca3d95e0f230f418048396bb4895639022863cb1105abc9442d475f3346",
     "skills/product-context/references/format.md": "f7be0fd4922c62b3a5af4edf6a2403fa2fea6049255826f612ec0beca3158ffa",
@@ -22,7 +22,7 @@
   },
   "questions": [],
   "actor": "agent:claude",
-  "note": "Refreshed quickstart for PR: removed stale \"after 0.4.1 is published\" wording and replaced the hard-coded 0.4.1 runtime path with <runtime-version>, per the plugin README. Reconfirmed the subscription work-budget claim. No source or policy changes.",
-  "recorded_at": "2026-11-18T06:03:57.214963+00:00",
-  "git_head": "5fa0c9f1bc3fb4251d95335efc14f1637f927e28"
+  "note": "Updated the quickstart to cover the model-quality-compare skill and its evaluations, taken from README.md. Reconfirmed four existing README-based claims. No source, policy or approval changes.",
+  "recorded_at": "2026-11-19T00:56:41.137716+00:00",
+  "git_head": "57a8a8e1fa835d2b676dabef5d3e36c423be2a1b"
 }

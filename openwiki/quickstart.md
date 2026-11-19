@@ -5,7 +5,7 @@ description: What my-little-skills provides and how the product-context wiki wor
 tags: [product, skills, product-context]
 verified:
   - by: openwiki/0.9.0
-    at: 2026-11-18T06:03:37.679Z
+    at: 2026-11-19T00:56:22.195Z
 sources:
   - id: openwiki-source-e806ba82c1dc93b631154825
     resource: repo://plugins/product-context-skills/README.md
@@ -15,7 +15,7 @@ sources:
     resource: repo://skills/product-context/references/subscription-wiki.md
   - id: openwiki-source-901fc0d98522e338a3c22bbb
     resource: repo://skills/product-context/SKILL.md
-generated: { by: "claude-code", at: "2026-11-18T06:03:37.679Z" }
+generated: { by: "claude-code", at: "2026-11-19T00:56:22.195Z" }
 ---
 
 # Quickstart
@@ -34,6 +34,13 @@ my-little-skills is a curated Agent Skills and plugin marketplace for Codex/Open
 
 - `visual-explainer` is bundled in `design-skills` for Claude Code and Codex. It turns concepts, flows, plans and changes into HTML figures; invoke `/design-skills:visual-explainer` in Claude Code or `$visual-explainer` in Codex. Its upstream record pins v0.15.0 and keeps the original MIT notices. Basic rendering needs Node.js.
 - Maintainer-authored skills listed in `LICENSING.md` are MIT licensed with standalone license files. Imported skills and assets keep their own licenses and attribution.
+
+## Model comparisons
+
+- `research-workflow-skills` includes `model-quality-compare`. The default GPT pilot uses four CLI calls with 24 original text cases and objective grading, records category scores, repeatability, token usage and wall time, and produces an HTML report. It never silently switches to API billing.
+- Its artifact workflow compares implementation, structure and research outcomes using independent writable starter copies, actual code and data outputs, frozen executable checks and separate blinded review. The expanded low-effort evaluation preserves both models' code, reports, dataset notices and numerical checks.
+- Native-host controls also support exact Claude model IDs through Claude.ai subscription login. A fresh-session Terra/Sonnet comparison records context exclusions, eight distinct sessions, unchanged task hashes, and separate objective versus interpretive results.
+- The GPT 6.1/6.2 pilot reached 100% for both models, so it cannot establish a general winner.
 
 ## Product-context harness
 

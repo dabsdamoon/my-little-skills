@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "pageVersion": "sha256:b842a5714991513e170b414fc6cc1565505b26ca456e8eaba8d81086bf61f8de",
+  "pageVersion": "sha256:2bb12b38cc2a0547744dce0a3dc7de9fd521c104b10057100e23cae4a5ca61c7",
   "claims": [
     {
       "id": "claim_5ca8efaadf1944cab1cc36d73b5006bc",
@@ -8,7 +8,7 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
         }
       ]
     },
@@ -18,7 +18,7 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
         }
       ]
     },
@@ -78,7 +78,7 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
         }
       ]
     },
@@ -88,13 +88,43 @@
       "evidence": [
         {
           "resource": "repo://README.md",
-          "version": "repo-file-v1:sha256:3fc67b97a7ab51b7c79eab4a677564c3f98a00dcb3eccdbaf022d7d9759e2d4d"
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
+        }
+      ]
+    },
+    {
+      "id": "claim_0bf97d11558741e7ad29642a8617bd4b",
+      "statement": "research-workflow-skills includes model-quality-compare; its default GPT pilot uses four CLI calls with 24 original text cases and objective grading, and it never silently switches to API billing.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
+        }
+      ]
+    },
+    {
+      "id": "claim_25a8f074799b4cc58baee08606ffe9ba",
+      "statement": "The model-quality-compare artifact workflow uses independent writable starter copies, frozen executable checks and separate blinded review; native-host controls also support exact Claude model IDs through Claude.ai subscription login.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
+        }
+      ]
+    },
+    {
+      "id": "claim_a739ec43845641248959d935a3d1319e",
+      "statement": "The GPT 6.1/6.2 pilot reached 100% for both models and cannot establish a general winner.",
+      "evidence": [
+        {
+          "resource": "repo://README.md",
+          "version": "repo-file-v1:sha256:720fca0e9e4b1be9ea8b18a83d06daa742ad24ffa63186f6c0db8be79bd3820f"
         }
       ]
     }
   ],
   "verification": {
     "by": "openwiki/0.9.0",
-    "at": "2026-11-18T06:03:37.679Z"
+    "at": "2026-11-19T00:56:22.195Z"
   }
 }
